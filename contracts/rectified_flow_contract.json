@@ -1,0 +1,154 @@
+{
+  "schema_version": "2A.1",
+  "milestone": "2A",
+  "component": "rectified_flow_and_generation",
+  "status": "characterized_with_unresolved_width_conflict",
+  "scope": {
+    "exact_paper_reproduction": false,
+    "scientific_implementation_in_public_release": false,
+    "full_training_or_generation_run": false,
+    "website_exporter_is_paper_sampler": false
+  },
+  "evidence_tiers": {
+    "locked_audit": "Pinned audit run instructions and discrepancy records.",
+    "observed_immutable_source": "Flow trainer, U-Net, sampler, generation wrapper, and website exporter inspection.",
+    "safe_synthetic_probe": "Dummy latent and zero-tensor CPU probes only.",
+    "checkpoint_schema_only": "Weights-only root keys and shape evidence.",
+    "manuscript_variants": "Older and later Flow width statements kept separately.",
+    "public_compatibility_config": "Wrapper-compatible public settings with exact_paper_reproduction=false."
+  },
+  "sources": [
+    "<immutable-source>/models/unet_1d.py",
+    "<immutable-source>/LRF/rectified_flow.py",
+    "<immutable-source>/1_Rectified_Flow_training.py",
+    "<immutable-source>/rectified_flow_training.py",
+    "<immutable-source>/1_train_flow.ps1",
+    "<immutable-source>/2_generate_synthetic_only.py",
+    "<immutable-source>/8_export_website_trajectories.py",
+    "<audit-repository>/docs/REPRODUCIBILITY_AUDIT.md",
+    "<audit-repository>/configs/locked/paper_release_reference.yaml",
+    "<public-repository>/configs/paper/six_channel_160_40.yaml"
+  ],
+  "contract": {
+    "physical": {
+      "shape": "[B,6,160]",
+      "sampling_rate_hz": 50,
+      "window_seconds": 3.2,
+      "orientation": "B,C,T",
+      "channel_units": {"accelerometer": "m/s^2", "gyroscope": "rad/s"}
+    },
+    "latent": {
+      "shape": "[B,48,40]",
+      "stride": 4,
+      "encoding": "VAE.encode(x)[0]"
+    },
+    "labels": {
+      "0": "walking",
+      "1": "running",
+      "2": "jump_up",
+      "3": "cycling"
+    },
+    "unet": {
+      "class": "LatentDiffusionUNet1D",
+      "input_channels": 48,
+      "channel_multipliers": [1, 2, 4],
+      "residual_kernels": [3, 3],
+      "long_grouped_kernel": 31,
+      "long_groups": "min(in_ch,out_ch)",
+      "group_norm_groups": 8,
+      "squeeze_excitation_reduction": 4,
+      "downsample": "AvgPool1d(2)",
+      "upsample": "nearest_x2_then_skip_concat",
+      "time_embedding": "sinusoidal -> Linear(C,4C) -> SiLU -> Linear(4C,C)",
+      "class_embedding": "Embedding(4,C), broadcast addition",
+      "base_width_evidence": {
+        "older_manuscript": 128,
+        "later_manuscript": 256,
+        "wrapper": 256,
+        "checkpoint_shapes": 256,
+        "status": "unresolved"
+      }
+    },
+    "training": {
+      "time_distribution": "Uniform[0,1)",
+      "interpolation": "z_t = (1-t) z_0 + t z_1",
+      "target": "z_1 - z_0",
+      "model_time": "1000*t",
+      "loss": "MSE",
+      "optimizer": "AdamW",
+      "learning_rate": 0.0005,
+      "betas": [0.9, 0.95],
+      "weight_decay": 0.0001,
+      "gradient_clip_norm": 1.0,
+      "epochs": 300,
+      "batch_size": 128,
+      "early_stop_patience": 50
+    },
+    "paper_sampling": {
+      "solver": "explicit Euler",
+      "steps": 10,
+      "start_time": 1.0,
+      "end_time": 0.0,
+      "dt": 0.1,
+      "update": "z <- z - dt * v(z,1000*t,label)",
+      "samples_per_class": 500,
+      "seed": 42,
+      "decoder": "frozen VAE.decode(z)"
+    },
+    "coordinate_systems": {
+      "tstr_input_and_decoded_windows": "standardized",
+      "physical_or_website_output": "inverse per-channel z-score",
+      "paper_and_website_outputs_must_not_be_collapsed": true
+    },
+    "website_trajectory": {
+      "steps": 100,
+      "record_every": 2,
+      "recorded_states": 51,
+      "duration_seconds": 10,
+      "overlap_samples": 40,
+      "construction": "independent native windows followed by linear overlap-add",
+      "seed_formula": "42 + subject*1000 + activity_id*100",
+      "status": "separate visualization contract"
+    },
+    "checkpoint_schema": {
+      "vae_root_keys": ["vae"],
+      "flow_root_keys": ["config", "epoch", "history", "opt", "unet", "val_loss"],
+      "flow_state_dict_key": "unet",
+      "load_policy_observed": "strict",
+      "binary_migration": "blocked"
+    }
+  },
+  "classifications": {
+    "canonical_observed": ["B,C,T orientation", "latent [B,48,40]", "interpolation and target", "model time 1000*t", "reverse 10-step Euler", "seed 42", "500 per class", "standardized TSTR coordinate system"],
+    "ambiguous": ["base width 128 versus 256", "combined LOSO trainer defaults", "visual standard-deviation semantics"],
+    "blocked": ["exact public implementation", "checkpoint migration", "paper-exact parity until width authority is resolved"]
+  },
+  "migration_recommendation": {
+    "flow_equations": "safe-copy",
+    "unet": "blocked",
+    "trainer": "blocked",
+    "generation_entrypoint": "minimal-edit",
+    "wrappers": "wrap",
+    "website_exporter": "safe-copy",
+    "checkpoint_binaries": "blocked",
+    "parity_tests": ["dummy loss test", "seeded reverse-Euler test", "latent shape test", "width-specific state-dict test", "standardized/physical output test", "website overlap-add test"]
+  },
+  "blockers": [
+    "Manuscript base width C=128 conflicts with later manuscript, wrapper, and checkpoint-shape evidence C=256.",
+    "The two Flow trainer files are byte-identical but have different live callers.",
+    "No historical environment lock or checkpoint training provenance establishes exact paper identity.",
+    "Website trajectory export has different steps, duration, seeds, and overlap-add behavior from paper sampling."
+  ],
+  "uncertainties": [
+    "3_run_full_losocv.py uses the unprefixed trainer and differing defaults.",
+    "Visual analysis scripts may apply additional rescaling or aggregation not represented in the core sampler contract.",
+    "Current CPU probes do not establish CUDA training parity."
+  ],
+  "verification_basis": {
+    "duplicate_hash": {"files": ["1_Rectified_Flow_training.py", "rectified_flow_training.py"], "sha256": "9DA925EC82F0704C4DEC2E55C37730327D1AEEA460F8A1ABB3197BE928D2CFB4"},
+    "checkpoint_probe": "Weights-only inspection confirmed VAE root vae, Flow root unet, and observed C=256 shapes.",
+    "cpu_probe": "Dummy Flow loss, sampling, and decode passed; CUDA autocast emitted a warning in VAE evaluation.",
+    "repositories": "Audit and public repositories remained clean at their pinned commits.",
+    "artifacts": "No data, checkpoints, results, logs, or generated trajectories were copied."
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "schema_version": "2A.1",
+  "milestone": "2A",
+  "component": "runtime_and_portability",
+  "status": "current_probe_only_no_historical_lock",
+  "scope": {
+    "historical_reproduction_environment_verified": false,
+    "current_cpu_probe_is_historical_claim": false,
+    "scientific_implementation_in_public_release": false,
+    "full_experiment_run": false
+  },
+  "evidence_tiers": {
+    "locked_audit": "Audit statements about missing environment lock and platform assumptions.",
+    "observed_immutable_source": "Static import, path, serialization, and wrapper inspection.",
+    "safe_synthetic_probe": "Current CPU imports and dummy tensor execution only.",
+    "current_tested_runtime": "The exact current package versions listed below; not historical provenance.",
+    "public_compatibility_config": "Public package declares configuration-layer dependencies only."
+  },
+  "sources": [
+    "<audit-repository>/docs/REPRODUCIBILITY_AUDIT.md",
+    "<audit-repository>/docs/PUBLIC_RELEASE_RISKS.md",
+    "<audit-repository>/docs/RELEASE_HANDOFF.md",
+    "<immutable-source>/VAE/VAE_logic.py",
+    "<immutable-source>/3_run_full_losocv.py",
+    "<immutable-source>/window_grid_aug_quality.py",
+    "<immutable-source>/windowing_sensitivity_grid_3x3.ps1",
+    "<public-repository>/pyproject.toml",
+    "<public-repository>/requirements.txt"
+  ],
+  "contract": {
+    "platform_and_orchestration": {
+      "platform_observed": "Windows",
+      "orchestration_observed": "PowerShell wrappers with Python child processes",
+      "portable_cli": "not established",
+      "hardcoded_roots": "present in scientific source and wrappers; replace with explicit roots during migration"
+    },
+    "current_tested_runtime": {
+      "python": "3.12.4",
+      "torch": "2.7.1+cpu",
+      "cuda_available": false,
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "scikit_learn": "1.4.2",
+      "PyYAML": "6.0.2",
+      "scipy": "1.12.0",
+      "matplotlib": "3.8.4",
+      "seaborn": "0.13.2",
+      "altair": "6.2.2",
+      "umap_learn": "0.5.7",
+      "tqdm": "4.67.1",
+      "tslearn": "unavailable",
+      "status": "current_probe_only"
+    },
+    "documentary_historical_claim": {
+      "python": "3.11.11",
+      "torch": "2.5.1",
+      "cuda": "12.1",
+      "gpu": "RTX 4070 Laptop GPU",
+      "status": "documentary_only_not_verified",
+      "policy": "Do not present this as a locked or reproduced environment."
+    },
+    "dependencies": {
+      "public_declared": ["PyYAML"],
+      "scientific_core_observed": ["torch", "numpy", "pandas", "matplotlib"],
+      "evaluation_observed": ["scikit-learn", "scipy", "altair", "matplotlib"],
+      "analysis_observed": ["seaborn", "umap-learn", "tslearn"],
+      "lockfile_present": false,
+      "historical_freeze_present": false
+    },
+    "device_and_precision": {
+      "selection": "Most entrypoints use CUDA when available and CPU fallback otherwise.",
+      "training_risks": ["AMP", "CUDA memory probing", "pin_memory", "profiling"],
+      "cpu_probe": "Core VAE and Flow dummy execution passed on CPU.",
+      "warning": "An unconditional CUDA autocast path emitted a warning during VAE evaluation.",
+      "migration": "Guard autocast and device-specific operations by the actual device."
+    },
+    "import_and_process_behavior": {
+      "main_guards": "Primary entrypoints generally have __main__ guards.",
+      "import_time_mutation": ["VAE/VAE_logic.py sets PYTORCH_ALLOC_CONF", "3_run_full_losocv.py sets thread variables and parses early arguments"],
+      "cwd_or_sys_path_mutation": ["window_grid_aug_quality.py", "VAE/main.py fallback import surfaces"],
+      "wrapper_side_effects": ["directory creation", "logs/manifests", "output moves", "fallback cleanup"]
+    },
+    "serialization": {
+      "checkpoint_format": ".pt via torch.save",
+      "loading": "Most loaders try weights_only=true and fall back to raw torch.load; some loaders use raw torch.load directly.",
+      "strictness": "VAE commonly non-strict; Flow loaders vary; observed Flow checkpoint path uses strict loading.",
+      "numpy_arrays": ".npz synthetic caches use allow_pickle=false; VAE history uses allow_pickle=true",
+      "source_logs": "tab-delimited numeric logs with 120 columns",
+      "migration_policy": "No binaries, logs, caches, or results in public Git."
+    },
+    "known_portability_risks": [
+      "hardcoded Windows/data roots",
+      "PowerShell-only wrappers",
+      "missing historical environment lock",
+      "raw torch.load fallbacks",
+      "unconditional CUDA autocast warning",
+      "import-time environment mutation",
+      "cwd/sys.path mutation",
+      "undefined supplementWin240 wrapper variable",
+      "optional tslearn unavailable in current probe runtime",
+      "BOMs and invalid escape warnings"
+    ]
+  },
+  "classifications": {
+    "current_runtime": "observed_current_only",
+    "historical_runtime": "documentary_only",
+    "public_dependencies": "compatibility_config_only",
+    "source_lock": "blocked",
+    "portable_execution": "blocked_until_rewrite"
+  },
+  "migration_recommendation": {
+    "dependency_declaration": "rewrite-with-parity-tests",
+    "path_and_environment_inputs": "rewrite-with-parity-tests",
+    "device_and_amp_guards": "minimal-edit",
+    "serialization": "minimal-edit",
+    "PowerShell_wrappers": "wrap",
+    "optional_analysis": "blocked",
+    "historical_runtime_claim": "safe-copy_as_documentary_only",
+    "prerequisites": ["lock a clean current environment", "add import-safety tests", "add CPU dummy tests", "define optional dependency gates", "remove hardcoded roots"]
+  },
+  "blockers": [
+    "No historical requirements lock, environment export, or pip freeze was found.",
+    "Current CPU probe cannot establish historical CUDA/PyTorch parity.",
+    "tslearn is unavailable in the verified current runtime.",
+    "The sensitivity wrapper references undefined supplementWin240.",
+    "Raw/legacy checkpoint-loading fallbacks require a trusted-artifact policy."
+  ],
+  "uncertainties": [
+    "Exact training hardware and dependency versions are documentary only.",
+    "Optional analysis dependencies may vary by script.",
+    "Import-time side effects can differ by current working directory and argument order."
+  ],
+  "verification_basis": {
+    "imports": "Core modules, TSTR, and window-grid analysis imported in an isolated current CPU probe.",
+    "dummy_execution": "VAE forward/evaluation, Flow loss/sampling/decode passed on CPU with the noted autocast warning.",
+    "public_tests": "Milestone 1 public skeleton tests passed 6/6 under Python -B with cache provider disabled.",
+    "repositories": "Audit and public repositories remained clean at their pinned commits.",
+    "artifacts": "Temporary probe directories were removed; no scientific artifacts were copied."
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "schema_version": "2A.1",
+  "milestone": "2A",
+  "component": "data_preprocessing",
+  "status": "characterized_with_3ch_and_split_interface_blockers",
+  "scope": {
+    "dataset": "REALDISP paper-specific four-class ideal-placement path",
+    "general_33_activity_processing": "out_of_scope",
+    "exact_paper_reproduction": false,
+    "raw_data_in_public_release": false
+  },
+  "evidence_tiers": {
+    "locked_audit": "Pinned audit documents and locked compatibility YAML.",
+    "observed_immutable_source": "Static source inspection of VAE preprocessing and wrappers.",
+    "safe_synthetic_probe": "Dummy logs and arrays only; no participant values.",
+    "manuscript_variants": "Manuscript-reported subject and preprocessing statements.",
+    "public_compatibility_config": "Non-executing/public path and paper configuration layer."
+  },
+  "sources": [
+    "<audit-repository>/docs/REPRODUCIBILITY_AUDIT.md",
+    "<audit-repository>/configs/locked/paper_release_reference.yaml",
+    "<immutable-source>/VAE/VAE_logic.py",
+    "<immutable-source>/VAE/Run_VAE_Pretraings.ps1",
+    "<immutable-source>/3_run_loso_evaluation.ps1",
+    "<public-repository>/configs/paper/six_channel_160_40.yaml",
+    "<public-repository>/configs/paper/accelerometer_only_160_40.yaml"
+  ],
+  "contract": {
+    "dataset": {
+      "name": "REALDISP",
+      "placement": "ideal",
+      "sensor": "right_thigh",
+      "sampling_rate_hz": 50,
+      "file_glob": "subject*_ideal.log",
+      "discovery_recursive": false,
+      "log_format": {
+        "separator": "\\t",
+        "header": false,
+        "expected_columns": 120,
+        "read_dtype": "float"
+      }
+    },
+    "subjects": {
+      "canonical_ids": [1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16],
+      "fold_count": 12,
+      "selection_basis": "locked audit and explicit wrapper lists",
+      "held_out_per_fold": 1,
+      "completeness_validation": "not performed by the source parser"
+    },
+    "columns": {
+      "right_thigh_zero_based": [80, 81, 82, 83, 84, 85],
+      "channel_order": ["ax", "ay", "az", "gx", "gy", "gz"],
+      "label_zero_based": 119,
+      "raw_signal_dtype": "float32",
+      "raw_label_dtype": "int32"
+    },
+    "labels": {
+      "source_codes": [1, 3, 4, 33],
+      "encoded": {
+        "0": {"source_code": 1, "name": "walking"},
+        "1": {"source_code": 3, "name": "running"},
+        "2": {"source_code": 4, "name": "jump_up"},
+        "3": {"source_code": 33, "name": "cycling"}
+      },
+      "class_count": 4,
+      "zero_division_policy": 0
+    },
+    "preprocessing_order": [
+      "discover nonrecursive subject*_ideal.log files",
+      "read 120-column tab-separated numeric logs",
+      "extract right-thigh columns 80..85 and label column 119",
+      "filter rows to source labels [1, 3, 4, 33]",
+      "construct contiguous runs on the filtered sequence",
+      "window each run",
+      "map source labels to encoded labels"
+    ],
+    "filtering_caveat": {
+      "status": "canonical_for_compatibility_but_unsafe_to_generalize",
+      "observed_behavior": "Target-label filtering occurs before contiguous-run construction.",
+      "synthetic_probe": {
+        "labels": [1, 1, 99, 99, 1, 1],
+        "result": "one B,C,T-style window spanning the excluded-label gap"
+      },
+      "policy": "Do not reuse this ordering as a general 33-activity continuity definition without a separate decision."
+    },
+    "windowing": {
+      "main_window_samples": 160,
+      "main_hop_samples": 40,
+      "main_window_seconds": 3.2,
+      "main_hop_seconds": 0.8,
+      "overlap_fraction": 0.75,
+      "complete_windows_only": true,
+      "padding": false,
+      "sensitivity_window_samples": [80, 160, 240],
+      "sensitivity_hop_samples": [20, 40, 80]
+    },
+    "normalization": {
+      "method": "per_channel_zscore",
+      "fit_axes": [0, 2],
+      "standard_deviation_ddof": 0,
+      "minimum_standard_deviation": 1e-8,
+      "fit_subject_stage": "post-validation training subjects only",
+      "apply_to": ["train", "validation", "held_out_test", "synthetic_in_standardized_coordinate_system"]
+    },
+    "loso_and_validation": {
+      "protocol": "leave_one_subject_out",
+      "held_out_subject_excluded_from_training_and_validation": true,
+      "vae_safe_subject_validation": {
+        "enabled": true,
+        "fraction": 0.15,
+        "unit": "subject",
+        "seed": 42
+      },
+      "cnn_internal_validation": {
+        "fraction": 0.20,
+        "unit": "training-pool samples",
+        "stage": "downstream classifier only"
+      },
+      "public_locked_020": "Separate compatibility evidence tier; do not overwrite the observed VAE-safe 0.15 split."
+    },
+    "arrays_and_metadata": {
+      "windows_shape": "[N_windows, 6, T]",
+      "windows_dtype": "float32",
+      "labels_shape": "[N_windows]",
+      "labels_preparation_dtype": "int64",
+      "standardizer_mean_shape": "[1, 6, 1]",
+      "standardizer_std_shape": "[1, 6, 1]",
+      "dataloader_input_shape": "[B, 6, T]",
+      "metadata": [
+        "train_subjects",
+        "held_out_subject",
+        "validation_subjects when safe split is used",
+        "per-subject window and class counts",
+        "train/test class counts",
+        "window",
+        "hop",
+        "class_names"
+      ]
+    },
+    "variants": {
+      "six_channel": {
+        "status": "canonical_observed",
+        "channels": ["ax", "ay", "az", "gx", "gy", "gz"],
+        "shape": "[N, 6, T]"
+      },
+      "three_channel": {
+        "intended_channels": ["ax", "ay", "az"],
+        "public_config_indices": [80, 81, 82],
+        "observed_source_status": "blocked",
+        "reason": "Observed VAE preprocessing always extracts and returns six channels and ignores ABLATION_ACC_ONLY.",
+        "policy": "Requires separate 3CH training/preprocessing lineage; never infer by dropping channels at inference time."
+      }
+    },
+    "split_interface": {
+      "safe_function": "prepare_realdisp_fold_vae_safe",
+      "observed_return_count": 8,
+      "standard_alias_expected_return_count": 7,
+      "status": "ambiguous_or_broken_standard_path",
+      "migration_policy": "Do not wrap the legacy alias until the return contract is repaired and regression-tested."
+    },
+    "leakage_audit": {
+      "hash": "SHA-1 over contiguous window bytes",
+      "observed_comparison": "train versus validation only",
+      "raises_on_duplicate": true,
+      "writes": "vae_split_audit.json",
+      "held_out_test_checked": false,
+      "manuscript_claim": "no identical train-test windows reported",
+      "status": "ambiguous",
+      "migration_policy": "Add explicit train-versus-held-out-test comparison while preserving the legacy train-versus-validation report."
+    }
+  },
+  "classifications": {
+    "canonical_observed": ["six-channel extraction", "four-class mapping", "160/40 complete windows", "training-only z-score fit in safe path"],
+    "ambiguous": ["standard split alias/return count", "train-test duplicate proof", "subject completeness validation"],
+    "blocked": ["current 3CH preprocessing lineage", "general full-activity parser reuse"]
+  },
+  "migration_recommendation": {
+    "dataset_discovery": "wrap",
+    "schema_and_columns": "safe-copy",
+    "four_class_filter_and_runs": "safe-copy",
+    "windowing": "safe-copy",
+    "normalization": "minimal-edit",
+    "safe_subject_split": "wrap",
+    "legacy_standard_split": "blocked",
+    "six_channel_variant": "safe-copy",
+    "three_channel_variant": "blocked",
+    "leakage_audit": "rewrite-with-parity-tests",
+    "prerequisites": ["freeze this contract", "add synthetic regression fixtures", "keep data outside Git", "record subject IDs and fit statistics"]
+  },
+  "blockers": [
+    "Observed preprocessing does not implement 3CH extraction.",
+    "The standard preparation alias and safe return count disagree.",
+    "Observed duplicate audit does not prove train-versus-held-out-test non-overlap.",
+    "Filtering-before-runs behavior is unsuitable as an unqualified general REALDISP parser rule."
+  ],
+  "uncertainties": [
+    "The source parser does not validate complete subject coverage before processing.",
+    "Manuscript wording about discarding transitions conflicts with observed filter ordering.",
+    "Public 0.20 config and VAE-safe 0.15 split represent distinct pipeline stages."
+  ],
+  "verification_basis": {
+    "synthetic_filter_probe": "Passed with labels [1,1,99,99,1,1] and produced one window spanning the gap.",
+    "synthetic_fixture_probe": "Discovered dummy subjects, produced [N,6,T] float32 windows and [N] int64 labels, and retained six channels under ABLATION_ACC_ONLY=1.",
+    "duplicate_probe": "Identical train/validation window raised the observed leakage error and wrote vae_split_audit.json in external temporary storage.",
+    "repositories": "Audit and public repositories remained clean at their pinned commits.",
+    "artifacts": "All synthetic fixtures and temporary outputs were removed; no participant data was opened."
+  }
+}

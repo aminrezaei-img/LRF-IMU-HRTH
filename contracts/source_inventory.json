@@ -1,0 +1,433 @@
+{
+  "schema_version": "2A.1",
+  "milestone": "2A",
+  "component": "source_inventory",
+  "status": "characterization_only",
+  "scope": {
+    "purpose": "Evidence-tiered inventory of scientific source candidates and entrypoint topology before migration.",
+    "scientific_implementation_copied": false,
+    "data_checkpoints_results_logs_copied": false,
+    "exact_paper_reproduction": false,
+    "coverage": "Important, canonical, duplicate, patched, historical, and blocked candidates; not an approval of every source file."
+  },
+  "contract": {
+    "inventory_scope": "Representative scientific source candidates, entrypoint relationships, duplicate groups, and migration blockers.",
+    "canonicality_evidence_order": ["locked_audit", "observed_immutable_source", "wrapper_call_sites", "current_source_defaults", "manuscript_variants"],
+    "candidate_count": 24,
+    "duplicate_group_count": 1,
+    "relationship_count": 7,
+    "classification_field": "candidates[].classification",
+    "migration_authorization": "Inventory classification is descriptive evidence and does not authorize migration."
+  },
+  "evidence_tiers": {
+    "locked_audit": "Pinned audit repository at release/audit-and-inventory, commit f38bebce36c4f21d857dc084ac8d06759c2c012d; includes the release manifest and locked run/reference documents.",
+    "observed_immutable_source": "Read-only static inspection of the immutable source tree using repository-relative paths and selected hashes.",
+    "safe_synthetic_probe": "Dummy-array or dummy-tensor probes in an external temporary directory; no participant values or full experiments.",
+    "checkpoint_schema_only": "Weights-only inspection of checkpoint keys, metadata, and tensor shapes; checkpoint binaries remain outside the public repository.",
+    "manuscript_variants": "Separate manuscript-era statements, retained as variant evidence rather than reconciled authority.",
+    "current_tested_runtime": "Current CPU probe environment used only for import, dummy execution, and public skeleton tests.",
+    "public_compatibility_config": "Milestone 1 public YAML/configuration layer; compatibility defaults are not scientific implementation or parity proof."
+  },
+  "sources": [
+    {
+      "id": "audit_manifest",
+      "tier": "locked_audit",
+      "path": "<audit-repository>/release_manifest.json",
+      "revision": "f38bebce36c4f21d857dc084ac8d06759c2c012d"
+    },
+    {
+      "id": "locked_run_guide",
+      "tier": "locked_audit",
+      "path": "<audit-repository>/configs/locked/RUNNING_INSTRUCTIONS.verbatim.md",
+      "revision": "f38bebce36c4f21d857dc084ac8d06759c2c012d"
+    },
+    {
+      "id": "immutable_run_guide",
+      "tier": "observed_immutable_source",
+      "path": "<immutable-source>/RUNNING_INSTRUCTIONS.md"
+    },
+    {
+      "id": "immutable_path_history",
+      "tier": "observed_immutable_source",
+      "path": "<immutable-source>/renaming_paths_vae.md"
+    },
+    {
+      "id": "public_configs",
+      "tier": "public_compatibility_config",
+      "path": "<public-repository>/configs/paper/"
+    }
+  ],
+  "classification_vocab": [
+    "canonical_observed",
+    "wrapper",
+    "duplicate",
+    "patched_current",
+    "historical_or_superseded",
+    "ambiguous",
+    "blocked",
+    "unused_or_unreachable"
+  ],
+  "migration_categories": [
+    "safe-copy",
+    "wrap",
+    "minimal-edit",
+    "rewrite-with-parity-tests",
+    "blocked"
+  ],
+  "classifications": {
+    "canonical_observed": [
+      "<immutable-source>/VAE/VAE_logic.py",
+      "<immutable-source>/LRF/rectified_flow.py",
+      "<immutable-source>/2_generate_synthetic_only.py",
+      "<immutable-source>/TSTR.py",
+      "<immutable-source>/8_export_website_trajectories.py",
+      "<immutable-source>/window_grid_aug_quality.py",
+      "<immutable-source>/vae_ablation_loso.py"
+    ],
+    "wrapper": [
+      "<immutable-source>/VAE/Run_VAE_Pretraings.ps1",
+      "<immutable-source>/1_train_flow.ps1",
+      "<immutable-source>/3_run_loso_evaluation.ps1"
+    ],
+    "duplicate": [
+      "<immutable-source>/rectified_flow_training.py"
+    ],
+    "patched_current": [
+      "<immutable-source>/8_tstr_classification_figure_org_PATCHED_v3.py",
+      "<immutable-source>/13_classification_violin_confusion_PATCHED.py"
+    ],
+    "historical_or_superseded": [
+      "<immutable-source>/13_classification_violin_confusion.py",
+      "<immutable-source>/renaming_paths_vae.md",
+      "<immutable-source>/VAE_weights/<variant>/SPECTRAL_LOSS_OFF/..."
+    ],
+    "ambiguous": [
+      "<immutable-source>/VAE/main.py",
+      "<immutable-source>/1_Rectified_Flow_training.py",
+      "<immutable-source>/models/unet_1d.py",
+      "<immutable-source>/3_run_full_losocv.py",
+      "<immutable-source>/windowing_sensitivity_grid_3x3.ps1"
+    ],
+    "blocked": [
+      "<immutable-source>/7_cluster_analysis.py",
+      "<immutable-source>/Results/model_weights/vae_weights/<variant>/..."
+    ],
+    "unused_or_unreachable": [
+      "<immutable-source>/10_coverage_population_analysis.py"
+    ]
+  },
+  "entrypoint_relationships": [
+    {
+      "caller": "<immutable-source>/VAE/Run_VAE_Pretraings.ps1",
+      "target": "<immutable-source>/VAE/VAE_logic.py",
+      "classification": "canonical_observed_wrapper_to_module"
+    },
+    {
+      "caller": "<immutable-source>/1_train_flow.ps1",
+      "target": "<immutable-source>/1_Rectified_Flow_training.py",
+      "classification": "documented_wrapper_target"
+    },
+    {
+      "caller": "<immutable-source>/2_generate_synthetic_all_folds.ps1",
+      "target": "<immutable-source>/2_generate_synthetic_only.py",
+      "classification": "generation_wrapper_target"
+    },
+    {
+      "caller": "<immutable-source>/2_generate_synthetic_only.py",
+      "target": "<immutable-source>/TSTR.py",
+      "classification": "generation_to_evaluation_dependency"
+    },
+    {
+      "caller": "<immutable-source>/3_run_loso_evaluation.ps1",
+      "target": "<immutable-source>/TSTR.py",
+      "classification": "evaluation_wrapper_target"
+    },
+    {
+      "caller": "<immutable-source>/3_run_full_losocv.py",
+      "target": "<immutable-source>/rectified_flow_training.py",
+      "classification": "live_import_of_duplicate"
+    },
+    {
+      "caller": "<immutable-source>/run_tstr_all_subjects.ps1",
+      "target": "<immutable-source>/8_tstr_classification_figure_org_PATCHED_v3.py",
+      "classification": "current_patched_analysis_path"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "<immutable-source>/VAE/VAE_logic.py",
+      "role": "VAE model, preprocessing, training, and evaluation module",
+      "classification": "canonical_observed",
+      "sha256": "3C989BB8242236D3107AE75A1533622D955D6E739D0B44103636897D01E80505",
+      "migration_recommendation": "rewrite-with-parity-tests",
+      "prerequisites": ["freeze data and VAE contracts", "resolve 3CH lineage", "resolve schedule evidence", "separate import-safe utilities from orchestration"],
+      "tests": ["shape and dtype regression tests", "synthetic preprocessing tests", "deterministic mean versus stochastic reparameterization", "checkpoint state-dict compatibility"]
+    },
+    {
+      "path": "<immutable-source>/VAE/Run_VAE_Pretraings.ps1",
+      "role": "VAE training wrapper",
+      "classification": "wrapper",
+      "sha256": "2BE8A6D0645431E36E336DB6AA0C4174668F53A6720036B56414E5F0709C1B3D",
+      "migration_recommendation": "wrap",
+      "prerequisites": ["portable interpreter and data-root interface", "explicit evidence-tier schedule"],
+      "tests": ["dry-run argument propagation", "path isolation", "nonzero child exit propagation"]
+    },
+    {
+      "path": "<immutable-source>/VAE/main.py",
+      "role": "alternate VAE QA/import surface",
+      "classification": "ambiguous",
+      "sha256": null,
+      "migration_recommendation": "blocked",
+      "prerequisites": ["prove whether any release workflow calls this surface", "reconcile latent stride and dimension defaults"],
+      "tests": ["import-safety test", "caller audit", "architecture compatibility test"]
+    },
+    {
+      "path": "<immutable-source>/1_Rectified_Flow_training.py",
+      "role": "documented direct Flow trainer",
+      "classification": "ambiguous",
+      "sha256": "9DA925EC82F0704C4DEC2E55C37730327D1AEEA460F8A1ABB3197BE928D2CFB4",
+      "migration_recommendation": "blocked",
+      "prerequisites": ["resolve duplicate-file ownership", "resolve C=128 versus C=256 width evidence", "freeze checkpoint contract"],
+      "tests": ["trainer import test", "one-batch flow-loss test", "checkpoint save/load parity test", "wrapper-to-module dry run"]
+    },
+    {
+      "path": "<immutable-source>/rectified_flow_training.py",
+      "role": "Flow trainer imported by combined LOSO path",
+      "classification": "duplicate",
+      "sha256": "9DA925EC82F0704C4DEC2E55C37730327D1AEEA460F8A1ABB3197BE928D2CFB4",
+      "migration_recommendation": "blocked",
+      "prerequisites": ["audit all importers", "choose one canonical implementation or tested alias"],
+      "tests": ["byte-equivalence record", "importer regression test", "single-source packaging test"]
+    },
+    {
+      "path": "<immutable-source>/1_train_flow.ps1",
+      "role": "Flow training wrapper",
+      "classification": "wrapper",
+      "sha256": "D089F64E8184E5DF1F622539093FF6BD90BF27C7A396A8D628B8B69C4EF62930",
+      "migration_recommendation": "wrap",
+      "prerequisites": ["parameterize roots and interpreter", "document width as compatibility evidence only"],
+      "tests": ["dry-run environment capture", "path and exit-code test", "configuration precedence test"]
+    },
+    {
+      "path": "<immutable-source>/models/unet_1d.py",
+      "role": "conditional latent Flow U-Net",
+      "classification": "ambiguous",
+      "sha256": "A9AEAD0FDE29283B64EBE45DDF505E4899FDFEE9A259532A82FC1ACE3F64AFE1",
+      "migration_recommendation": "blocked",
+      "prerequisites": ["resolve base-width authority", "verify checkpoint channel shapes"],
+      "tests": ["state-dict shape test", "CPU forward test", "conditioning and time-scale regression test"]
+    },
+    {
+      "path": "<immutable-source>/LRF/rectified_flow.py",
+      "role": "Flow equations and sampling utilities",
+      "classification": "canonical_observed",
+      "sha256": "6A4698A810CDD3589BDC1B6DF31A77DBE8C4C36754A29FFD455E26B629135B7A",
+      "migration_recommendation": "safe-copy",
+      "prerequisites": ["freeze latent and label contracts"],
+      "tests": ["interpolation and target test", "reverse Euler direction test", "seeded dummy sampling test"]
+    },
+    {
+      "path": "<immutable-source>/2_generate_synthetic_only.py",
+      "role": "fold-level synthetic generation entrypoint",
+      "classification": "canonical_observed",
+      "sha256": "DFBD857F05EFD6661AAE84CB7DCF879DB73CE5B5D1A84DF914B9830728167126",
+      "migration_recommendation": "minimal-edit",
+      "prerequisites": ["portable roots", "explicit paper versus website sampler mode"],
+      "tests": ["dummy checkpoint key validation", "seed and sample-count test", "standardized versus physical-unit output test"]
+    },
+    {
+      "path": "<immutable-source>/TSTR.py",
+      "role": "core TRTR/TSTR classifier and metric implementation",
+      "classification": "canonical_observed",
+      "sha256": "6D67F44B0B9340D3EF65FF9CF47A8848E1D754E71AB2525A6EC4242E8F4DA702",
+      "migration_recommendation": "rewrite-with-parity-tests",
+      "prerequisites": ["freeze evaluation contract", "separate file/path/config concerns"],
+      "tests": ["dummy RF/CNN smoke test", "macro-F1 and retention test", "confusion aggregation test"]
+    },
+    {
+      "path": "<immutable-source>/3_run_full_losocv.py",
+      "role": "combined LOSO orchestrator",
+      "classification": "ambiguous",
+      "sha256": "09BCC1FE4C92098255E93B672795A15D671EF7286BF0D7160571F7F08D6ADC89",
+      "migration_recommendation": "blocked",
+      "prerequisites": ["resolve duplicate trainer", "resolve differing defaults and import-time side effects", "repair safe-split interface"],
+      "tests": ["import-safe orchestration test", "fold isolation test", "dry-run subprocess graph"]
+    },
+    {
+      "path": "<immutable-source>/3_run_loso_evaluation.ps1",
+      "role": "evaluation wrapper",
+      "classification": "wrapper",
+      "sha256": "A75FF3715F1C69C86941AC28AAE756524C2B242EF65CE28C568D3439E70E857D",
+      "migration_recommendation": "wrap",
+      "prerequisites": ["portable roots", "explicit cache and artifact policy"],
+      "tests": ["dry-run command graph", "artifact allowlist test", "child failure propagation"]
+    },
+    {
+      "path": "<immutable-source>/8_tstr_classification_figure_org_PATCHED_v3.py",
+      "role": "current patched four-scenario evaluator",
+      "classification": "patched_current",
+      "sha256": "8FF104FF33C96ACA94567352FA6290A0249F638982490E73193A1291F92C6BF9",
+      "migration_recommendation": "wrap",
+      "prerequisites": ["freeze scenario names and scarce-sample semantics", "preserve provenance distinction from TSTR.py"],
+      "tests": ["scenario dispatch test", "dummy per-class cap test", "fold aggregation test"]
+    },
+    {
+      "path": "<immutable-source>/13_classification_violin_confusion_PATCHED.py",
+      "role": "current patched visualization/evaluation summary",
+      "classification": "patched_current",
+      "sha256": "57E0EA682AE0D37C152BC8C48DAB450F5DEFBA93AE53DF341210135BE98D549C",
+      "migration_recommendation": "wrap",
+      "prerequisites": ["confirm output-only visualization scope"],
+      "tests": ["synthetic table fixture", "nanmean and cm_count test"]
+    },
+    {
+      "path": "<immutable-source>/13_classification_violin_confusion.py",
+      "role": "unpatched legacy visualization/evaluation summary",
+      "classification": "historical_or_superseded",
+      "sha256": "9CA06DDB13A6E914CBC32646ADEE57F15DA935B5DA8CBA3C4FAEA163A82583A5",
+      "migration_recommendation": "blocked",
+      "prerequisites": ["prove historical result dependency before any archival migration"],
+      "tests": ["diff against patched script", "provenance lookup"]
+    },
+    {
+      "path": "<immutable-source>/8_export_website_trajectories.py",
+      "role": "website visualization exporter",
+      "classification": "canonical_observed",
+      "sha256": null,
+      "migration_recommendation": "safe-copy",
+      "prerequisites": ["label as website-only contract", "keep generated trajectories outside Git"],
+      "tests": ["dummy overlap-add test", "record_every and duration test", "inverse-standardization test"]
+    },
+    {
+      "path": "<immutable-source>/windowing_sensitivity_grid_3x3.ps1",
+      "role": "window/hop sensitivity wrapper",
+      "classification": "ambiguous",
+      "sha256": null,
+      "migration_recommendation": "blocked",
+      "prerequisites": ["define the referenced supplementWin240 variable", "verify nine-grid command graph"],
+      "tests": ["PowerShell parse/dry run", "grid completeness test", "artifact isolation test"]
+    },
+    {
+      "path": "<immutable-source>/window_grid_aug_quality.py",
+      "role": "window-grid and augmentation analysis",
+      "classification": "canonical_observed",
+      "sha256": null,
+      "migration_recommendation": "minimal-edit",
+      "prerequisites": ["remove cwd and sys.path mutation", "make input/output roots explicit"],
+      "tests": ["dummy grid summary test", "import-safety test", "sample-SD test"]
+    },
+    {
+      "path": "<immutable-source>/vae_ablation_loso.py",
+      "role": "VAE-only latent Gaussian ablation",
+      "classification": "canonical_observed",
+      "sha256": "124401CF8BA3D76B0FA32E66B8955D3708962E05D1A9DBDD17F03C0FFC41A202",
+      "migration_recommendation": "minimal-edit",
+      "prerequisites": ["resolve final table provenance", "keep flow_used=false explicit"],
+      "tests": ["dummy per-class latent sampling test", "no-flow path test", "provenance metadata test"]
+    },
+    {
+      "path": "<immutable-source>/10_coverage_population_analysis.py",
+      "role": "coverage analysis with fallback data import",
+      "classification": "unused_or_unreachable",
+      "sha256": "684959A12CCF197E06C4002BBC140191D6B92EFBE77ACF2AF226CD924BF105EB",
+      "migration_recommendation": "blocked",
+      "prerequisites": ["resolve absent data.realdisp fallback package", "define analysis input boundary"],
+      "tests": ["import-path test", "missing-dependency failure test"]
+    },
+    {
+      "path": "<immutable-source>/7_cluster_analysis.py",
+      "role": "optional clustering analysis",
+      "classification": "blocked",
+      "sha256": null,
+      "migration_recommendation": "blocked",
+      "prerequisites": ["lock and verify optional tslearn dependency"],
+      "tests": ["optional-dependency gate", "dummy clustering fixture"]
+    },
+    {
+      "path": "<immutable-source>/renaming_paths_vae.md",
+      "role": "historical path and naming record",
+      "classification": "historical_or_superseded",
+      "sha256": "DE688340BBB4030532D3E6DAC9B90091D090F3845EADCCCB750D5160C42DC011",
+      "migration_recommendation": "safe-copy",
+      "prerequisites": ["keep historical claims visibly documentary"],
+      "tests": ["path-marker scan", "cross-reference review"]
+    },
+    {
+      "path": "<immutable-source>/Results/model_weights/vae_weights/<variant>/...",
+      "role": "checkpoint and run-output tree",
+      "classification": "blocked",
+      "sha256": null,
+      "migration_recommendation": "blocked",
+      "prerequisites": ["privacy review", "provenance review", "size and licensing review", "checkpoint schema gate"],
+      "tests": ["weights-only schema inspection outside Git", "artifact exclusion scan"]
+    },
+    {
+      "path": "<immutable-source>/VAE_weights/<variant>/SPECTRAL_LOSS_OFF/...",
+      "role": "historical output naming convention",
+      "classification": "historical_or_superseded",
+      "sha256": null,
+      "migration_recommendation": "blocked",
+      "prerequisites": ["prove whether naming encodes a setting or only history"],
+      "tests": ["path-history comparison", "configuration provenance check"]
+    }
+  ],
+  "duplicate_groups": [
+    {
+      "files": [
+        "<immutable-source>/1_Rectified_Flow_training.py",
+        "<immutable-source>/rectified_flow_training.py"
+      ],
+      "classification": "byte_identical_live_duplicate",
+      "sha256": "9DA925EC82F0704C4DEC2E55C37730327D1AEEA460F8A1ABB3197BE928D2CFB4",
+      "callers": ["1_train_flow.ps1 targets prefixed file", "3_run_full_losocv.py imports unprefixed file"],
+      "decision": "Do not select a global canonical file in Milestone 2A; future work must audit callers and add a tested compatibility alias."
+    }
+  ],
+  "patched_or_superseded": [
+    {
+      "current": "<immutable-source>/8_tstr_classification_figure_org_PATCHED_v3.py",
+      "legacy": null,
+      "classification": "patched_current"
+    },
+    {
+      "current": "<immutable-source>/13_classification_violin_confusion_PATCHED.py",
+      "legacy": "<immutable-source>/13_classification_violin_confusion.py",
+      "classification": "patched_current_with_legacy_predecessor"
+    },
+    {
+      "current": "current wrapper/output paths",
+      "legacy": "SPECTRAL_LOSS_OFF path naming and historical 14_* privacy names",
+      "classification": "historical_path_drift"
+    }
+  ],
+  "migration_recommendation": {
+    "default": "Keep the public tree documentary and compatibility-only. Migrate no scientific module until its evidence gate, path boundary, privacy policy, and parity tests are satisfied.",
+    "next_gate": [
+      "resolve the Flow duplicate and width conflict",
+      "resolve VAE schedule evidence and 3CH lineage",
+      "repair safe-split/return-count mismatch",
+      "lock a current tested environment",
+      "design synthetic-only parity fixtures before any source migration"
+    ]
+  },
+  "blockers": [
+    "No single authoritative canonical Flow trainer is established.",
+    "Manuscript C=128 conflicts with wrapper/checkpoint C=256.",
+    "The observed VAE preprocessing path does not implement 3CH extraction.",
+    "The public release intentionally contains no scientific implementation.",
+    "Historical and current output naming do not by themselves prove training settings."
+  ],
+  "uncertainties": [
+    "VAE/main.py may be a QA surface rather than a release path.",
+    "A fallback import of data.realdisp is unreachable unless the primary VAE import fails.",
+    "Current wrapper defaults and Python defaults differ in several training parameters.",
+    "Some analysis provenance is partial or manual."
+  ],
+  "verification_basis": {
+    "python_source_parse": "45 Python files parsed with python -B; syntax failures 0.",
+    "powershell_inventory": "7 PowerShell wrappers inspected statically.",
+    "repositories": "Audit and public repositories remained clean at their pinned commits.",
+    "source_integrity": "Selected source hashes matched before and after inspection; immutable source was not a Git worktree.",
+    "artifacts": "No scientific source, raw data, checkpoints, results, logs, or participant artifacts were copied."
+  }
+}

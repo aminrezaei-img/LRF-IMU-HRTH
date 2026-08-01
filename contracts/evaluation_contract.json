@@ -1,0 +1,162 @@
+{
+  "schema_version": "2A.1",
+  "milestone": "2A",
+  "component": "evaluation",
+  "status": "characterized_with_provenance_gates",
+  "scope": {
+    "exact_paper_reproduction": false,
+    "full_evaluation_run": false,
+    "participant_data_in_public_release": false,
+    "result_artifacts_in_public_release": false
+  },
+  "evidence_tiers": {
+    "locked_audit": "Pinned evaluation assumptions, metric definitions, and provenance summaries.",
+    "observed_immutable_source": "TSTR, patched four-scenario evaluator, wrappers, and summary scripts.",
+    "safe_synthetic_probe": "Dummy windows and labels used for pure helper behavior only.",
+    "checkpoint_schema_only": "Generation input shape and checkpoint nesting only.",
+    "manuscript_variants": "Publication and table claims preserved as provenance tiers.",
+    "public_compatibility_config": "Non-executing paper configurations."
+  },
+  "sources": [
+    "<immutable-source>/TSTR.py",
+    "<immutable-source>/8_tstr_classification_figure_org_PATCHED_v3.py",
+    "<immutable-source>/3_run_full_losocv.py",
+    "<immutable-source>/window_grid_aug_quality.py",
+    "<immutable-source>/sensitivity_summary.py",
+    "<immutable-source>/vae_ablation_loso.py",
+    "<audit-repository>/docs/REPRODUCIBILITY_AUDIT.md",
+    "<audit-repository>/docs/PAPER_RESULT_PROVENANCE.md",
+    "<public-repository>/configs/paper/six_channel_160_40.yaml"
+  ],
+  "contract": {
+    "dataset": {
+      "name": "REALDISP",
+      "sampling_rate_hz": 50,
+      "labels": {"0": "walking", "1": "running", "2": "jump_up", "3": "cycling"},
+      "loso_subjects": [1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16],
+      "fold_count": 12,
+      "window_samples": 160,
+      "hop_samples": 40,
+      "overlap_fraction": 0.75
+    },
+    "split": {
+      "protocol": "leave_one_subject_out",
+      "held_out_test": "one subject per fold, excluded from training and validation",
+      "vae_safe_subject_validation_fraction": 0.15,
+      "cnn_internal_validation_fraction": 0.20,
+      "standardization": "fit on post-validation training windows only; apply unchanged to validation, held-out, and synthetic windows",
+      "ambiguity": "Public/locked compatibility config records 0.20 while source safe subject split uses 0.15; preserve both evidence tiers."
+    },
+    "scenarios": {
+      "TRTR": "real post-safe-split training data to held-out real test data",
+      "Scarce": "up to 2 real windows per class, sampled without replacement",
+      "TSTR": "synthetic-only training, configured 500 synthetic windows per class",
+      "TSTR+Scarce": "synthetic training plus scarce real windows"
+    },
+    "generation_input": {
+      "sampler": "Euler integration from t=1 to t=0",
+      "steps": 10,
+      "seed": 42,
+      "synthetic_windows_per_class": 500,
+      "decoder_frozen": true,
+      "actual_count_caveat": "Cache metadata may reduce the configured count; do not infer count from configuration alone."
+    },
+    "classifiers": {
+      "random_forest": {
+        "estimator": "RandomForestClassifier",
+        "n_estimators": 100,
+        "random_state": 42,
+        "n_jobs": 1,
+        "input": "flattened standardized [C,T] window",
+        "class_weight": null
+      },
+      "cnn": {
+        "architecture": "Conv1d 32 -> 64 -> MaxPool1d -> 128; FC 256 -> 128 -> 4",
+        "kernel_size": 5,
+        "padding": 2,
+        "dropout": 0.3,
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "max_epochs": 80,
+        "patience": 10,
+        "batch_size": 64,
+        "internal_validation_fraction": 0.20,
+        "class_weights": false
+      }
+    },
+    "metrics": {
+      "primary": "macro-F1",
+      "primary_labels": [0, 1, 2, 3],
+      "zero_division": 0,
+      "secondary": ["accuracy", "per_class_f1"],
+      "retention": "per-fold scenario macro-F1 divided by per-fold TRTR macro-F1",
+      "fold_summary": "mean and sample standard deviation across 12 folds",
+      "standard_deviation_ddof": 1
+    },
+    "confusion_matrices": {
+      "core_tstr": "synthetic-only TSTR predictions",
+      "four_scenario": "row-normalized TSTR+Scarce confusion matrix",
+      "fold_aggregation": "arithmetic nanmean across fold matrices",
+      "cm_count": "number of folds with a nonzero cell, not number of samples"
+    },
+    "variants": {
+      "6CH": "separately trained six-channel model",
+      "3CH": "separately trained accelerometer-only model; not inference-time channel dropping"
+    },
+    "window_grid": {
+      "window_samples": [80, 160, 240],
+      "hop_samples": [20, 40, 80],
+      "settings": 9,
+      "baseline": [160, 40],
+      "augmentation": "2 real plus up to 500 synthetic windows per class"
+    },
+    "vae_only_ablation": {
+      "flow_used": false,
+      "window": [160, 40],
+      "generation": "per-class diagonal Gaussian in VAE latent space",
+      "synthetic_windows_per_class": 500,
+      "num_steps": 0,
+      "classifier": "Random Forest"
+    }
+  },
+  "classifications": {
+    "canonical_observed": ["RF settings", "TRTR/TSTR core scenario names", "macro-F1 primary metric", "12-fold mean and sample SD", "paper sampler seed and steps"],
+    "partial_or_manual": ["data-efficiency table", "displayed CNN variants", "some distributional SDs", "6CH/3CH utility summaries"],
+    "blocked": ["final 6CH/3CH table lineage", "final VAE-only table lineage", "accepted-manuscript equivalence"]
+  },
+  "provenance": {
+    "direct_complete": ["main RF TRTR/TSTR headline summary", "window-grid TSTR headline summary", "augmentation headline summary"],
+    "partial_manual": ["data-efficiency", "displayed CNN variants", "6CH/3CH utility", "some distributional standard deviations"],
+    "blocked": ["final 6CH/3CH table because utility TeX is a header-only stub", "final VAE-only LaTeX/table lineage", "exact accepted-manuscript identity"]
+  },
+  "migration_recommendation": {
+    "core_tstr": "wrap",
+    "patched_four_scenario_evaluator": "wrap",
+    "rf": "safe-copy",
+    "cnn": "wrap",
+    "metrics_and_fold_summary": "minimal-edit",
+    "confusion_matrix_aggregation": "minimal-edit",
+    "window_grid": "wrap",
+    "vae_only_ablation": "wrap",
+    "public_evaluation_implementation": "rewrite-with-parity-tests",
+    "prerequisites": ["freeze split and 3CH policies", "recover blocked provenance where needed", "add dummy fixtures", "keep results and caches outside Git"]
+  },
+  "blockers": [
+    "The VAE-safe 0.15 subject split and CNN 0.20 internal split must remain distinct.",
+    "3CH is a separate training policy but current preprocessing lineage is blocked.",
+    "Several published tables are partial/manual or lack final source artifacts.",
+    "Public release has no evaluator implementation and must not imply regenerated paper results."
+  ],
+  "uncertainties": [
+    "Some table values were transferred or post-processed outside the direct summary path.",
+    "Cache metadata can override configured synthetic count.",
+    "Confusion matrix cm_count is fold presence count, not sample count."
+  ],
+  "verification_basis": {
+    "pure_helper_probe": "flatten_windows, stratified split, per-class caps, and sample-SD helper probes passed with dummy arrays.",
+    "source_distinction": "TSTR.py and patched four-scenario evaluator were kept as separate provenance paths.",
+    "repositories": "Audit and public repositories remained clean at their pinned commits.",
+    "artifacts": "No result arrays, synthetic caches, checkpoints, or participant data were copied."
+  }
+}
