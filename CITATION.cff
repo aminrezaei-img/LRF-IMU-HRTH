@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this release, please cite the paper and acknowledge the release version."
+title: "A latent rectified flow approach to generate synthetic wearable data – a LABDA solution"
+type: article
+version: "0.1.0"
+journal: "Machine Learning: Health"
+doi: "10.1088/3049-477X/ae91ef"
+authors:
+  - family-names: Rezaei
+    given-names: Amin
+    orcid: "https://orcid.org/0009-0001-5258-9174"
+  - family-names: Kjærgaard
+    given-names: Morten
+    orcid: "https://orcid.org/0009-0003-3081-7054"
+  - family-names: Schipperijn
+    given-names: Jasper
+    orcid: "https://orcid.org/0000-0002-6558-7610"
+keywords:
+  - human activity recognition
+  - inertial measurement units
+  - latent rectified flow
+  - synthetic data generation

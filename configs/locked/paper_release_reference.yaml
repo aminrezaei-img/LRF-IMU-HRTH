@@ -1,0 +1,192 @@
+# Locked paper release reference for LRF-IMU.
+# This file is a non-executing inventory copy of values observed in the repository.
+# It must not be treated as a new experiment configuration.
+
+reference_status:
+  doi_user_supplied: "10.1088/3049-477X/ae91ef"
+  source_project_root: "D:/PAPER2/CODEX_CLEANUP - Copy/BACKUP THE NIGHT BEFORE SUBMISSION/VERSION AT THE TIME OF SUBMISSION/LRF-IMU-P3"
+  verbatim_source_copy: "configs/locked/RUNNING_INSTRUCTIONS.verbatim.md"
+  primary_run_guide: "RUNNING_INSTRUCTIONS.md"
+  accepted_manuscript_candidate: "manuscript/Manuscript_02_06_2026.tex"
+  created_for: "release/audit-and-inventory"
+
+dataset:
+  name: "REALDISP"
+  source_assumption: "REALDISP benchmark ideal-placement log files"
+  local_raw_log_root: "D:/PAPER2/SALVAGED_PARTS/ideal_logs"
+  placement: "ideal"
+  sensor: "right_thigh"
+  sampling_rate_hz: 50
+  included_subjects: [1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16]
+  excluded_reason_recorded: "Only subjects with complete recordings for the four selected activities were used."
+  label_column_zero_based: 119
+  right_thigh_acc_gyro_columns_zero_based: [80, 81, 82, 83, 84, 85]
+  right_thigh_channels: ["ax", "ay", "az", "gx", "gy", "gz"]
+  class_codes_original: [1, 3, 4, 33]
+  class_mapping:
+    0:
+      realdisp_code: 1
+      name: "walking"
+    1:
+      realdisp_code: 3
+      name: "running"
+    2:
+      realdisp_code: 4
+      name: "jump_up"
+    3:
+      realdisp_code: 33
+      name: "cycling"
+
+windowing:
+  main_window_samples: 160
+  main_hop_samples: 40
+  main_window_seconds: 3.2
+  main_hop_seconds: 0.8
+  main_overlap_percent: 75
+  sensitivity_grid_windows_samples: [80, 160, 240]
+  sensitivity_grid_hops_samples: [20, 40, 80]
+  standardization: "Per-channel z-score fitted on training participants only within each LOSO fold."
+  normalization_axes: "Mean and standard deviation over sample and time axes for each channel."
+  known_windowing_caveat: "The paper-specific four-class preprocessing filters target labels before creating contiguous runs; this is acceptable for reproducing the paper but should be reviewed before reuse as a general REALDISP parser."
+
+splits:
+  protocol: "Leave-One-Subject-Out"
+  number_of_folds: 12
+  fold_ids: [1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16]
+  held_out_subject_per_fold: "Each fold holds out exactly one listed subject as the test subject."
+  vae_train_validation_split: "Training participants only; held-out subject excluded."
+  downstream_validation: "CNN validation split drawn from training participants only."
+  leakage_audit: "SHA-1 duplicate and overlap audit reported no identical train-test windows."
+
+seeds:
+  global_seed: 42
+  pythonhashseed: 42
+  synthetic_generation_seed: 42
+  tstr_seed: 42
+  window_subsample_seed: 42
+  subject_split_seed: 42
+
+vae:
+  source_files:
+    - "VAE/VAE_logic.py"
+    - "VAE/Run_VAE_Pretraings.ps1"
+  architecture:
+    type: "LatentVAE1D"
+    input_channels: 6
+    input_window_samples: 160
+    latent_dim_channels: 48
+    latent_stride: 4
+    latent_time_steps: 40
+    encoder_downsampling_steps: 2
+    decoder_upsampling_steps: 2
+    deterministic_reconstruction_pass: true
+  training:
+    batch_size_recorded_in_checkpoint_meta: 256
+    learning_rate_default: 0.001
+    max_epochs: 1000
+    early_stop_min_epochs_observed_in_scripts: 200
+    early_stop_patience_observed_in_scripts: 100
+    use_amp_bf16: true
+    use_safe_subject_split: true
+    use_spectral_loss: false
+    fft_weight: 0.0
+    grad_clip_observed: 1.0
+    l2_weight_observed: 0.5
+    l1_weight_observed: 0.1
+    beta_init_observed: 0.08
+    beta_min_observed: 0.04
+    beta_decay_observed: 0.995
+    augmentation_observed:
+      enabled: true
+      jitter: 0.008
+      scale: 0.04
+      time_mask: 0.05
+  uncertainty: "Some manuscript text reports w_L2=1.0 and beta schedule 5e-3 to 1e-5; scripts used for later grid/revision runs show different VAE settings. Treat this as a release audit discrepancy until resolved."
+
+rectified_flow:
+  source_files:
+    - "1_Rectified_Flow_training.py"
+    - "1_train_flow.ps1"
+    - "LRF/rectified_flow.py"
+    - "models/unet_1d.py"
+  training:
+    latent_dim_channels: 48
+    latent_stride: 4
+    epochs: 300
+    learning_rate: 0.0005
+    early_stop_patience: 50
+    grad_clip: 1.0
+    optimizer: "AdamW"
+    optimizer_betas: [0.9, 0.95]
+    weight_decay: 0.0001
+    configured_batch_size_ps1: 128
+    auto_batch_enabled: true
+    batch_size_recorded_subject01_summary: 512
+    model_ch_configured_ps1: 256
+  architecture:
+    type: "LatentDiffusionUNet1D used as rectified-flow velocity field"
+    channel_multipliers: [1, 2, 4]
+    residual_block_kernel_short: 3
+    residual_block_kernel_long: 31
+    normalization_groups: 8
+    squeeze_excitation_reduction: 4
+    downsampling: "AvgPool1d factor 2"
+    upsampling: "Nearest-neighbour factor 2"
+    num_classes: 4
+  sampling:
+    ode_solver: "Euler"
+    steps: 10
+    start_time: 1.0
+    end_time: 0.0
+    synthetic_windows_per_class_for_tstr: 500
+  uncertainty: "The manuscript supplementary table states base width C=128, while the observed flow training PowerShell sets FLOW_MODEL_CH=256 and subject01 flow metadata records model_ch=256."
+
+classifiers:
+  random_forest:
+    source_file: "TSTR.py"
+    estimator: "RandomForestClassifier"
+    n_estimators: 100
+    random_state: 42
+    n_jobs: 1
+    input: "Flattened standardized window, shape N by C*T"
+    output: "predict_proba for four classes"
+  cnn:
+    source_file: "TSTR.py"
+    architecture:
+      conv1: "Conv1d input_channels -> 32, kernel_size=5, padding=2"
+      conv2: "Conv1d 32 -> 64, kernel_size=5, padding=2"
+      pool: "MaxPool1d kernel_size=2"
+      conv3: "Conv1d 64 -> 128, kernel_size=5, padding=2"
+      fc1: "128*(T/2) -> 256"
+      fc2: "256 -> 128"
+      fc3: "128 -> num_classes"
+      dropout: 0.3
+    training:
+      epochs: 80
+      patience: 10
+      batch_size: 64
+      learning_rate: 0.001
+      weight_decay: 0.0001
+      validation_fraction: 0.2
+
+canonical_commands:
+  vae_pretraining: ".\\VAE\\Run_VAE_Pretraings.ps1 -IdealDir \"D:/PAPER2/SALVAGED_PARTS/ideal_logs\" -VariantTag \"6CH/full\" -Subjects @(1,2,3,5,8,9,10,11,12,13,14,16)"
+  flow_training: ".\\1_train_flow.ps1"
+  synthetic_cache_generation: ".\\2_generate_synthetic_all_folds.ps1"
+  loso_evaluation: ".\\3_run_loso_evaluation.ps1"
+  tstr_all_subjects: ".\\run_tstr_all_subjects.ps1"
+  window_grid: ".\\windowing_sensitivity_grid_3x3.ps1; python window_grid_aug_quality.py"
+  vae_ablation: ".\\vae_ablation.ps1; python vae_ablation_loso.py"
+
+immutable_reference_artifacts:
+  - "RUNNING_INSTRUCTIONS.md"
+  - "Readme.md"
+  - "renaming_paths_vae.md"
+  - "manuscript/Manuscript_02_06_2026.tex"
+  - "Results/model_weights"
+  - "Results/synthetic_weights"
+  - "Results/loso"
+  - "Results/sensitivity_grid_analysis"
+  - "Results/privacy_audit"
+  - "Results/membership_inference"
+  - "Results/distinctness_and_population_coverage"

@@ -1,0 +1,81 @@
+# Generated data and experiment outputs (keep release source/config/docs/tests visible).
+/Results/
+/results/
+/data/
+/raw/
+/raw_data/
+/datasets/
+/generated/
+/artifacts/
+/outputs/
+/runs/
+/checkpoints/
+/synthetic/
+/cache/
+/caches/
+/logs/
+/tmp/
+/temp/
+**/checkpoints/
+
+# Model files and generated numerical artifacts.
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.h5
+*.hdf5
+*.bin
+*.npz
+*.npy
+*.pkl
+*.pickle
+*.db
+*.joblib
+*.onnx
+*.sqlite
+*.sqlite3
+
+# Logs, Python caches, test and coverage output.
+*.log
+*.out
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Local environments and build output.
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+/build/
+/dist/
+
+# IDE, assistant, and orchestration state.
+.vscode/
+.idea/
+.claude/
+.codex/
+.agents/
+.omx/
+*.swp
+*.swo
+
+# Local secrets and credentials.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# OS metadata.
+.DS_Store
+Thumbs.db

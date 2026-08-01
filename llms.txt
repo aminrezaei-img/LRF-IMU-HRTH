@@ -1,0 +1,33 @@
+# LRF-IMU
+
+> Milestone 1 public-release boundary: portable configuration and audit references only.
+
+## Paper identity
+
+- Title: A latent rectified flow approach to generate synthetic wearable data – a LABDA solution
+- Authors: Amin Rezaei; Morten Kjærgaard; Jasper Schipperijn
+- Journal: Machine Learning: Health
+- DOI: 10.1088/3049-477X/ae91ef
+
+## Evidence boundary
+
+- Audited task: REALDISP, ideal placement, right-thigh IMU, 50 Hz.
+- Channels: ax, ay, az, gx, gy, gz.
+- Activities: codes 1, 3, 4, 33 mapped to walking, running, jump_up, cycling.
+- Subjects: 1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16.
+- Cross-validation: leave-one-subject-out; main window/hop: 160/40 samples.
+- Config values are compatibility defaults, not an exact reproduction claim.
+
+## Important files
+
+- `README.md`: scope and setup.
+- `configs/paper/`: three portable YAML variants.
+- `src/lrf_imu/`: configuration and path primitives.
+- `docs/`: audit, discrepancy, data, model, and reproducibility records.
+- `tests/test_no_absolute_paths.py`: safety scanner.
+
+## Not included
+
+REALDISP data, derived windows, checkpoints, synthetic caches, result files,
+scientific model/preprocessing/generation/evaluation code, logs, manuscript
+history, review material, and a license grant are outside this milestone.
