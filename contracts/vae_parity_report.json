@@ -1,0 +1,370 @@
+{
+  "checkpoint_payloads": false,
+  "hash_convention": {
+    "immutable_source": "SHA-256 of source file bytes exactly as stored; original line endings are preserved.",
+    "public_implementation": "SHA-256 of UTF-8 file bytes after CRLF is normalized to LF; no other bytes are changed."
+  },
+  "checkpoints_tested": [
+    {
+      "bytes": 3005794,
+      "channels": 6,
+      "relative_description": "Results/model_weights/vae_weights/6CH/full/subject_01/vae_s4_z48.pt",
+      "root_keys": [
+        "vae"
+      ],
+      "selected_shapes": {
+        "dec_out.weight": [
+          6,
+          160,
+          1
+        ],
+        "enc_in.0.weight": [
+          160,
+          6,
+          7
+        ],
+        "mu_head.weight": [
+          48,
+          160,
+          1
+        ]
+      },
+      "sha256": "7F11C6D4F6E5AB968A22F075EA5CFAE1B2F32A1322A0656F019871EED2BA8E2B",
+      "state_dict_key_count": 26,
+      "weights_only": true
+    },
+    {
+      "bytes": 2990434,
+      "channels": 3,
+      "relative_description": "Results/model_weights/vae_weights/3CH/ablation/subject_01/vae_s4_z48.pt",
+      "root_keys": [
+        "vae"
+      ],
+      "selected_shapes": {
+        "dec_out.weight": [
+          3,
+          160,
+          1
+        ],
+        "enc_in.0.weight": [
+          160,
+          3,
+          7
+        ],
+        "mu_head.weight": [
+          48,
+          160,
+          1
+        ]
+      },
+      "sha256": "2E2431C91FF6ECDFDAA6866CA5FED7846CEC05D539B6EB5966E6DBE2117B2BC2",
+      "state_dict_key_count": 26,
+      "weights_only": true
+    }
+  ],
+  "commands": [
+    "PYTHONPATH=src python -m lrf_imu vae-smoke",
+    "PYTHONPATH=src python -m lrf_imu inspect-vae-checkpoint --checkpoint <external-checkpoint> --channels 6",
+    "PYTHONPATH=src python -m lrf_imu inspect-vae-checkpoint --checkpoint <external-checkpoint> --channels 3",
+    "PYTHONPATH=src python -m lrf_imu prepare-data --config configs/paper/six_channel_160_40.yaml --data-root <external-data-root> --held-out-subject 1 --sensor-configuration six_channel --seed 42 --compatibility-mode filter_before_runs --validate-only",
+    "PYTHONPATH=src python -B -m pytest -p no:cacheprovider --basetemp <external-writable-basetemp> tests/test_vae_m3b.py -q"
+  ],
+  "exact_paper_reproduction": false,
+  "external_validation_outputs": [
+    "<external-validation-root>/gate_d_real_fold_summary.json",
+    "<external-validation-root>/gate_e_vae_eval_summary.json"
+  ],
+  "gates": {
+    "A_synthetic_smoke": {
+      "channel_results": [
+        {
+          "channels": 6,
+          "deterministic_equal": true,
+          "fixed_seed_stochastic_equal": true,
+          "input_shape": [
+            2,
+            6,
+            160
+          ],
+          "latent_shape": [
+            2,
+            48,
+            40
+          ],
+          "reconstruction_shape": [
+            2,
+            6,
+            160
+          ]
+        },
+        {
+          "channels": 3,
+          "deterministic_equal": true,
+          "fixed_seed_stochastic_equal": true,
+          "input_shape": [
+            2,
+            3,
+            160
+          ],
+          "latent_shape": [
+            2,
+            48,
+            40
+          ],
+          "reconstruction_shape": [
+            2,
+            3,
+            160
+          ]
+        }
+      ],
+      "device": "cpu",
+      "invalid_channel_rejection": {
+        "rejected": true,
+        "requested_channels": 4
+      },
+      "status": "PASS"
+    },
+    "B_original_public_numeric_parity": {
+      "results": [
+        {
+          "channels": 6,
+          "input_shape": [
+            2,
+            6,
+            160
+          ],
+          "latent_shape": [
+            2,
+            48,
+            40
+          ],
+          "max_abs_errors": {
+            "decoded_mean": 0.0,
+            "deterministic_reconstruction": 0.0,
+            "fixed_seed_stochastic_latent": 0.0,
+            "initialized_state": 0.0,
+            "posterior_logvar": 0.0,
+            "posterior_mean": 0.0
+          },
+          "reconstruction_shape": [
+            2,
+            6,
+            160
+          ],
+          "state_dict_key_count": 26
+        },
+        {
+          "channels": 3,
+          "input_shape": [
+            2,
+            3,
+            160
+          ],
+          "latent_shape": [
+            2,
+            48,
+            40
+          ],
+          "max_abs_errors": {
+            "decoded_mean": 0.0,
+            "deterministic_reconstruction": 0.0,
+            "fixed_seed_stochastic_latent": 0.0,
+            "initialized_state": 0.0,
+            "posterior_logvar": 0.0,
+            "posterior_mean": 0.0
+          },
+          "reconstruction_shape": [
+            2,
+            3,
+            160
+          ],
+          "state_dict_key_count": 26
+        }
+      ],
+      "status": "PASS",
+      "tolerance": 0.0
+    },
+    "C_historical_checkpoint_parity": {
+      "cross_channel_mismatch_rejected": true,
+      "max_abs_errors_by_channel": {
+        "3": {
+          "decoded_mean": 0.0,
+          "deterministic_reconstruction": 0.0,
+          "posterior_logvar": 0.0,
+          "posterior_mean": 0.0
+        },
+        "6": {
+          "decoded_mean": 0.0,
+          "deterministic_reconstruction": 0.0,
+          "posterior_logvar": 0.0,
+          "posterior_mean": 0.0
+        }
+      },
+      "root_key": "vae",
+      "state_dict_key_count": 26,
+      "status": "PASS",
+      "tolerance": 0.0,
+      "weights_only": true
+    },
+    "D_real_fold": {
+      "aggregate_reconstruction_loss": {
+        "l1_original": 0.1358768343925476,
+        "l1_public": 0.1358768343925476,
+        "mse_original": 0.06474264711141586,
+        "mse_public": 0.06474264711141586
+      },
+      "class_counts": {
+        "held_out_test": {
+          "cycling": 86,
+          "jump_up": 12,
+          "running": 63,
+          "walking": 82
+        },
+        "train": {
+          "cycling": 810,
+          "jump_up": 102,
+          "running": 620,
+          "walking": 867
+        },
+        "validation": {
+          "cycling": 106,
+          "jump_up": 11,
+          "running": 65,
+          "walking": 98
+        }
+      },
+      "data_root": "<external-data-root>",
+      "held_out_subject": "01",
+      "input_shape": [
+        243,
+        6,
+        160
+      ],
+      "latent_shape": [
+        243,
+        48,
+        40
+      ],
+      "max_abs_differences": {
+        "posterior_logvar": 0.0,
+        "posterior_mean": 0.0,
+        "reconstruction": 0.0
+      },
+      "mean_abs_differences": {
+        "posterior_logvar": 0.0,
+        "posterior_mean": 0.0,
+        "reconstruction": 0.0
+      },
+      "normalization": {
+        "ddof": 0,
+        "fit_sample_count": 2399,
+        "fit_stage": "post_validation_training_subjects_only",
+        "mean_shape": [
+          1,
+          6,
+          1
+        ],
+        "statistics_persisted": false,
+        "std_shape": [
+          1,
+          6,
+          1
+        ],
+        "training_only": true
+      },
+      "participant_windows_serialized": false,
+      "reconstruction_shape": [
+        243,
+        6,
+        160
+      ],
+      "status": "PASS",
+      "subject_membership_equal": true,
+      "tolerance": 0.0,
+      "train_subjects": [
+        "02",
+        "14",
+        "16",
+        "05",
+        "03",
+        "13",
+        "09",
+        "12",
+        "08",
+        "11"
+      ],
+      "validation_subjects": [
+        "10"
+      ]
+    },
+    "E_vae_only_evaluation": {
+      "flow_used": false,
+      "historical_vae_only_tstr": "not run; wrapper writes source Results and depends on non-migrated classifier/evaluation orchestration",
+      "status": "PARTIAL",
+      "stored_metric_comparison_abs_differences": {
+        "fft": 0.00034704548971986604,
+        "kl": 0.0008443599832909446,
+        "l1": 0.00011033032621657335,
+        "mse": 9.88709607294691e-05
+      },
+      "stored_metric_comparison_tolerance": 1e-06,
+      "validation_input_shape": [
+        280,
+        6,
+        160
+      ],
+      "validation_latent_shape": [
+        280,
+        48,
+        40
+      ],
+      "validation_reconstruction_shape": [
+        280,
+        6,
+        160
+      ]
+    }
+  },
+  "license_safe": true,
+  "minimal_modifications": [
+    "Added explicit independent 3CH/6CH and geometry validation.",
+    "Added source-compatible constructor and reparameterization aliases.",
+    "Removed source import-time environment mutation and unrelated dataset orchestration.",
+    "Added lazy optional exports so the configuration-only import path remains lightweight.",
+    "Added safe weights-only checkpoint root/key/shape/channel validation and no-write CLI probes."
+  ],
+  "public": {
+    "checkpoint_boundary": "src/lrf_imu/checkpoints.py",
+    "cli_boundary": "src/lrf_imu/cli.py",
+    "model_relative_path": "src/lrf_imu/models/vae.py",
+    "model_sha256": "43F0F81E629E3A1277835487E68C0D24441093EB4C9CE5AD39DC6DD41DAFDDEF",
+    "training_relative_path": "src/lrf_imu/training/vae.py",
+    "training_sha256": "F474B69C26B6DFF8B5AADA61D37F68B4E83E525BAD0B13E8B50012A26C6493B9"
+  },
+  "schema_version": "m3b.vae-parity-report.1",
+  "source": {
+    "model_relative_path": "<immutable-source>/VAE/VAE_logic.py",
+    "model_sha256": "3C989BB8242236D3107AE75A1533622D955D6E739D0B44103636897D01E80505",
+    "wrapper_relative_path": "<immutable-source>/VAE/Run_VAE_Pretraings.ps1",
+    "wrapper_sha256": "2BE8A6D0645431E36E336DB6AA0C4174668F53A6720036B56414E5F0709C1B3D"
+  },
+  "tensor_values_included": false,
+  "unresolved_schedule_conflict": {
+    "decision": "Preserve both evidence variants; do not claim exact paper reproduction.",
+    "observed_wrapper": {
+      "beta_decay": 0.995,
+      "beta_init": 0.08,
+      "beta_min": 0.04,
+      "l1_weight": 0.1,
+      "l2_weight": 0.5
+    },
+    "older_manuscript": {
+      "beta_decay": 0.7,
+      "beta_init": 0.005,
+      "beta_min": 1e-05,
+      "l1_weight": 0.1,
+      "l2_weight": 1.0
+    }
+  }
+}

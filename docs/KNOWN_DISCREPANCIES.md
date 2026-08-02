@@ -456,3 +456,24 @@ root. The root YAMLs remain human-facing evidence and synchronization is
 test-guarded. This resolves the packaging/runtime discrepancy only. It does
 not resolve VAE schedule, Flow width, checkpoint lineage, participant-data
 access, or exact-paper identity.
+## Milestone 3B status: VAE compatibility versus historical metrics
+
+M3B resolves the implementation-level VAE state and forward-compatibility
+boundary for the named 3CH and 6CH subject-01 checkpoints. The public model and
+the immutable model have exact zero maximum error for synthetic deterministic
+outputs, checkpoint-loaded deterministic outputs, and the one-fold comparison
+on identical normalized inputs. This does not resolve the training or
+evaluation environment used to produce historical scalar metrics.
+
+The public one-fold validation reconstruction was compared with the stored
+subject-01 validation JSON. The public versus stored absolute differences were
+MSE 9.8871e-05, L1 1.1033e-04, FFT 3.4705e-04, and KL 8.4436e-04.
+Possible contributors include historical preprocessing/runtime details; the
+available evidence does not isolate one cause. Gate E therefore remains
+PARTIAL, and these differences must not be silently relabeled as exact
+historical metric parity.
+
+The VAE schedule conflict remains open: the observed wrapper records L2/L1
+weights 0.5/0.1 and beta 0.08/0.04/0.995, while older manuscript evidence
+records 1.0/0.1 and 0.005/0.00001/0.7. M3B preserves both evidence sets and
+keeps exact_paper_reproduction: false.

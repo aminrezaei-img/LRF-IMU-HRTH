@@ -1,9 +1,9 @@
 # LRF-IMU
 
-This repository is the public LRF-IMU release boundary through Milestone 3A. It
-establishes a small, auditable home for portable configuration and path
-primitives while the scientific implementation and release decisions remain
-under review.
+This repository is the public LRF-IMU release boundary through Milestone 3B. It
+contains the portable M3A data-preparation boundary and an evidence-labelled
+VAE/checkpoint boundary. The scientific implementation and release decisions
+remain under review where the evidence is incomplete.
 
 ## Paper identity
 
@@ -57,7 +57,11 @@ for the evidence boundary.
 
 ## Install and inspect the configuration layer
 
-The runtime dependencies are PyYAML and NumPy (numpy>=1.20). The lower bound is an unpinned, minimum-safe runtime declaration for the supported Python floor and APIs used by this package; it is not a historical environment claim. The test optional extra supplies pytest for the repository test suite.
+The base runtime dependencies are PyYAML and NumPy (numpy>=1.20). The lower
+bound is an unpinned, minimum-safe runtime declaration for the supported Python
+floor and APIs used by this package; it is not a historical environment claim.
+The test extra supplies pytest and the optional training extra supplies PyTorch
+for VAE operations.
 From the repository root,
 install the configuration layer and test tools with:
 
@@ -144,6 +148,32 @@ accelerometer path selects columns 80 through 82 as a separately trained schema;
 is not an inference-time drop from a 6CH input and is not historical lineage evidence.
 
 M3A has no participant artifacts, checkpoints, result payloads, or VAE/model
-migration, and it makes no exact-paper reproduction claim. See
-docs/SCIENTIFIC_PARITY_REPORT.md and docs/MILESTONE_3A_HANDOFF.md for the evidence
-summary and handoff contract.
+migration, and it makes no exact-paper reproduction claim. M3B adds only the
+public VAE implementation, safe checkpoint inspection/loading, and no-write
+CPU/reconstruction entry points; it does not add checkpoints or participant
+artifacts. See docs/MILESTONE_3B_HANDOFF.md and docs/VAE_PARITY_REPORT.md for the
+evidence summary.
+
+## Milestone 3B VAE boundary
+
+Install the optional VAE dependency before using the model commands:
+
+~~~text
+python -m pip install -e ".[test,training]"
+~~~
+
+The public model accepts independent declared 6CH or 3CH inputs and preserves
+the observed geometry [batch, channels, 160] -> [batch, 48, 40]. It rejects
+unsupported channel counts and cross-channel checkpoint use. The following
+commands are explicit-path, CPU-safe metadata/reconstruction probes; they do
+not write checkpoints, tensors, or participant windows:
+
+~~~text
+PYTHONPATH=src python -m lrf_imu vae-smoke
+PYTHONPATH=src python -m lrf_imu inspect-vae-checkpoint --checkpoint <external-checkpoint> --channels 6
+PYTHONPATH=src python -m lrf_imu reconstruct --config configs/paper/six_channel_160_40.yaml --checkpoint <external-checkpoint> --input <safe-npy-or-npz> --device cpu
+~~~
+
+The VAE copy is compatibility evidence, not an exact paper-reproduction
+claim. Historical checkpoints, raw data, and Results outputs remain external
+and are never copied into this tree.

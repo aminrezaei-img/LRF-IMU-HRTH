@@ -2,7 +2,7 @@
 
 ## What this milestone establishes
 
-Milestone 1 provides:
+The release history provides:
 
 - portable roots and configuration loading under `src/lrf_imu/`;
 - three evidence-labeled YAML variants;
@@ -13,11 +13,12 @@ Milestone 1 provides:
 
 ## What it does not establish
 
-This tree does not contain the REALDISP data, preprocessing implementation,
-VAE or Flow implementation, generation code, evaluation code, checkpoints,
-synthetic caches, result summaries, paper figures, or manuscript source. It
-therefore cannot reproduce the scientific results from a clean checkout and
-must not claim exact paper equivalence.
+This tree does not contain the REALDISP data, historical checkpoints, Flow
+implementation, generation/classifier evaluation code, synthetic caches, result
+summaries, paper figures, or manuscript source. M3B adds a public VAE boundary
+and verifies it against the immutable implementation and named external
+checkpoints, but it cannot reproduce the scientific results from a clean
+checkout and must not claim exact paper equivalence.
 
 The configuration values are compatibility defaults selected from audited
 manuscript, wrapper, and checkpoint evidence. The unresolved VAE schedule and

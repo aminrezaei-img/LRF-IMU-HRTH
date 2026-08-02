@@ -102,3 +102,20 @@ The root YAMLs remain reviewable evidence. The packaged copies only remove the
 repository-checkout dependency from the default runtime path. No participant
 artifact, checkpoint, VAE/model implementation, or machine-specific path is
 introduced by this mapping.
+## Milestone 3B VAE mapping
+
+M3B adds the following public compatibility surfaces. The source tree and
+historical checkpoint payloads remain read-only external evidence; no payload is
+copied into the public tree.
+
+| Historical/evidence path | Public path | Status | Minimal change and guard |
+| --- | --- | --- | --- |
+| <immutable-source>/VAE/VAE_logic.py (3C989BB8...) | src/lrf_imu/models/vae.py | Copied model semantics with boundary guards | Layer order, names, dimensions, activations, and forward equations preserved; 3CH/6CH validation and keyword aliases added. |
+| <immutable-source>/VAE/VAE_logic.py and Run_VAE_Pretraings.ps1 | src/lrf_imu/training/vae.py | Compatibility training surface | Augmentation, loss, profile, optimizer, and checkpoint semantics represented without import-time path mutation or dataset orchestration. |
+| Observed vae state-dict checkpoint boundary | src/lrf_imu/checkpoints.py | Safe loader/inspector | weights_only=True, exact root key, 26-key schema, channel/shape checks, and explicit paths. |
+| Historical VAE CLI/evaluation entry points | src/lrf_imu/cli.py | No-write public probes | CPU smoke, safe checkpoint inspection, and deterministic reconstruction only. |
+
+Behavioral parity is established for synthetic inputs, both named external
+subject-01 checkpoints, and one prepared external REALDISP fold. This mapping
+does not establish training-environment identity, historical metric identity,
+Flow/TSTR parity, or exact paper reproduction.
