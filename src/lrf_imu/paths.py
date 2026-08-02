@@ -6,9 +6,9 @@ directory when no base is supplied), while absolute roots are preserved.
 No directories are created by this module.
 """
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, cast
 
 
 PathLike = Union[str, Path]
@@ -27,6 +27,9 @@ def _base_path(base_dir: Optional[PathLike]) -> Path:
         return Path.cwd()
     return Path(base_dir).expanduser().resolve()
 
+
+def _override_root(current: Path, value: Optional[PathLike]) -> Path:
+    return Path(value) if value is not None else current
 
 def _resolve_root(value: PathLike, base_dir: Path) -> Path:
     """Resolve one configured root against ``base_dir`` when it is relative."""
@@ -70,12 +73,12 @@ class ProjectPaths:
         if unknown:
             raise ValueError("Unknown path root(s): {}".format(", ".join(sorted(unknown))))
 
-        values = {
-            key: value
-            for key, value in roots.items()
-            if value is not None
-        }
-        return replace(self, **values)
+        return ProjectPaths(
+            data_root=_override_root(self.data_root, roots.get("data_root")),
+            output_root=_override_root(self.output_root, roots.get("output_root")),
+            checkpoint_root=_override_root(self.checkpoint_root, roots.get("checkpoint_root")),
+            results_root=_override_root(self.results_root, roots.get("results_root")),
+        )
 
     def data(self, *parts: PathLike) -> Path:
         return self.data_root.joinpath(*parts)
@@ -154,10 +157,10 @@ def paths_from_mapping(
     """
 
     paths = ProjectPaths(
-        data_root=Path(mapping.get("data_root", DEFAULT_DATA_ROOT)),
-        output_root=Path(mapping.get("output_root", DEFAULT_OUTPUT_ROOT)),
-        checkpoint_root=Path(mapping.get("checkpoint_root", DEFAULT_CHECKPOINT_ROOT)),
-        results_root=Path(mapping.get("results_root", DEFAULT_RESULTS_ROOT)),
+        data_root=Path(cast(PathLike, mapping.get("data_root", DEFAULT_DATA_ROOT))),
+        output_root=Path(cast(PathLike, mapping.get("output_root", DEFAULT_OUTPUT_ROOT))),
+        checkpoint_root=Path(cast(PathLike, mapping.get("checkpoint_root", DEFAULT_CHECKPOINT_ROOT))),
+        results_root=Path(cast(PathLike, mapping.get("results_root", DEFAULT_RESULTS_ROOT))),
     )
     return paths.resolved(base_dir)
 

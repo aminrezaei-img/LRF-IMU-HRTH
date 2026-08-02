@@ -49,3 +49,48 @@ The release smoke checks should:
 5. verify the seven locked/reference hashes and repository/source integrity.
 
 No scientific training or evaluation command is part of this milestone.
+
+## Milestone 3A evidence
+
+The seven data-preparation lanes are covered by synthetic-only fixtures and pure
+contract tests. The compact parity flow reports 16 training, 7 validation, and 8
+held-out windows with held-out subject 05, validation subject 01, and training
+subjects 02 and 03. It exercises both 6CH and the explicit reconstructed 3CH path,
+the default filter-before-runs mode and strict contiguity, training-only ddof=0
+normalization, all-pair duplicate auditing, and SHA-1 exact-window identity.
+
+The final integration command is:
+
+    python -B -m pytest -p no:cacheprovider --basetemp <external-basetemp>
+
+The M3A run collected 109 tests and completed with 109 passed and 0 warnings.
+Additional checks covered CLI help, foreign-working-directory dry-run and
+validate-only behavior, explicit metadata writing, overwrite refusal, JSON-safe
+metadata, import/compile safety, path and artifact scanners, and 6CH/3CH compact
+flows. The output policy was verified to serialize no raw or participant-derived
+window arrays.
+
+These results establish a portable public preparation boundary, not a rerun of
+the participant study. No participant artifacts, checkpoints, VAE/Flow migration,
+full training, full evaluation, or exact-paper equivalence claim is included.
+## Milestone 3A correction pass
+
+The executable package declares the same two core runtime requirements in
+pyproject.toml and requirements.txt: PyYAML and the unpinned lower-bound
+declaration numpy>=1.20. The lower bound is a current minimum-safe
+compatibility choice for the supported Python floor, not a claim about the
+historical research environment.
+
+The six-channel default YAML is also included as intentional package data.
+The root paper YAMLs remain human-facing evidence, while
+tests/test_packaging.py guards normalized byte synchronization with the
+installed-resource copies. The parser and pipeline preserve
+split.classifier_window_validation_fraction: 0.20 for the classifier/window
+protocol and read split.vae_subject_validation_fraction: 0.15 for the
+VAE-safe subject split. The legacy split.validation_fraction: 0.20 key remains
+an explicit classifier/window alias.
+
+A clean wheel probe must run both the lrf-imu prepare-data console script and
+python -m lrf_imu prepare-data from a foreign working directory with no
+repository checkout on the import path. These probes use the synthetic fixture
+only and do not establish participant-level reproducibility.

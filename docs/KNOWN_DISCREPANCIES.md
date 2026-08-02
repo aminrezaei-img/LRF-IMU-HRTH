@@ -414,3 +414,45 @@ or another workstation-specific path. Milestone 1 contains no scientific
 implementation code or operational defaults; future migrated code must
 parameterize all such paths and must fail a scanner when they appear outside
 the named historical-reference files.
+
+## Milestone 3A implementation status
+
+M3A closes the public data-preparation interface without closing the scientific
+evidence gaps. The synthetic contract suite validates the 120-column schema,
+right-thigh 80..85 selection, label 119, raw-to-encoded mapping 1/3/4/33 ->
+0/1/2/3, 160/40 windows, filter-before-runs compatibility, strict contiguity,
+0.15 VAE subject splitting, compact 16/7/8 parity, training-only ddof=0
+standardization, and SHA-1 exact-window duplicate identity.
+
+The following remain intentional discrepancies or boundaries:
+
+- The public default is metadata-only and external-root based. It does not write
+  raw logs, participant-derived windows, checkpoints, synthetic caches, or result
+  payloads, even where historical wrappers wrote local artifacts.
+- The 3CH path is a public reconstruction over columns 80..82 for a separate model.
+  It is not an inference-time drop from 6CH and does not recover historical VAE
+  or checkpoint lineage.
+- VAE schedule, Flow width, model/checkpoint provenance, full evaluation provenance,
+  and exact accepted-manuscript identity remain unresolved. No exact-paper claim is
+  supported, and no VAE/model migration is part of M3A.
+- The public duplicate audit checks all split pairs by default; the historical
+  train/validation-only behavior is retained only as an explicitly named adapter.
+
+No participant artifacts were added by M3A. The existing historical-reference
+scanner exception remains narrow and applies only to named provenance documents.
+## M3A correction status: validation fractions and package defaults
+
+The paper-facing YAMLs retain split.validation_fraction: 0.20 as historical
+classifier/window compatibility evidence. It is now accompanied by the
+explicit split.classifier_window_validation_fraction: 0.20 field and the
+separate VAE subject-level field
+split.vae_subject_validation_fraction: 0.15. The parser rejects disagreement
+between the legacy alias and the named classifier value, while the pipeline
+reads the explicit VAE value. The 0.20 value is not silently relabeled.
+
+The installed package carries synchronized copies of the paper YAMLs as
+intentional package data so its default config does not walk to a repository
+root. The root YAMLs remain human-facing evidence and synchronization is
+test-guarded. This resolves the packaging/runtime discrepancy only. It does
+not resolve VAE schedule, Flow width, checkpoint lineage, participant-data
+access, or exact-paper identity.

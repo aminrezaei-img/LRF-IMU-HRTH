@@ -11,14 +11,23 @@ from dataclasses import fields, is_dataclass
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Union
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from .paths import PathLike, ProjectPaths, paths_from_mapping
 
 
-DEFAULT_CONFIG_PATH = Path("configs/paper/six_channel_160_40.yaml")
+PACKAGE_CONFIG_DIR = Path(__file__).resolve().parent / "resources" / "configs" / "paper"
+PACKAGE_CONFIG_FILENAMES = (
+    "six_channel_160_40.yaml",
+    "accelerometer_only_160_40.yaml",
+    "sensitivity_grid.yaml",
+)
+_PACKAGE_CONFIG_REQUESTS = frozenset(
+    "configs/paper/{}".format(name) for name in PACKAGE_CONFIG_FILENAMES
+)
+DEFAULT_CONFIG_PATH = PACKAGE_CONFIG_DIR / "six_channel_160_40.yaml"
 
 
 class ConfigError(ValueError):
@@ -165,7 +174,14 @@ class SplitConfig:
     protocol: str = "leave_one_subject_out"
     held_out_subject: Optional[int] = None
     fold_id: Optional[int] = None
-    validation_fraction: float = 0.2
+    vae_subject_validation_fraction: float = 0.15
+    classifier_window_validation_fraction: float = 0.20
+
+    @property
+    def validation_fraction(self) -> float:
+        """Backward-compatible alias for classifier/window validation."""
+
+        return self.classifier_window_validation_fraction
 
 
 @dataclass(frozen=True)
@@ -548,14 +564,34 @@ class ExperimentConfig:
         classifiers = _parse_classifiers(data.get("classifiers"), int(data.get("seed", 42)))
 
         split_data = _mapping(data.get("split"), "split")
+        legacy_fraction = split_data.get("validation_fraction")
+        classifier_fraction_value = split_data.get(
+            "classifier_window_validation_fraction",
+            0.2 if legacy_fraction is None else legacy_fraction,
+        )
+        classifier_fraction = _fraction(
+            classifier_fraction_value,
+            "split.classifier_window_validation_fraction",
+        )
+        if legacy_fraction is not None:
+            legacy_fraction_value = _fraction(
+                legacy_fraction,
+                "split.validation_fraction",
+            )
+            if legacy_fraction_value != classifier_fraction:
+                raise ConfigError(
+                    "split.validation_fraction is a legacy classifier/window alias "
+                    "and must equal split.classifier_window_validation_fraction"
+                )
         split = SplitConfig(
             protocol=str(split_data.get("protocol", "leave_one_subject_out")),
             held_out_subject=_optional_int(split_data.get("held_out_subject"), "split.held_out_subject"),
             fold_id=_optional_int(split_data.get("fold_id"), "split.fold_id"),
-            validation_fraction=_fraction(
-                split_data.get("validation_fraction", 0.2),
-                "split.validation_fraction",
+            vae_subject_validation_fraction=_fraction(
+                split_data.get("vae_subject_validation_fraction", 0.15),
+                "split.vae_subject_validation_fraction",
             ),
+            classifier_window_validation_fraction=classifier_fraction,
         )
 
         sensitivity_data = _mapping(
@@ -984,6 +1020,11 @@ def load_config(
     requested = Path(config_path or DEFAULT_CONFIG_PATH).expanduser()
     path = requested if requested.is_absolute() else base / requested
     path = path.resolve()
+    if not path.is_file() and not requested.is_absolute():
+        if requested.as_posix() in _PACKAGE_CONFIG_REQUESTS:
+            package_candidate = (PACKAGE_CONFIG_DIR / requested.name).resolve()
+            if package_candidate.is_file():
+                path = package_candidate
     if not path.is_file():
         raise ConfigError("Configuration file does not exist: {}".format(path))
     try:

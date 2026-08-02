@@ -1,6 +1,6 @@
 # LRF-IMU
 
-This repository is the Milestone 1 boundary for a public LRF-IMU release. It
+This repository is the public LRF-IMU release boundary through Milestone 3A. It
 establishes a small, auditable home for portable configuration and path
 primitives while the scientific implementation and release decisions remain
 under review.
@@ -57,8 +57,8 @@ for the evidence boundary.
 
 ## Install and inspect the configuration layer
 
-The current package has one runtime dependency, PyYAML. The `test` optional
-extra supplies pytest for the repository test suite. From the repository root,
+The runtime dependencies are PyYAML and NumPy (numpy>=1.20). The lower bound is an unpinned, minimum-safe runtime declaration for the supported Python floor and APIs used by this package; it is not a historical environment claim. The test optional extra supplies pytest for the repository test suite.
+From the repository root,
 install the configuration layer and test tools with:
 
 ```text
@@ -83,10 +83,22 @@ config = load_config(
 print(config.paths.data_root)
 ```
 
-No model, preprocessing, generation, or evaluation entry point is promised by
-this milestone. Later migration work must preserve the audit discrepancies and
-the data-release restrictions instead of treating these configs as proof of
-scientific parity.
+
+The default six-channel profile is packaged as an intentional runtime resource,
+so both the lrf-imu console script and python -m lrf_imu prepare-data can load
+it from an installed wheel and from a foreign working directory. The
+human-facing copies remain under configs/paper/; a packaging test compares
+their normalized bytes with the packaged resources.
+
+The split configuration distinguishes the VAE subject validation fraction
+(split.vae_subject_validation_fraction: 0.15) from the classifier/window
+fraction (split.classifier_window_validation_fraction: 0.20). The historical
+split.validation_fraction: 0.20 key is retained as an explicitly documented
+classifier/window alias and must agree with the named classifier value.
+Milestone 3A adds a metadata-only data-preparation boundary; it does not
+migrate VAE, Flow, classifier, generation, or evaluation models. Later work must
+preserve the audit discrepancies and data-release restrictions instead of
+treating this boundary as proof of scientific parity.
 
 ## Verification
 
@@ -101,3 +113,37 @@ python -B -m pytest -q -p no:cacheprovider --basetemp <external-temp>
 
 The project intentionally has no `LICENSE` file yet; see
 [LICENSE_DECISIONS.md](LICENSE_DECISIONS.md).
+
+## Milestone 3A data-preparation boundary
+
+Milestone 3A integrates seven contract-driven lanes under src/lrf_imu/data/:
+activities and schemas, REALDISP discovery/loading, activity-bounded windowing,
+subject/window splits, training-only normalization, duplicate auditing, and a
+metadata-only pipeline with the lrf-imu prepare-data CLI.
+
+The locked compatibility behavior is:
+
+- 120 tab-separated raw columns, right-thigh signal columns 80 through 85, and
+  label column 119; raw activity codes 1, 3, 4, and 33 map to encoded labels
+  0, 1, 2, and 3.
+- 160-sample windows with a 40-sample hop. The default filter_before_runs mode
+  filters the four-class vocabulary before run detection;
+  strict_original_contiguity is available when gaps must remain boundaries.
+- VAE-safe subject validation uses 0.15 and the compact fixture reproduces 16/7/8
+  windows with held-out subject 05, validation subject 01, and training subjects
+  02 and 03.
+- Standardization is fit on training windows only with population standard
+  deviation (ddof=0). Duplicate identity uses canonical exact-window bytes and
+  SHA-1.
+
+The public safety boundary is intentional: preparation reads explicit external data
+roots, keeps participant-derived arrays in memory, audits all split pairs by
+default, and writes only prepare_data_metadata.json after an explicit output
+permission flag. Dry-run and validate-only modes never write. The reconstructed 3CH
+accelerometer path selects columns 80 through 82 as a separately trained schema; it
+is not an inference-time drop from a 6CH input and is not historical lineage evidence.
+
+M3A has no participant artifacts, checkpoints, result payloads, or VAE/model
+migration, and it makes no exact-paper reproduction claim. See
+docs/SCIENTIFIC_PARITY_REPORT.md and docs/MILESTONE_3A_HANDOFF.md for the evidence
+summary and handoff contract.

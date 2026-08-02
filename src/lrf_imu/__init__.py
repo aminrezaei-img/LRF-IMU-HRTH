@@ -2,6 +2,7 @@
 
 from .config import (
     DEFAULT_CONFIG_PATH,
+    PACKAGE_CONFIG_DIR,
     REQUIRED_EVIDENCE_TIERS,
     ActivitySpec,
     ClassifierConfig,
@@ -35,6 +36,7 @@ __all__ = [
     "CNNConfig",
     "DEFAULT_CONFIG_PATH",
     "EvidenceConfig",
+    "PACKAGE_CONFIG_DIR",
     "EvidenceTier",
     "ExperimentConfig",
     "FlowConfig",

@@ -9,7 +9,7 @@ SOURCE_ROOT = REPOSITORY_ROOT / "src"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from lrf_imu import load_config
+from lrf_imu import load_config  # noqa: E402
 
 
 CONFIG_PATH = REPOSITORY_ROOT / "configs" / "paper" / "six_channel_160_40.yaml"

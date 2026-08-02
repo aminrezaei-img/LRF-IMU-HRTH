@@ -71,3 +71,34 @@ logs; checkpoints; `.pt`, `.npz`, or `.pkl` files; synthetic caches; `Results/`
 outputs; manuscript/review history; logs; `.claude/`; and the current
 audit-to-source drift described in `KNOWN_DISCREPANCIES.md`. No equivalence
 claim can be made for any of these items from this milestone.
+
+## Milestone 3A public implementations
+
+Milestone 3A adds public contract implementations rather than one-to-one copies
+of immutable-source modules. The mapping is:
+
+| Historical/evidence contract | Public M3A surface | Status |
+| --- | --- | --- |
+| Four-class activity vocabulary and 120-column right-thigh layout | src/lrf_imu/data/activities.py, schema.py | Synthetic contract locked |
+| REALDISP ideal-log discovery and selected-channel loading | src/lrf_imu/data/realdisp.py | External-root, nonrecursive, no participant data copied |
+| Filter-before-runs and complete-window construction | src/lrf_imu/data/windowing.py | Compatibility default plus explicit strict mode |
+| VAE-safe subject split and separate CNN split | src/lrf_imu/data/splits.py | 0.15 and 0.20 remain distinct |
+| Training-only standardization | src/lrf_imu/data/normalization.py | Population ddof=0, floor 1e-8 |
+| Exact-window duplicate audit | src/lrf_imu/data/audit.py | SHA-1 canonical bytes; public all-pair scope |
+| Preparation orchestration and safe output | src/lrf_imu/data/pipeline.py, cli.py | Metadata-only; explicit write permission |
+
+The M3A code is a public safety implementation derived from the locked contracts
+and synthetic fixtures. It is not a claim that the historical scientific source
+was copied, that participant artifacts are reproducible from this tree, or that
+any VAE/model migration occurred. The reconstructed 3CH path is explicitly
+separate and remains a fresh-training requirement.
+## M3A configuration-resource mapping
+
+| Human-facing evidence path | Installed runtime path | Status and guard |
+| --- | --- | --- |
+| configs/paper/six_channel_160_40.yaml, accelerometer_only_160_40.yaml, and sensitivity_grid.yaml | src/lrf_imu/resources/configs/paper/ with the same filenames | Intentional package-data copies for wheel portability. tests/test_packaging.py compares normalized bytes and parses both sides. This is configuration-resource synchronization, not a scientific source-copy or exact-paper claim. |
+
+The root YAMLs remain reviewable evidence. The packaged copies only remove the
+repository-checkout dependency from the default runtime path. No participant
+artifact, checkpoint, VAE/model implementation, or machine-specific path is
+introduced by this mapping.

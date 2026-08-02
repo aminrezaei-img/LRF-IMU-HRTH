@@ -72,3 +72,42 @@ The next migration milestone is not complete until:
 - synthetic parity tests pass under a clean, documented runtime;
 - no exact-paper or full-rerun claim is made without direct provenance; and
 - the audit and immutable source remain unchanged.
+
+## Milestone 3A status
+
+Milestone 3A implements the seven data-preparation lanes that were authorized by
+the synthetic parity boundary:
+
+1. activities and raw/schema validation;
+2. direct-child REALDISP loading;
+3. activity-bounded 160/40 windowing with filter-before-runs default and strict
+   contiguity opt-in;
+4. VAE subject-level and separate CNN window-level split interfaces;
+5. training-only population-standard-deviation normalization;
+6. SHA-1 exact-window duplicate auditing across public split pairs; and
+7. a metadata-only pipeline, package exports, and CLI safety boundary.
+
+These are public contract implementations backed by synthetic fixtures; they are
+not copies of participant-derived scientific modules. Historical compatibility is
+preserved where useful, while public safety intentionally requires explicit roots,
+separate 3CH configuration, no inference-time channel dropping, no implicit
+writes, and no serialized participant arrays. The public duplicate audit covers
+every split pair by default; the train/validation-only adapter is retained only
+as a labeled historical compatibility mode.
+
+The 3CH route is PUBLIC_RECONSTRUCTION_REQUIRED: it is a separate accelerometer
+schema for fresh downstream training and does not establish historical checkpoint
+or VAE lineage. VAE, Flow, model, generation, and evaluation migration remains
+blocked and is outside M3A; Milestone 3B is not started by this handoff.
+### M3A correction constraints
+
+The M3A runtime dependency gate is satisfied by a current unpinned lower bound,
+numpy>=1.20, declared consistently with PyYAML in pyproject.toml and
+requirements.txt. It is not a historical environment reconstruction.
+The default configuration is package data with a byte-synchronization test;
+the root paper YAMLs remain evidence and examples.
+
+The split contract names the VAE subject validation fraction as 0.15 and the
+classifier/window fraction as 0.20. The legacy 0.20 key remains an explicit
+classifier/window alias. Any future migration must preserve these protocols
+separately and must not infer VAE validation from the generic historical key.

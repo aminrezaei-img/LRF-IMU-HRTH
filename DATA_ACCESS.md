@@ -44,3 +44,27 @@ user-selected `data_root` to a configuration loader; do not encode a personal
 or machine-specific path in a config, script, notebook, or documentation file.
 Do not commit raw logs, preprocessed windows, or participant-derived synthetic
 data. Check the current dataset terms before sharing any derived artifact.
+
+## Milestone 3A preparation contract
+
+The public loader accepts only explicit direct-child subject*_ideal.log files.
+Each row must have exactly 120 numeric tab-separated columns. The six-channel
+path selects right-thigh columns 80..85; the explicit reconstructed 3CH path selects
+80..82. Column 119 is retained as a raw activity code and is mapped only through
+the four-class vocabulary 1 -> 0, 3 -> 1, 4 -> 2, and 33 -> 3.
+
+The default public compatibility mode is filter-before-runs, preserving the
+historical paper-task behavior for short excluded-label gaps. Strict original
+contiguity is an explicit opt-in. Complete 160/40 windows do not cross activity
+boundaries and are never padded. The VAE subject-level validation fraction is
+0.15; the separate CNN window-level fraction remains 0.20.
+
+Normalization is fitted on the training partition only, using population standard
+deviation (ddof=0) with a 1e-8 floor. Duplicate checks use SHA-1 over canonical
+exact-window bytes and the public default checks train/validation, train/test, and
+validation/test boundaries; a historical train/validation-only adapter remains
+explicitly labeled as compatibility behavior.
+
+REALDISP and all participant-derived arrays remain outside this repository. The
+preparation pipeline returns arrays in memory but serializes only JSON-safe metadata
+with raw values, labels, signals, and windows excluded.
