@@ -1,0 +1,5 @@
+subject,raw_rows,compact_windows,selected_channels,window_samples,stride_samples
+01,24,7,6,4,2
+02,24,8,6,4,2
+03,24,8,6,4,2
+05,24,8,6,4,2

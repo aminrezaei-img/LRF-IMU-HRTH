@@ -1,0 +1,32 @@
+{
+  "crossfade_weights": [
+    0.0,
+    0.5
+  ],
+  "expected_reconstruction": [
+    0,
+    1,
+    2,
+    7,
+    12,
+    13
+  ],
+  "overlap": 2,
+  "policy": "linear_crossfade",
+  "schema_version": "2B.synthetic-website-overlap.1",
+  "target_length": 6,
+  "windows": [
+    [
+      0,
+      1,
+      2,
+      3
+    ],
+    [
+      10,
+      11,
+      12,
+      13
+    ]
+  ]
+}

@@ -38,6 +38,10 @@
 
 # Logs, Python caches, test and coverage output.
 *.log
+!tests/fixtures/synthetic/raw/subject01_ideal.log
+!tests/fixtures/synthetic/raw/subject02_ideal.log
+!tests/fixtures/synthetic/raw/subject03_ideal.log
+!tests/fixtures/synthetic/raw/subject05_ideal.log
 *.out
 __pycache__/
 *.py[cod]

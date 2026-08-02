@@ -1,0 +1,168 @@
+{
+  "authority_pins": {
+    "audit_repository": {
+      "branch": "release/audit-and-inventory",
+      "commit": "f38bebce36c4f21d857dc084ac8d06759c2c012d"
+    },
+    "immutable_source": {
+      "label": "submission-time immutable source",
+      "path_policy": "immutable-source-relative only"
+    },
+    "public_repository": {
+      "branch": "release/v1.0.0-candidate",
+      "commit": "8445c9cff1b93e92844b94394258635b5d25fd54",
+      "parent": "cc401f8dbe381fe3efe534219e6a912f955279a8"
+    }
+  },
+  "channel_contract": {
+    "latent_shape": [
+      "B",
+      48,
+      40
+    ],
+    "separate_training_schema_required": true,
+    "six_channel_decoder_shape": [
+      6,
+      160,
+      1
+    ],
+    "six_channel_input_shape": [
+      "B",
+      6,
+      160
+    ],
+    "three_channel_decoder_shape": [
+      3,
+      160,
+      1
+    ],
+    "three_channel_input_shape": [
+      "B",
+      3,
+      160
+    ]
+  },
+  "checkpoint_shape_gates": [
+    {
+      "gate": "six_channel_input",
+      "shape": [
+        "B",
+        6,
+        160
+      ],
+      "status": "observed"
+    },
+    {
+      "gate": "three_channel_input",
+      "shape": [
+        "B",
+        3,
+        160
+      ],
+      "status": "reconstruction_required"
+    },
+    {
+      "gate": "six_channel_decoder",
+      "shape": [
+        6,
+        160,
+        1
+      ],
+      "status": "observed"
+    },
+    {
+      "gate": "three_channel_decoder",
+      "shape": [
+        3,
+        160,
+        1
+      ],
+      "status": "reconstruction_required"
+    }
+  ],
+  "contract_id": "three_channel_lineage",
+  "contradictions": [
+    {
+      "description": "observed parser columns 80 through 85 versus intended three-channel columns 80 through 82",
+      "id": "C1"
+    },
+    {
+      "description": "ABLATION_ACC_ONLY namespace is not a closed training/evaluation lineage",
+      "id": "C2"
+    },
+    {
+      "description": "Flow and TSTR paths do not provide a common three-channel checkpoint lineage",
+      "id": "C3"
+    },
+    {
+      "description": "aggregate result roots are insufficient to attribute a three-channel run",
+      "id": "C4"
+    },
+    {
+      "description": "shape-compatible reconstruction is not evidence of source checkpoint equivalence",
+      "id": "C5"
+    }
+  ],
+  "exact_paper_reproduction": false,
+  "intended_three_channel_route": {
+    "inference_time_drop_allowed": false,
+    "selected_channel_count": 3,
+    "selected_columns": [
+      80,
+      81,
+      82
+    ],
+    "source_relative_path": "VAE/VAE_logic.py"
+  },
+  "milestone": "2B",
+  "observed_parser": {
+    "ignored_namespace": "ABLATION_ACC_ONLY",
+    "selected_channel_count": 6,
+    "selected_columns": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85
+    ],
+    "source_relative_path": "VAE/VAE_logic.py"
+  },
+  "outcome": "PUBLIC_RECONSTRUCTION_REQUIRED",
+  "provenance": {
+    "evidence_tiers": {
+      "A": "direct observation",
+      "B": "cross-checked wrapper/configuration",
+      "C": "synthetic reconstruction"
+    },
+    "public_fixture_payloads": false
+  },
+  "release_decision": {
+    "allow_inference_time_channel_drop": false,
+    "claim_three_channel_parity": false,
+    "requires_public_reconstruction": true
+  },
+  "schema_version": "2B.three-channel-lineage.1",
+  "stages": [
+    {
+      "observed": "six right-thigh channels 80 through 85",
+      "stage": "selection",
+      "three_channel_status": "separate intended selection 80 through 82"
+    },
+    {
+      "observed": "six-channel checkpoint-facing shape",
+      "stage": "vae",
+      "three_channel_status": "shape-compatible probe only; fresh reconstruction required"
+    },
+    {
+      "observed": "Flow/TSTR lineage is not unified with the three-channel route",
+      "stage": "flow",
+      "three_channel_status": "blocked"
+    },
+    {
+      "observed": "aggregate roots do not close one three-channel lineage",
+      "stage": "evaluation",
+      "three_channel_status": "blocked"
+    }
+  ]
+}

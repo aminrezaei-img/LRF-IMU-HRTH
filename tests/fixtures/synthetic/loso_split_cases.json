@@ -1,0 +1,71 @@
+{
+  "compact_windows_per_subject": {
+    "01": 7,
+    "02": 8,
+    "03": 8,
+    "05": 8
+  },
+  "production_loso_profile": {
+    "first_fold_held_out": "01",
+    "fold_count": 12,
+    "last_fold_held_out": "16",
+    "subjects": [
+      "01",
+      "02",
+      "03",
+      "05",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "16"
+    ]
+  },
+  "safe_split": {
+    "held_out_subject": "05",
+    "shapes": {
+      "held_out_test": [
+        8,
+        6,
+        4
+      ],
+      "train": [
+        16,
+        6,
+        4
+      ],
+      "validation": [
+        7,
+        6,
+        4
+      ]
+    },
+    "training_subjects": [
+      "02",
+      "03"
+    ],
+    "validation_subjects": [
+      "01"
+    ],
+    "window_counts": {
+      "held_out_test": 8,
+      "train": 16,
+      "validation": 7
+    }
+  },
+  "schema_version": "2B.synthetic-splits.1",
+  "seed": 42,
+  "subjects": [
+    "01",
+    "02",
+    "03",
+    "05"
+  ],
+  "validation_fraction_separation": {
+    "cnn_window_fraction": 0.2,
+    "vae_subject_fraction": 0.15
+  }
+}

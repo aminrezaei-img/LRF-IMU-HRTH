@@ -1,0 +1,60 @@
+{
+  "files": [
+    "README.md",
+    "channel_selection.json",
+    "cnn_split_case.json",
+    "duplicate_audit_cases.json",
+    "evaluation_reference.json",
+    "fixture_manifest.json",
+    "flow_probe.json",
+    "loso_split_cases.json",
+    "metadata_summary.csv",
+    "preprocessing_cases.json",
+    "raw/compact_rows.json",
+    "raw/subject01_ideal.log",
+    "raw/subject02_ideal.log",
+    "raw/subject03_ideal.log",
+    "raw/subject05_ideal.log",
+    "standardization_cases.json",
+    "vae_probe.json",
+    "website_overlap_add.json",
+    "website_trajectory.json"
+  ],
+  "fixture_root": "tests/fixtures/synthetic",
+  "integrity": {
+    "algorithm": "sha256",
+    "checksum_excludes_itself": true,
+    "checksum_file": "SHA256SUMS",
+    "checksum_line_endings": "UTF-8 text with CRLF normalized to LF before hashing",
+    "paths_sorted_posix": true
+  },
+  "protocol_separation": {
+    "cnn_window_validation_fraction": 0.2,
+    "paper_sampling_steps": 10,
+    "vae_subject_validation_fraction": 0.15,
+    "website_euler_steps": 100,
+    "website_native_samples": 500
+  },
+  "raw_files": [
+    "raw/subject01_ideal.log",
+    "raw/subject02_ideal.log",
+    "raw/subject03_ideal.log",
+    "raw/subject05_ideal.log"
+  ],
+  "row_counts": {
+    "compact_windows": {
+      "01": 7,
+      "02": 8,
+      "03": 8,
+      "05": 8
+    },
+    "raw_rows_per_subject": 24
+  },
+  "safety": {
+    "checkpoint_payloads": false,
+    "deterministic": true,
+    "license_safe": true,
+    "participant_derived_data": false
+  },
+  "schema_version": "2B.synthetic-fixture-manifest.1"
+}

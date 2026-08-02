@@ -1,0 +1,144 @@
+{
+  "forward_interpolation": {
+    "expected_mse": 9,
+    "expected_target_velocity": [
+      [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          4
+        ]
+      ]
+    ],
+    "expected_zt": [
+      [
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ]
+    ],
+    "model_time_encoding": 250,
+    "predicted_velocity": [
+      [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    ],
+    "t": 0.25,
+    "z0": [
+      [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ]
+    ],
+    "z1": [
+      [
+        [
+          5,
+          6
+        ],
+        [
+          7,
+          8
+        ]
+      ]
+    ]
+  },
+  "production_profile": {
+    "latent_shape": [
+      "B",
+      48,
+      40
+    ],
+    "paper_steps": 10,
+    "seed": 42,
+    "time_interval": [
+      1.0,
+      0.0
+    ],
+    "website_euler_steps": 100,
+    "website_native_samples": 500
+  },
+  "reverse_euler": {
+    "after_final_step": [
+      [
+        [
+          4.0,
+          4.0
+        ],
+        [
+          4.0,
+          4.0
+        ]
+      ]
+    ],
+    "after_first_step": [
+      [
+        [
+          4.5,
+          5.0
+        ],
+        [
+          5.5,
+          6.0
+        ]
+      ]
+    ],
+    "dt": -0.5,
+    "initial": [
+      [
+        [
+          5,
+          6
+        ],
+        [
+          7,
+          8
+        ]
+      ]
+    ],
+    "steps": 2,
+    "times": [
+      1.0,
+      0.5
+    ],
+    "velocity": [
+      [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ]
+    ]
+  },
+  "schema_version": "2B.synthetic-flow-probe.1",
+  "width_evidence": {
+    "compatibility_value": 256,
+    "manuscript_value": 128,
+    "status": "HOLD"
+  }
+}

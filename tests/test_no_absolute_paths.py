@@ -8,15 +8,56 @@ resolution, and must not be widened to cover active release content.
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import re
+import shutil
 from typing import Iterator
 
 import pytest
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+SYNTHETIC_FIXTURE_ROOT = "tests/fixtures/synthetic"
+SYNTHETIC_LOG_ALLOWLIST = frozenset(
+    {
+        "tests/fixtures/synthetic/raw/subject01_ideal.log",
+        "tests/fixtures/synthetic/raw/subject02_ideal.log",
+        "tests/fixtures/synthetic/raw/subject03_ideal.log",
+        "tests/fixtures/synthetic/raw/subject05_ideal.log",
+    }
+)
+SYNTHETIC_FIXTURE_FILE_ALLOWLIST = frozenset(
+    {
+        "tests/fixtures/synthetic/README.md",
+        "tests/fixtures/synthetic/SHA256SUMS",
+        "tests/fixtures/synthetic/channel_selection.json",
+        "tests/fixtures/synthetic/cnn_split_case.json",
+        "tests/fixtures/synthetic/duplicate_audit_cases.json",
+        "tests/fixtures/synthetic/evaluation_reference.json",
+        "tests/fixtures/synthetic/fixture_manifest.json",
+        "tests/fixtures/synthetic/flow_probe.json",
+        "tests/fixtures/synthetic/loso_split_cases.json",
+        "tests/fixtures/synthetic/metadata_summary.csv",
+        "tests/fixtures/synthetic/preprocessing_cases.json",
+        "tests/fixtures/synthetic/raw/compact_rows.json",
+        "tests/fixtures/synthetic/raw/subject01_ideal.log",
+        "tests/fixtures/synthetic/raw/subject02_ideal.log",
+        "tests/fixtures/synthetic/raw/subject03_ideal.log",
+        "tests/fixtures/synthetic/raw/subject05_ideal.log",
+        "tests/fixtures/synthetic/standardization_cases.json",
+        "tests/fixtures/synthetic/vae_probe.json",
+        "tests/fixtures/synthetic/website_overlap_add.json",
+        "tests/fixtures/synthetic/website_trajectory.json",
+    }
+)
+SYNTHETIC_FIXTURE_DIRECTORY_ALLOWLIST = frozenset(
+    {
+        "tests/fixtures/synthetic",
+        "tests/fixtures/synthetic/raw",
+    }
+)
 
 # These are the only historical copies allowed to retain source-workstation
 # markers.  Matching is by exact repository-relative path, never by directory
@@ -129,16 +170,77 @@ _KNOWN_TOKEN_RES = (
 )
 
 
-def _relative_path(path: Path) -> str:
+def _relative_path(path: Path, repository_root: Path = REPOSITORY_ROOT) -> str:
     """Return a stable path representation for diagnostics and allowlisting."""
 
-    return path.relative_to(REPOSITORY_ROOT).as_posix()
+    return path.relative_to(repository_root).as_posix()
 
 
-def _iter_tree_entries() -> Iterator[Path]:
-    """Yield release-tree files and directories, excluding VCS internals."""
+def _is_under(relative_path: str, root: str) -> bool:
+    return relative_path == root or relative_path.startswith(root + "/")
 
-    for current_root, directory_names, file_names in os.walk(REPOSITORY_ROOT):
+
+def _is_allowed_synthetic_log(relative_path: str) -> bool:
+    return relative_path in SYNTHETIC_LOG_ALLOWLIST
+
+
+def _synthetic_fixture_tree_findings(
+    repository_root: Path = REPOSITORY_ROOT,
+) -> list[str]:
+    """Reject every physical synthetic-fixture path outside the manifest tree."""
+
+    fixture_root = repository_root / SYNTHETIC_FIXTURE_ROOT
+    findings: list[str] = []
+    if not fixture_root.is_dir():
+        return [f"{SYNTHETIC_FIXTURE_ROOT}: missing synthetic fixture directory"]
+
+    manifest_path = fixture_root / "fixture_manifest.json"
+    if not manifest_path.is_file():
+        findings.append(
+            f"{_relative_path(manifest_path, repository_root)}: missing fixture manifest"
+        )
+    else:
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            findings.append(
+                f"{_relative_path(manifest_path, repository_root)}: invalid fixture manifest: {exc}"
+            )
+        else:
+            expected_manifest_files = {
+                path[len(SYNTHETIC_FIXTURE_ROOT) + 1 :]
+                for path in SYNTHETIC_FIXTURE_FILE_ALLOWLIST
+                if path != f"{SYNTHETIC_FIXTURE_ROOT}/SHA256SUMS"
+            }
+            declared_files = {
+                Path(path).as_posix() for path in manifest.get("files", [])
+            }
+            if declared_files != expected_manifest_files:
+                findings.append(
+                    f"{_relative_path(manifest_path, repository_root)}: manifest file list does not match the exact public allowlist"
+                )
+
+    for current_root, directory_names, file_names in os.walk(fixture_root):
+        current_path = Path(current_root)
+        for name in directory_names:
+            path = current_path / name
+            relative_path = _relative_path(path, repository_root)
+            if relative_path not in SYNTHETIC_FIXTURE_DIRECTORY_ALLOWLIST:
+                findings.append(
+                    f"{relative_path}: unmanifested synthetic fixture directory"
+                )
+        for name in file_names:
+            path = current_path / name
+            relative_path = _relative_path(path, repository_root)
+            if relative_path not in SYNTHETIC_FIXTURE_FILE_ALLOWLIST:
+                findings.append(f"{relative_path}: unmanifested synthetic fixture file")
+    return findings
+
+
+def _iter_tree_entries(repository_root: Path = REPOSITORY_ROOT) -> Iterator[Path]:
+    """Yield physical release-tree entries, excluding only VCS internals."""
+
+    for current_root, directory_names, file_names in os.walk(repository_root):
         directory_names[:] = [
             name for name in directory_names if name.casefold() != ".git"
         ]
@@ -147,8 +249,8 @@ def _iter_tree_entries() -> Iterator[Path]:
         yield from (current_path / name for name in file_names)
 
 
-def _iter_files() -> Iterator[Path]:
-    for path in _iter_tree_entries():
+def _iter_files(repository_root: Path = REPOSITORY_ROOT) -> Iterator[Path]:
+    for path in _iter_tree_entries(repository_root):
         if path.is_file():
             yield path
 
@@ -198,8 +300,10 @@ def _sensitive_filename_reason(path: Path) -> str | None:
     return None
 
 
-def _secret_findings(path: Path, text: str) -> list[str]:
-    relative_path = _relative_path(path)
+def _secret_findings(
+    path: Path, text: str, repository_root: Path = REPOSITORY_ROOT
+) -> list[str]:
+    relative_path = _relative_path(path, repository_root)
     findings: list[str] = []
     for line_number, line in enumerate(text.splitlines(), start=1):
         if _PRIVATE_KEY_BEGIN.casefold() in line.casefold():
@@ -259,19 +363,24 @@ def test_no_absolute_or_personal_paths_in_public_text() -> None:
         )
 
 
-def test_no_secrets_or_forbidden_generated_artifacts() -> None:
-    findings: list[str] = []
+def _collect_safety_findings(repository_root: Path = REPOSITORY_ROOT) -> list[str]:
+    findings = _synthetic_fixture_tree_findings(repository_root)
 
-    for path in _iter_tree_entries():
-        relative_path = _relative_path(path)
-        if path.is_dir() and path.name.casefold() in FORBIDDEN_DIRECTORY_NAMES:
+    for path in _iter_tree_entries(repository_root):
+        relative_path = _relative_path(path, repository_root)
+        if (
+            path.is_dir()
+            and path.name.casefold() in FORBIDDEN_DIRECTORY_NAMES
+            and not _is_under(relative_path, SYNTHETIC_FIXTURE_ROOT)
+        ):
             findings.append(f"{relative_path}: forbidden directory")
             continue
         if not path.is_file():
             continue
 
         suffix = path.suffix.casefold()
-        if suffix in FORBIDDEN_FILE_SUFFIXES:
+        synthetic_log = suffix == ".log" and _is_allowed_synthetic_log(relative_path)
+        if suffix in FORBIDDEN_FILE_SUFFIXES and not synthetic_log:
             findings.append(
                 f"{relative_path}: forbidden generated/binary file suffix {suffix!r}"
             )
@@ -279,14 +388,65 @@ def test_no_secrets_or_forbidden_generated_artifacts() -> None:
         if filename_reason:
             findings.append(f"{relative_path}: forbidden {filename_reason}")
 
-        if suffix in FORBIDDEN_FILE_SUFFIXES:
+        if suffix in FORBIDDEN_FILE_SUFFIXES and not synthetic_log:
             continue
         text = _read_text(path)
         if text is not None:
-            findings.extend(_secret_findings(path, text))
+            findings.extend(_secret_findings(path, text, repository_root))
+    return findings
 
+
+def test_no_secrets_or_forbidden_generated_artifacts() -> None:
+    findings = _collect_safety_findings()
     if findings:
         pytest.fail(
             "Found secrets, sensitive files, or forbidden generated artifacts:\n- "
             + "\n- ".join(findings)
         )
+
+def test_synthetic_log_allowlist_rejects_unlisted_paths() -> None:
+    allowed = {
+        "tests/fixtures/synthetic/raw/subject01_ideal.log",
+        "tests/fixtures/synthetic/raw/subject02_ideal.log",
+        "tests/fixtures/synthetic/raw/subject03_ideal.log",
+        "tests/fixtures/synthetic/raw/subject05_ideal.log",
+    }
+    assert all(_is_allowed_synthetic_log(path) for path in allowed)
+    assert not _is_allowed_synthetic_log(
+        "tests/fixtures/synthetic/raw/subject99_ideal.log"
+    )
+    assert not _is_allowed_synthetic_log(
+        "tests/fixtures/synthetic/raw/extra_forbidden.log"
+    )
+
+
+def test_synthetic_fixture_tree_rejects_ignored_unmanifested_probes() -> None:
+    source_root = REPOSITORY_ROOT / SYNTHETIC_FIXTURE_ROOT
+    sandbox_root = REPOSITORY_ROOT / ".scanner-negative-probe"
+    assert not sandbox_root.exists()
+    fixture_target = sandbox_root / SYNTHETIC_FIXTURE_ROOT
+    shutil.copytree(source_root, fixture_target)
+    (sandbox_root / ".gitignore").write_text(
+        "**/checkpoints/\n*.pt\n*.log\n", encoding="utf-8"
+    )
+    probes = {
+        "tests/fixtures/synthetic/raw/subject99_ideal.log": b"probe\n",
+        "tests/fixtures/synthetic/raw/model.pt": b"checkpoint probe",
+        "tests/fixtures/synthetic/raw/checkpoints/metadata.json": b"{}",
+        "tests/fixtures/synthetic/raw/nested/extra.json": b"{}",
+        "tests/fixtures/synthetic/unmanifested.json": b"{}",
+    }
+    try:
+        for relative_path, payload in probes.items():
+            probe = sandbox_root / relative_path
+            probe.parent.mkdir(parents=True, exist_ok=True)
+            probe.write_bytes(payload)
+        findings = _collect_safety_findings(sandbox_root)
+        assert findings
+        for relative_path in probes:
+            assert any(
+                finding.startswith(relative_path + ":") for finding in findings
+            ), relative_path
+    finally:
+        shutil.rmtree(sandbox_root, ignore_errors=True)
+    assert not sandbox_root.exists()

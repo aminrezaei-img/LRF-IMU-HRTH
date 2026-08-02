@@ -1,0 +1,62 @@
+{
+  "axes": [
+    0,
+    2
+  ],
+  "channel_bases": [
+    0,
+    10,
+    20,
+    30,
+    40,
+    50
+  ],
+  "constant_channel_std_after_floor": 1e-08,
+  "ddof": 0,
+  "epsilon_floor": 1e-08,
+  "expected_train_means": [
+    0,
+    10,
+    20,
+    30,
+    40,
+    50
+  ],
+  "expected_train_stds": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "held_out_channel_means": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60
+  ],
+  "inverse_transform_round_trip": true,
+  "schema_version": "2B.synthetic-standardization.1",
+  "synthetic_channel_means": [
+    20,
+    30,
+    40,
+    50,
+    60,
+    70
+  ],
+  "time_pattern": [
+    -1,
+    1,
+    -1,
+    1
+  ],
+  "train_shape": [
+    2,
+    6,
+    4
+  ]
+}

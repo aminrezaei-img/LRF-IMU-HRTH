@@ -1,0 +1,64 @@
+{
+  "compact": {
+    "input_shape": [
+      2,
+      6,
+      16
+    ],
+    "latent_shape": [
+      2,
+      4,
+      4
+    ],
+    "reconstruction_shape": [
+      2,
+      6,
+      16
+    ]
+  },
+  "determinism_assertions": [
+    "same_seed_same_fixture_hash",
+    "different_seed_may_change_stochastic_probe",
+    "no_checkpoint_payload"
+  ],
+  "production": {
+    "input_shape": [
+      1,
+      6,
+      160
+    ],
+    "latent_shape": [
+      1,
+      48,
+      40
+    ],
+    "reconstruction_shape": [
+      1,
+      6,
+      160
+    ]
+  },
+  "schema_version": "2B.synthetic-vae-probe.1",
+  "seeds": [
+    42,
+    7,
+    8
+  ],
+  "three_channel": {
+    "input_shape": [
+      1,
+      3,
+      160
+    ],
+    "latent_shape": [
+      1,
+      48,
+      40
+    ],
+    "reconstruction_shape": [
+      1,
+      3,
+      160
+    ]
+  }
+}

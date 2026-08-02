@@ -1,0 +1,55 @@
+{
+  "cases": [
+    {
+      "case_id": "clean",
+      "expected_duplicates": [],
+      "held_out_test": [],
+      "train": [
+        "window_a"
+      ],
+      "validation": [
+        "window_b"
+      ]
+    },
+    {
+      "case_id": "train_val_duplicate",
+      "expected_duplicates": [
+        "train_validation:window_a"
+      ],
+      "held_out_test": [],
+      "train": [
+        "window_a"
+      ],
+      "validation": [
+        "window_a"
+      ]
+    },
+    {
+      "case_id": "train_test_only_duplicate",
+      "expected_duplicates": [
+        "train_held_out_test:window_a"
+      ],
+      "held_out_test": [
+        "window_a"
+      ],
+      "train": [
+        "window_a"
+      ],
+      "validation": [
+        "window_b"
+      ]
+    }
+  ],
+  "expected_hashes": {
+    "window_a": "478936532281235e7357fc6c46d200c64c57344b",
+    "window_b": "13b146757321fa4926435b5e952f97e3ef035ab9"
+  },
+  "hash_algorithm": "sha1",
+  "legacy_alias": {
+    "coverage": "train and validation only",
+    "name": "train_validation",
+    "status": "HOLD"
+  },
+  "required_extension": "train_held_out_test",
+  "schema_version": "2B.synthetic-duplicates.1"
+}

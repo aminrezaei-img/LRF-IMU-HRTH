@@ -1,0 +1,204 @@
+{
+  "activity": {
+    "display_name": "Running",
+    "id": 1,
+    "name": "running"
+  },
+  "native_signal": {
+    "channels": 6,
+    "overlap": 2,
+    "samples": 6,
+    "sampling_hz": 50,
+    "segments": 2
+  },
+  "production_profile": {
+    "duration_seconds": 10,
+    "native_samples": 500,
+    "overlap_samples": 40,
+    "record_count": 2,
+    "segments": 4,
+    "state_count": 51,
+    "stored_steps": 100,
+    "window_samples": 160
+  },
+  "schema_version": "2B.synthetic-website-trajectory.1",
+  "stored_trajectory": {
+    "activity_class_id": 1,
+    "base_seed": 42,
+    "computed_seed": 2142,
+    "seed_formula": "base_seed + subject_id * 1000 + activity_class_id * 100",
+    "signals": [
+      [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105
+        ],
+        [
+          200,
+          201,
+          202,
+          203,
+          204,
+          205
+        ],
+        [
+          300,
+          301,
+          302,
+          303,
+          304,
+          305
+        ],
+        [
+          400,
+          401,
+          402,
+          403,
+          404,
+          405
+        ],
+        [
+          500,
+          501,
+          502,
+          503,
+          504,
+          505
+        ]
+      ],
+      [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105
+        ],
+        [
+          200,
+          201,
+          202,
+          203,
+          204,
+          205
+        ],
+        [
+          300,
+          301,
+          302,
+          303,
+          304,
+          305
+        ],
+        [
+          400,
+          401,
+          402,
+          403,
+          404,
+          405
+        ],
+        [
+          500,
+          501,
+          502,
+          503,
+          504,
+          505
+        ]
+      ],
+      [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105
+        ],
+        [
+          200,
+          201,
+          202,
+          203,
+          204,
+          205
+        ],
+        [
+          300,
+          301,
+          302,
+          303,
+          304,
+          305
+        ],
+        [
+          400,
+          401,
+          402,
+          403,
+          404,
+          405
+        ],
+        [
+          500,
+          501,
+          502,
+          503,
+          504,
+          505
+        ]
+      ]
+    ],
+    "signals_shape": [
+      3,
+      6,
+      6
+    ],
+    "stored_sample_indices": [
+      0,
+      2,
+      4
+    ],
+    "stored_steps": 3,
+    "stored_times": [
+      1.0,
+      0.5,
+      0.0
+    ],
+    "subject_id": 2
+  },
+  "units": {
+    "accelerometer": "m/s2",
+    "gyroscope": "rad/s"
+  }
+}

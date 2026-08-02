@@ -1,0 +1,402 @@
+{
+  "authority_pins": {
+    "audit_repository": {
+      "branch": "release/audit-and-inventory",
+      "commit": "f38bebce36c4f21d857dc084ac8d06759c2c012d"
+    },
+    "immutable_source": {
+      "label": "submission-time immutable source",
+      "path_policy": "immutable-source-relative only"
+    },
+    "public_repository": {
+      "branch": "release/v1.0.0-candidate",
+      "commit": "8445c9cff1b93e92844b94394258635b5d25fd54",
+      "parent": "cc401f8dbe381fe3efe534219e6a912f955279a8"
+    }
+  },
+  "compatibility_profile": {
+    "cnn": {
+      "batch_size": 64,
+      "channels": [
+        32,
+        64,
+        128
+      ],
+      "class_weights": null,
+      "dropout": 0.3,
+      "early_stop_patience": 10,
+      "epochs": 80,
+      "fully_connected": [
+        256,
+        128,
+        4
+      ],
+      "kernel_size": 5,
+      "learning_rate": 0.001,
+      "padding": 2,
+      "pool_after_block": 2,
+      "validation_fraction": 0.2,
+      "weight_decay": 0.0001
+    },
+    "data": {
+      "channels": 6,
+      "label_column": 119,
+      "right_thigh_columns": [
+        80,
+        81,
+        82,
+        83,
+        84,
+        85
+      ],
+      "sampling_hz": 50,
+      "stride_samples": 40,
+      "window_samples": 160
+    },
+    "flow": {
+      "automatic_batch_selection": true,
+      "base_width": 256,
+      "batch_safety_fraction": 0.75,
+      "channel_multipliers": [
+        1,
+        2,
+        4
+      ],
+      "configured_batch_size": 128,
+      "direct_patience": 50,
+      "latent_shape": [
+        "B",
+        48,
+        40
+      ],
+      "max_epochs": 300,
+      "minimum_epochs_full_loso": 20,
+      "observed_subject_01_effective_batch_size": 512,
+      "sampler": {
+        "method": "reverse_euler",
+        "paper_steps": 10,
+        "seed": 42,
+        "time_end": 0.0,
+        "time_start": 1.0,
+        "website_euler_steps": 100,
+        "website_native_samples": 500,
+        "website_seed_formula": "base_seed + subject_id * 1000 + activity_class_id * 100"
+      }
+    },
+    "random_forest": {
+      "n_estimators": 100,
+      "n_jobs": 1,
+      "random_state": 42
+    },
+    "vae": {
+      "augmentation": {
+        "jitter": 0.008,
+        "scale": 0.04,
+        "time_mask": 0.05
+      },
+      "batch_size": 256,
+      "beta_schedule": {
+        "decay": 0.995,
+        "end": 0.04,
+        "start": 0.08
+      },
+      "early_stop_patience": 100,
+      "input_shape": [
+        "B",
+        6,
+        160
+      ],
+      "latent_shape": [
+        "B",
+        48,
+        40
+      ],
+      "loss_weights": {
+        "l1": 0.1,
+        "l2": 0.5
+      },
+      "max_epochs": 1000,
+      "min_epochs": 200
+    }
+  },
+  "contract_id": "configuration_decision_matrix",
+  "decision_status_legend": {
+    "COMPATIBILITY_PROFILE": "explicit public value with source conflict or qualification retained",
+    "HOLD": "requires independent resolution before an exact claim",
+    "RESOLVED": "stable enough for the public fixture boundary"
+  },
+  "evidence_tiers": {
+    "A": "directly observed in immutable source or pinned audit artifact",
+    "B": "cross-checked configuration or wrapper behavior used for public compatibility",
+    "C": "synthetic reconstruction or test expectation; never upgrades a conflict"
+  },
+  "exact_paper_reproduction": false,
+  "hash_hygiene": {
+    "copied_report_sha256": "9F1210C6034695061E83A648F2941CA9F6E8E0A057F547FE320D3F24D967F3EE",
+    "discrepancy": "two-character transcription error in copied fixture-design report; independently recomputed immutable-source value is authoritative; no source drift observed",
+    "recomputed_sha256": "9F1210C6034695061E83A648F2941CA9F6E0E8A057F547FE320D3F24D967F3EE",
+    "status": "HOLD",
+    "website_exporter_source_relative_path": "8_export_website_trajectories.py"
+  },
+  "items": [
+    {
+      "decision_id": "accepted_source_candidate_identity",
+      "decision_status": "HOLD",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "manuscript/Manuscript_02_06_2026.tex"
+        }
+      ],
+      "evidence_tier": "A",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "candidate manuscript identity retained; accepted-source identity is not independently closed",
+      "public_impact": "citation and exact-reproduction claims must remain qualified",
+      "selected_public_compatibility_value": "candidate manuscript path is retained as a release pin, not an exact acceptance assertion",
+      "unresolved_conflict": "accepted-source identity remains unresolved"
+    },
+    {
+      "decision_id": "vae_loss_weights_and_beta_schedule",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/Run_VAE_Pretraings.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "later wrapper profile: loss weights 0.5 and 0.1; beta 0.08 to 0.04; decay 0.995",
+      "public_impact": "VAE numerical equivalence is not claimed",
+      "selected_public_compatibility_value": "L2=0.5; L1=0.1; beta=0.08 to 0.04 with decay 0.995; older/manuscript alternatives remain unresolved",
+      "unresolved_conflict": "conflicting historical schedule"
+    },
+    {
+      "decision_id": "flow_base_width",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "models/unet_1d.py"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "later configuration-backed width 256; manuscript reports 128",
+      "public_impact": "model architecture equivalence is not claimed",
+      "selected_public_compatibility_value": "public profile uses 256 and retains 128 as unresolved conflict",
+      "unresolved_conflict": "width conflict"
+    },
+    {
+      "decision_id": "vae_batch_size",
+      "decision_status": "RESOLVED",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/Run_VAE_Pretraings.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "batch size 256",
+      "public_impact": "fixture and metadata can assert batch",
+      "selected_public_compatibility_value": "256",
+      "unresolved_conflict": "none identified"
+    },
+    {
+      "decision_id": "flow_batch_size",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "1_train_flow.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "configured batch 128 with automatic selection; subject 01 effective observation 512",
+      "public_impact": "no universal effective-batch claim",
+      "selected_public_compatibility_value": "record configured and observed values separately",
+      "unresolved_conflict": "effective batch is context-dependent"
+    },
+    {
+      "decision_id": "vae_training_duration",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/Run_VAE_Pretraings.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "maximum 1000; minimum 200; patience 100",
+      "public_impact": "no completed-run claim",
+      "selected_public_compatibility_value": "1000/200/100",
+      "unresolved_conflict": "duration semantics remain wrapper-specific"
+    },
+    {
+      "decision_id": "flow_training_duration",
+      "decision_status": "HOLD",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "1_train_flow.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "cap 300; direct patience 50; full LOSO minimum 20",
+      "public_impact": "requires resolution before exact training claim",
+      "selected_public_compatibility_value": "record all three observations",
+      "unresolved_conflict": "duration and patience contexts conflict"
+    },
+    {
+      "decision_id": "vae_minimum_epochs",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/Run_VAE_Pretraings.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "minimum 200",
+      "public_impact": "early stopping semantics remain qualified",
+      "selected_public_compatibility_value": "200",
+      "unresolved_conflict": "none identified"
+    },
+    {
+      "decision_id": "flow_minimum_epochs",
+      "decision_status": "RESOLVED",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "1_train_flow.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "full LOSO minimum 20",
+      "public_impact": "do not collapse path variants",
+      "selected_public_compatibility_value": "20 for full LOSO compatibility metadata",
+      "unresolved_conflict": "direct-training path is separate"
+    },
+    {
+      "decision_id": "vae_early_stop_patience",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/Run_VAE_Pretraings.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "patience 100",
+      "public_impact": "no completed-run claim",
+      "selected_public_compatibility_value": "100",
+      "unresolved_conflict": "none identified"
+    },
+    {
+      "decision_id": "flow_early_stop_patience",
+      "decision_status": "HOLD",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "1_train_flow.ps1"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "direct patience 50; full LOSO context differs",
+      "public_impact": "requires resolution",
+      "selected_public_compatibility_value": "retain both contexts",
+      "unresolved_conflict": "patience conflict"
+    },
+    {
+      "decision_id": "vae_augmentation",
+      "decision_status": "COMPATIBILITY_PROFILE",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/VAE_logic.py"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "noise 0.008; scale 0.04; time_mask 0.05",
+      "public_impact": "synthetic fixture does not emulate augmentation",
+      "selected_public_compatibility_value": "jitter=0.008; scale=0.04; time_mask=0.05",
+      "unresolved_conflict": "implementation lineage not fully unified"
+    },
+    {
+      "decision_id": "rectified_flow_sampling",
+      "decision_status": "RESOLVED",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "LRF/rectified_flow.py"
+        }
+      ],
+      "evidence_tier": "A",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "reverse Euler; paper 10 steps; website 500 native steps; interval 1 to 0; seed 42",
+      "public_impact": "visualization is not paper sampling",
+      "selected_public_compatibility_value": "keep paper and website protocols separate",
+      "unresolved_conflict": "none for fixture boundary"
+    },
+    {
+      "decision_id": "random_forest_classifier_settings",
+      "decision_status": "RESOLVED",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "TSTR.py"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "100 trees; seed 42; one job",
+      "public_impact": "synthetic metrics only",
+      "selected_public_compatibility_value": "100/42/1",
+      "unresolved_conflict": "none identified"
+    },
+    {
+      "decision_id": "cnn_classifier_settings",
+      "decision_status": "RESOLVED",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "8_tstr_classification_figure_org_PATCHED_v3.py"
+        }
+      ],
+      "evidence_tier": "B",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "channels 32/64/128; kernel 5; pool after block 2; FC 256/128/4; dropout .3; 80 epochs; patience 10; batch64; lr .001; wd .0001; validation .20",
+      "public_impact": "synthetic metrics only",
+      "selected_public_compatibility_value": "profile recorded verbatim as compatibility metadata",
+      "unresolved_conflict": "none identified"
+    },
+    {
+      "decision_id": "channel_lineage_and_augmentation_ablation",
+      "decision_status": "HOLD",
+      "evidence_refs": [
+        {
+          "authority": "immutable-source",
+          "path": "VAE/VAE_logic.py"
+        }
+      ],
+      "evidence_tier": "A",
+      "exact_paper_reproduction": false,
+      "historical_behavior": "observed six-channel parser, intended separate three-channel route, ablation namespace not unified",
+      "public_impact": "fresh three-channel reconstruction/evaluation required",
+      "selected_public_compatibility_value": "PUBLIC_RECONSTRUCTION_REQUIRED; no inference-time drop",
+      "unresolved_conflict": "projection and checkpoint lineage conflict"
+    }
+  ],
+  "milestone": "2B",
+  "schema_version": "2B.configuration-evidence.1",
+  "scope": "accepted evidence and public compatibility profile"
+}

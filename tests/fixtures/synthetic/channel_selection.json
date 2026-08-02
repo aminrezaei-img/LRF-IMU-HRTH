@@ -1,0 +1,48 @@
+{
+  "allow_inference_time_channel_drop": false,
+  "intended_three_channel_columns": [
+    80,
+    81,
+    82
+  ],
+  "intended_three_channel_names": [
+    "acc_x",
+    "acc_y",
+    "acc_z"
+  ],
+  "observed_six_channel_columns": [
+    80,
+    81,
+    82,
+    83,
+    84,
+    85
+  ],
+  "observed_six_channel_names": [
+    "acc_x",
+    "acc_y",
+    "acc_z",
+    "gyro_x",
+    "gyro_y",
+    "gyro_z"
+  ],
+  "production_shapes": {
+    "six_channel_input": [
+      "B",
+      6,
+      160
+    ],
+    "six_channel_latent": [
+      "B",
+      48,
+      40
+    ],
+    "three_channel_input": [
+      "B",
+      3,
+      160
+    ]
+  },
+  "schema_version": "2B.synthetic-channel-selection.1",
+  "three_channel_is_separate_schema": true
+}

@@ -1,0 +1,534 @@
+{
+  "authority_pins": {
+    "audit_repository": {
+      "branch": "release/audit-and-inventory",
+      "commit": "f38bebce36c4f21d857dc084ac8d06759c2c012d"
+    },
+    "immutable_source": {
+      "path_policy": "immutable-source-relative only"
+    },
+    "public_repository": {
+      "branch": "release/v1.0.0-candidate",
+      "commit": "8445c9cff1b93e92844b94394258635b5d25fd54"
+    }
+  },
+  "contract_id": "reference_behavior_snapshots",
+  "exact_paper_reproduction": false,
+  "integrity_policy": {
+    "checkpoint_payloads": false,
+    "participant_data": false,
+    "source_paths_sanitized": true,
+    "website_hash_hygiene_documented": true
+  },
+  "milestone": "2B",
+  "schema_version": "2B.reference-behavior-snapshots.1",
+  "snapshot_summary": {
+    "hold": 5,
+    "pass": 14,
+    "total": 19
+  },
+  "snapshots": [
+    {
+      "behavior": "later wrapper VAE profile is recorded as compatibility metadata",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "contracts/configuration_decision_matrix.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "config.vae_later_wrapper_profile",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "flow width and batch observations are separated",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "contracts/configuration_decision_matrix.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "config.flow_compatibility_profile",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "batch and duration contexts remain distinct",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "contracts/configuration_decision_matrix.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "config.batch_and_duration_qualification",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "paper reverse Euler fixture uses ten steps and seed 42",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/flow_probe.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "sampling.paper_reverse_euler",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "website visualization remains a separate 100-step protocol",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/website_trajectory.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "sampling.website_trajectory",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "filter-before-runs gap bridging is represented",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/preprocessing_cases.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "preprocessing.filter_before_runs",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "compact four/two windows do not cross boundaries",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/preprocessing_cases.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "preprocessing.compact_window_contract",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "production 160/40 at 50 Hz is recorded",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "contracts/parity_fixture_contract.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "preprocessing.production_window_contract",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "three-channel indices are explicit and separate",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "contracts/three_channel_lineage.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "preprocessing.three_channel_selection_contract",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "safe subject split returns 16/7/8",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/loso_split_cases.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "split.safe_subject_split",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "0.15 VAE and 0.20 CNN fractions remain separate",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/cnn_split_case.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "split.vae_vs_cnn_validation_fraction",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "train-validation and train-held-out-test comparisons are represented",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/duplicate_audit_cases.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "duplicate.audit_scope",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "macro-F1 and sample/population dispersion fields are explicit",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/evaluation_reference.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "metrics.reference_aggregation",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "all fixture files are covered by a manifest checksum",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "PASS"
+      },
+      "fixture_inputs": [
+        "tests/fixtures/synthetic/fixture_manifest.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "PASS"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "fixture.deterministic_hash_manifest",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "PASS",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "three-channel source lineage is not closed",
+      "evidence_tier": "C",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "HOLD"
+      },
+      "fixture_inputs": [
+        "contracts/three_channel_lineage.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "HOLD"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "preprocessing.proposed_3ch_projection_source_lineage",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "HOLD",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "safe eight-item return and legacy seven-item alias differ",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "HOLD"
+      },
+      "fixture_inputs": [
+        "contracts/parity_fixture_contract.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "HOLD"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "vae.safe_split_eight_item_contract_and_legacy_alias_gate",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "HOLD",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "historical VAE schedules conflict",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "HOLD"
+      },
+      "fixture_inputs": [
+        "contracts/configuration_decision_matrix.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "HOLD"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "holds.vae_schedule_conflict",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "HOLD",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "manuscript width 128 and compatibility width 256 conflict",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "HOLD"
+      },
+      "fixture_inputs": [
+        "contracts/configuration_decision_matrix.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "HOLD"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "holds.flow_base_width_conflict",
+      "source": {
+        "hash_status": "source-relative evidence pin; not a fixture payload",
+        "path": "sanitized investigation evidence",
+        "sha256": null
+      },
+      "status": "HOLD",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    },
+    {
+      "behavior": "copied report hash is transcribed incorrectly",
+      "evidence_tier": "B",
+      "expected_outputs": {
+        "exact_paper_reproduction": false,
+        "status": "HOLD"
+      },
+      "fixture_inputs": [
+        "contracts/configuration_decision_matrix.json"
+      ],
+      "observed_outputs": {
+        "public_payload_included": false,
+        "status": "HOLD"
+      },
+      "platform_sensitivity": "none for synthetic contract",
+      "snapshot_id": "holds.fixture_report_website_source_hash_transcription",
+      "source": {
+        "hash_status": "recomputed immutable-source value authoritative; copied report has a two-character transcription discrepancy",
+        "path": "8_export_website_trajectories.py",
+        "reported_sha256": "9F1210C6034695061E83A648F2941CA9F6E8E0A057F547FE320D3F24D967F3EE",
+        "sha256": "9F1210C6034695061E83A648F2941CA9F6E0E8A057F547FE320D3F24D967F3EE"
+      },
+      "status": "HOLD",
+      "tolerances": {
+        "numeric": "exact for synthetic integers; no claim beyond fixture"
+      }
+    }
+  ],
+  "unresolved_holds": [
+    "preprocessing.proposed_3ch_projection_source_lineage",
+    "vae.safe_split_eight_item_contract_and_legacy_alias_gate",
+    "holds.vae_schedule_conflict",
+    "holds.flow_base_width_conflict",
+    "holds.fixture_report_website_source_hash_transcription"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "channels": {
+    "inference_time_drop": false,
+    "six_channel_indices": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85
+    ],
+    "three_channel_indices": [
+      80,
+      81,
+      82
+    ]
+  },
+  "checkpoint_payloads": false,
+  "contract_id": "parity_fixture_contract",
+  "deterministic": true,
+  "duplicate_audit": {
+    "legacy_alias": "train_validation",
+    "required_comparisons": [
+      "train_validation",
+      "train_held_out_test"
+    ]
+  },
+  "expected_safe_split": {
+    "held_out_test": 8,
+    "subject_window_counts": {
+      "01": 7,
+      "02": 8,
+      "03": 8,
+      "05": 8
+    },
+    "train": 16,
+    "validation": 7
+  },
+  "fixture_root": "tests/fixtures/synthetic",
+  "human_auditable": true,
+  "integrity": {
+    "checksum_algorithm": "sha256",
+    "checksum_excludes_itself": true,
+    "checksum_file": "tests/fixtures/synthetic/SHA256SUMS",
+    "checksum_line_endings": "UTF-8 text with CRLF normalized to LF before hashing"
+  },
+  "license_safe": true,
+  "participant_derived_data": false,
+  "raw_recipe": {
+    "allowed_labels": [
+      1,
+      3,
+      4,
+      33
+    ],
+    "columns": 120,
+    "disallowed_gap_label": 99,
+    "label_column": 119,
+    "rows_per_subject": 24,
+    "selected_columns": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85
+    ],
+    "subjects": [
+      "01",
+      "02",
+      "03",
+      "05"
+    ]
+  },
+  "sampling": {
+    "keep_protocols_separate": true,
+    "paper_steps": 10,
+    "seed": 42,
+    "website_base_seed": 42,
+    "website_euler_steps": 100,
+    "website_native_samples": 500,
+    "website_seed_formula": "base_seed + subject_id * 1000 + activity_class_id * 100"
+  },
+  "schema_version": "2B.parity-fixture.1",
+  "split_separation": {
+    "cnn_window_validation_fraction": 0.2,
+    "vae_subject_validation_fraction": 0.15
+  },
+  "standardization": {
+    "axes": [
+      0,
+      2
+    ],
+    "ddof": 0,
+    "epsilon_floor": 1e-08,
+    "training_only": true
+  },
+  "windowing": {
+    "boundary_crossing": false,
+    "compact_stride_samples": 2,
+    "compact_window_samples": 4,
+    "filter_before_runs": true,
+    "gap_bridge": true,
+    "production_stride_samples": 40,
+    "production_window_samples": 160,
+    "sampling_hz": 50
+  }
+}
