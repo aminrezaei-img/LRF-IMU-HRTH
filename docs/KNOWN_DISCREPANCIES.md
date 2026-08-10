@@ -499,3 +499,18 @@ Paper/TSTR sampling is ten reverse-Euler steps. Website trajectory generation is
 ### Verification environment limitation
 
 On Windows, the default pytest temporary-directory ACLs were incompatible with the sandbox identity. Verification therefore used an explicitly external basetemp, disabled the cache provider, disabled bytecode writes, and a temporary isolated `tmp_path` fixture. The final complete suite passed 129 tests with one existing skip. The fixture and all temporary caches are outside staging and are not part of the patch.
+## Milestone 3D runtime/evaluation discrepancy
+
+Historical synthetic-cache metadata records CUDA generation, while the M3D
+validation host provided CPU-only PyTorch. The same seed does not produce the
+same noise across CPU and CUDA RNG streams. Fresh public TSTR folds therefore
+contain explicit differences from the stored historical artifacts. Supplying
+the immutable historical subject-01 cache to the public evaluator reproduces
+the unrounded RF result exactly, isolating this discrepancy to generation
+runtime/device rather than preprocessing, RF, or metric logic.
+
+CNN results are also classified as stochastic/runtime reproduction, not
+bitwise historical parity. Aggregate proximity never overrides a differing
+fold. The public 3CH all-fold result strengthens empirical compatibility but
+does not resolve the historical parser-lineage gap. These limitations preserve
+`exact_paper_reproduction=false`.

@@ -10,8 +10,8 @@ remain under review where the evidence is incomplete.
 The paper record used by this skeleton is:
 
 - **Title:** *A latent rectified flow approach to generate synthetic wearable
-  data – a LABDA solution*
-- **Authors:** Amin Rezaei, Morten Kjærgaard, and Jasper Schipperijn
+  data â€“ a LABDA solution*
+- **Authors:** Amin Rezaei, Morten KjÃ¦rgaard, and Jasper Schipperijn
 - **Journal:** *Machine Learning: Health*
 - **DOI:** [10.1088/3049-477X/ae91ef](https://doi.org/10.1088/3049-477X/ae91ef)
 
@@ -207,3 +207,25 @@ Website trajectories use a deliberately separate profile: 100 reverse-Euler step
 Milestone 3C validation passed Gates A-E and the website contract. The detailed metadata-only evidence is external at `<external-validation-root>/m3c_validation.json`; the committed parity contract is `contracts/flow_parity_report.json`.
 
 `exact_paper_reproduction` remains `false`, and the 128-versus-256 width conflict remains explicitly unresolved. See `docs/FLOW_PARITY_REPORT.md` and `docs/KNOWN_DISCREPANCIES.md`.
+## Milestone 3D: evaluation
+
+The package exposes source-compatible RF/CNN evaluation for one fold or the
+canonical 12-fold cohort. Inputs and outputs are always explicit:
+
+```text
+python -m lrf_imu evaluate --data-root <realdisp-root> --sensor six_channel --classifier rf --held-out-subject 1 --synthetic-cache <external-cache> --scenario trtr --scenario tstr
+python -m lrf_imu evaluate-loso --data-root <realdisp-root> --sensor six_channel --classifier rf --synthetic-root <external-cache-root> --output-root <external-output> --write-results --resume
+```
+
+Fresh CPU evaluation completed all 12 RF folds for 6CH and separate 3CH
+models, plus a corrected all-fold 6CH CNN run seeded once per fold before the
+historical scenario order. Historical subject-01 RF metrics reproduce exactly
+when the immutable historical cache is supplied. Fresh CPU generation is not
+bitwise equivalent to historical CUDA generation, so affected TSTR folds are
+reported as partial rather than exact.
+
+TSTR/scarce-only requests execute TRTR internally for retention but return only
+the requested scenarios. Synthetic caches require a validated adjacent
+identity/checksum manifest. Write mode requires an explicit output root, and
+fresh/resumed fold results share one aggregation schema. See
+`docs/EVALUATION_PARITY_REPORT.md`.

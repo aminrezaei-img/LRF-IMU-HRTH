@@ -220,6 +220,9 @@ def build_parser() -> argparse.ArgumentParser:
     export.add_argument("--overlap-samples", type=_non_negative_int, default=40)
     export.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
     export.add_argument("--output", metavar="PATH", help="explicit JSON output path")
+    from .evaluation.cli import add_evaluation_parsers
+
+    add_evaluation_parsers(subparsers)
     return parser
 
 
@@ -693,6 +696,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _run_generate(args)
         if args.command == "export-trajectories":
             return _run_export_trajectories(args)
+        if args.command == "evaluate":
+            from .evaluation.cli import run_evaluate
+
+            return run_evaluate(args)
+        if args.command == "evaluate-loso":
+            from .evaluation.cli import run_evaluate_loso
+
+            return run_evaluate_loso(args)
         parser.error("unknown command: {}".format(args.command))
     except (PreparationError, FileExistsError, NotADirectoryError, OSError, ValueError) as exc:
         print("lrf-imu: error: {}".format(exc), file=sys.stderr)

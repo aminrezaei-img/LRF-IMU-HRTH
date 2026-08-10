@@ -1,0 +1,325 @@
+{
+  "ambiguities": [
+    "The four-scenario CSVs store four-decimal values; unrounded LOSO JSON exists only for TRTR/TSTR 6CH.",
+    "The active four-scenario evaluator and TSTR.py both exclude the VAE-safe validation subjects from classifier training; this is historical behavior, not an endorsement that all 11 non-held-out subjects were used.",
+    "The 3CH reference is empirical output from the historical separate-model path; it does not resolve the documented parser-lineage gap."
+  ],
+  "artifact_families": [
+    {
+      "channels": 6,
+      "classifiers": [
+        "rf",
+        "cnn"
+      ],
+      "experiment": "flow utility LOSO",
+      "files_read": 24,
+      "held_out_subjects": [
+        1,
+        2,
+        3,
+        5,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16
+      ],
+      "metrics": [
+        "trtr_accuracy",
+        "tstr_accuracy",
+        "trtr_macro_f1",
+        "tstr_macro_f1",
+        "accuracy_retention",
+        "macro_f1_retention",
+        "trtr_per_class_f1",
+        "tstr_per_class_f1",
+        "n_real_train",
+        "n_real_test",
+        "n_syn"
+      ],
+      "path_template": "Results/loso/{Random_forest_classifier|CNN}/6CH/full/subject_{fold:02d}/tstr_results.json",
+      "precision": "unrounded JSON; preferred fold-level reference",
+      "scenarios": [
+        "trtr",
+        "tstr"
+      ]
+    },
+    {
+      "channels": [
+        6,
+        3
+      ],
+      "classifiers": [
+        "rf",
+        "cnn"
+      ],
+      "experiment": "four-scenario LOSO classification",
+      "files_read": 48,
+      "held_out_subjects": [
+        1,
+        2,
+        3,
+        5,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16
+      ],
+      "metrics": [
+        "train_size",
+        "accuracy",
+        "f1_macro",
+        "retention_ratio"
+      ],
+      "path_template": "Results/tstr_classification/{6CH/full|3CH/ablation}/subject_{fold:02d}/TSTR_Classification_{RF|CNN}/TSTR_Classification_Results.csv",
+      "precision": "four-decimal CSV; use for four-scenario comparison with rounding acknowledged",
+      "scenarios": [
+        "trtr",
+        "scarce",
+        "tstr",
+        "tstr_scarce"
+      ]
+    },
+    {
+      "channels": [
+        6,
+        3
+      ],
+      "classifiers": [
+        "rf",
+        "cnn"
+      ],
+      "experiment": "four-scenario per-class LOSO classification",
+      "files_read": 48,
+      "metrics": [
+        "precision",
+        "recall",
+        "f1_score",
+        "support"
+      ],
+      "path_template": "Results/tstr_classification/{6CH/full|3CH/ablation}/subject_{fold:02d}/TSTR_Classification_{RF|CNN}/TSTR_AllScenarios_Report.csv",
+      "scenarios": [
+        "trtr",
+        "scarce",
+        "tstr",
+        "tstr_scarce"
+      ]
+    },
+    {
+      "channels": [
+        6,
+        3
+      ],
+      "class_order": [
+        "walking",
+        "running",
+        "jump_up",
+        "cycling"
+      ],
+      "classifiers": [
+        "rf",
+        "cnn"
+      ],
+      "experiment": "TSTR plus scarce confusion",
+      "files_read": 48,
+      "metric": "row-normalized confusion matrix",
+      "path_template": "Results/tstr_classification/{6CH/full|3CH/ablation}/subject_{fold:02d}/TSTR_Classification_{RF|CNN}/Confusion_TSTRplusScarce_norm.csv",
+      "scenario": "tstr_scarce"
+    },
+    {
+      "aggregation": "12 fold values, sample SD ddof=1",
+      "channels": [
+        6,
+        3
+      ],
+      "classifiers": [
+        "rf",
+        "cnn"
+      ],
+      "experiment": "four-scenario LOSO aggregate",
+      "files_read": 4,
+      "metrics": [
+        "accuracy_mean",
+        "accuracy_sd",
+        "f1_macro_mean",
+        "f1_macro_sd",
+        "retention_mean",
+        "retention_sd"
+      ],
+      "path_template": "Results/tstr_classification/{6CH/full|3CH/ablation}/allfolds/tstr_classification_{rf|cnn}_summary.csv"
+    },
+    {
+      "aggregation": "12 folds; pandas sample SD",
+      "channels": 6,
+      "classifiers": [
+        "rf",
+        "cnn"
+      ],
+      "experiment": "canonical unrounded 6CH LOSO aggregate",
+      "metrics": "metric/mean/std/n long table",
+      "path": "Results/loso/loso_summary_by_classifier.csv",
+      "sha256": "736ADAACDC4F4F4BC01CD10593A9FB338859CA1AA9F7067DF2F75E83FC74E33A"
+    },
+    {
+      "channels": 6,
+      "classifier": "rf",
+      "experiment": "nine-setting window/segmentation sensitivity",
+      "files_read": 108,
+      "metrics": [
+        "trtr_accuracy",
+        "tstr_accuracy",
+        "trtr_macro_f1",
+        "tstr_macro_f1",
+        "macro_f1_retention"
+      ],
+      "note": "mapped for Milestone 3E; not executed or migrated in 3D implementation",
+      "path_template": "Results/sensitivity_grid_analysis/FLOW/WIN{80|160|240}_HOP{20|40|80}/subject_{fold:02d}/tstr_results.json",
+      "scenarios": [
+        "trtr",
+        "tstr"
+      ]
+    }
+  ],
+  "canonical_folds": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    16
+  ],
+  "observed_reference_values": {
+    "3ch_rf": {
+      "trtr_macro_f1_mean": 0.9804250000000002,
+      "tstr_macro_f1_mean": 0.9800416666666667,
+      "tstr_retention_mean": 0.9997083333333333
+    },
+    "6ch_rf": {
+      "scarce_macro_f1_mean": 0.40044166666666664,
+      "scarce_macro_f1_sd": 0.0877522489567629,
+      "trtr_macro_f1_mean": 0.9850666666666665,
+      "trtr_macro_f1_sd": 0.0210509051126218,
+      "tstr_macro_f1_mean": 0.9559416666666668,
+      "tstr_macro_f1_sd": 0.08130667487228756,
+      "tstr_retention_mean": 0.9709833333333334,
+      "tstr_scarce_macro_f1_mean": 0.9507083333333334,
+      "tstr_scarce_macro_f1_sd": 0.08746183020280472
+    },
+    "subject_01_6ch_rf": {
+      "scarce_macro_f1": 0.4417,
+      "trtr_macro_f1": 1.0,
+      "tstr_macro_f1": 0.7397,
+      "tstr_scarce_macro_f1": 0.7383
+    }
+  },
+  "reference_hashes": {
+    "3ch_rf_allfold_summary": "031DBFEAB517505EC0F3530E170AA7422C8C5C1F7B42393297FF1C5B9F85D115",
+    "6ch_rf_allfold_summary": "8B991911C4F30B3A5F32C7D506DAA445E65A554B424A49DAC71115F500D44BB7",
+    "subject_01_6ch_rf_four_scenario": "FC0ED99D9FFFBF72DC803A0D31DAB8375731A1A49EC3DD94D2E70584EAC4A4DC"
+  },
+  "schema_version": "m3d.evaluation-reference-map.1",
+  "scope": "reference-only; no historical artifact is copied or overwritten",
+  "source_files": [
+    {
+      "path": "TSTR.py",
+      "role": "canonical TRTR/TSTR generation and RF/CNN evaluation",
+      "sha256": "6D67F44B0B9340D3EF65FF9CF47A8848E1D754E71AB2525A6EC4242E8F4DA702"
+    },
+    {
+      "path": "8_tstr_classification_figure_org_PATCHED_v3.py",
+      "role": "active four-scenario RF/CNN evaluator",
+      "sha256": "8FF104FF33C96ACA94567352FA6290A0249F638982490E73193A1291F92C6BF9"
+    },
+    {
+      "path": "8_1_summarize_tstr_classification_across_folds.py",
+      "role": "all-fold sample-SD and confusion aggregation",
+      "sha256": "BC2D6C66E651303386B612861CD4BBE2105727EC58C4C0B00E2818FA693D1810"
+    },
+    {
+      "path": "3_run_loso_evaluation.ps1",
+      "role": "12-fold RF/CNN cached-synthetic wrapper",
+      "sha256": "A75FF3715F1C69C86941AC28AAE756524C2B242EF65CE28C568D3439E70E857D"
+    }
+  ],
+  "source_semantics": {
+    "classifier_training_population": "the active evaluator uses prepare_realdisp_fold_vae_safe().train_ds; its subject-level 0.15 VAE validation partition is excluded from RF/CNN classifier training",
+    "cnn": {
+      "batch_size": 64,
+      "class_weights_default": false,
+      "conv_filters": [
+        32,
+        64,
+        128
+      ],
+      "cudnn": {
+        "benchmark": false,
+        "deterministic": true
+      },
+      "dropout": 0.3,
+      "fc_hidden": [
+        256,
+        128
+      ],
+      "kernel_size": 5,
+      "learning_rate": 0.001,
+      "max_epochs": 80,
+      "model_initialization_rng": "global Torch RNG consumed sequentially across scenarios",
+      "optimizer": "Adam",
+      "padding": 2,
+      "patience": 10,
+      "pool_after_conv2": true,
+      "run_seed": "once per held-out fold before ordered TRTR, scarce, TSTR, TSTR+scarce",
+      "split": "StratifiedShuffleSplit(random_state=seed), permutation fallback",
+      "train_shuffle": "torch DataLoader generator seeded with 42",
+      "weight_decay": 0.0001,
+      "window_validation_fraction": 0.2
+    },
+    "confusion": {
+      "aggregate": "numpy.nanmean",
+      "cm_count": "number of folds whose cell is > 1e-6",
+      "fold_artifact": "row-normalized TSTR+Scarce"
+    },
+    "metrics": {
+      "aggregate_sd_ddof": 1,
+      "labels": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "primary": "macro F1",
+      "retention": "fold scenario macro F1 / (fold TRTR macro F1 + 1e-8)",
+      "secondary": [
+        "accuracy",
+        "per-class F1"
+      ],
+      "zero_division": 0
+    },
+    "rf": {
+      "n_estimators": 100,
+      "n_jobs": 1,
+      "other_parameters": "sklearn defaults",
+      "random_state": 42
+    },
+    "subject_01_observed_counts": {
+      "classifier_train": 2399,
+      "held_out_test": 243,
+      "scarce": 8,
+      "synthetic": 2000
+    }
+  },
+  "status": "historical_artifacts_read_and_mapped"
+}

@@ -129,3 +129,24 @@ Gate E used the public M3A preparation contract and the accepted six-channel VAE
 Focused M3C plus M3B tests: 20 passed, 1 skipped. Complete public suite: 129 passed, 1 skipped. Ruff passed on changed modules and the M3C tests; mypy passed on the five changed Python modules. Compile/import and JSON/YAML/TOML/CFF parsing are recorded in the parity contract.
 
 The metadata-only evidence output is `<external-validation-root>/m3c_validation.json`. It contains checkpoint hashes, sizes, root-key/schema metadata, shapes, and aggregate error statistics, never tensor payloads, generated arrays, windows, or participant artifacts.
+## Milestone 3D evaluation record
+
+The public evaluator completed all twelve RF folds for 6CH and separately
+trained 3CH checkpoints, and all twelve 6CH CNN folds. Each fold recorded the
+classifier-training subjects, excluded VAE-validation subjects, real/test/class
+counts, synthetic count, classifier settings, and fold-level historical
+comparison. Retention was computed fold-wise and aggregate SD used `ddof=1`.
+
+The fresh runtime was Python 3.12.4, PyTorch 2.7.1 CPU, scikit-learn 1.4.2,
+and NumPy 1.26.4. Historical cache metadata identifies CUDA generation; CPU
+and CUDA RNG streams differ. Consequently the public evaluator is exact on
+the immutable historical subject-01 cache, while fresh CPU TSTR results are
+PARTIAL and retain every nonzero fold-level difference.
+
+The corrected 6CH CNN run seeds once per fold before model construction and
+executes scenarios in historical order; model initializations therefore consume
+the sequential global Torch RNG. Per-scenario DataLoaders retain independent
+seed-42 generators. The previous reset-per-scenario run is invalidated and
+excluded. Cache manifests validate sensor/fold/config/checkpoint/sample identity
+and the generated-array SHA-256. The full metadata-only record is
+`contracts/evaluation_parity_report.json`.

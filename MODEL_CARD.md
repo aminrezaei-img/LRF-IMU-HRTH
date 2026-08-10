@@ -61,3 +61,16 @@ The paper/TSTR profile is ten reverse-Euler steps with the paper seed convention
 ### Scientific status
 
 Source/public parity passed on synthetic probes, both historical checkpoint widths/channels, and one held-out REALDISP fold. This validates implementation parity, not a claim of exact paper reproduction. `exact_paper_reproduction=false`; the historical width-256 checkpoint versus manuscript/source width-128 discrepancy remains unresolved. No TSTR/evaluation script was migrated and no generated artifacts are included.
+## Milestone 3D evaluation supplement
+
+The release now includes RF and CNN evaluation logic, but no evaluation model,
+checkpoint, participant data, or generated sample. All-fold 6CH/3CH RF and 6CH
+CNN runs were executed externally. Deterministic evaluation matches historical
+metrics when supplied the same stored cache. Fresh CPU-generated TSTR samples
+do not claim equivalence to historical CUDA-generated samples; fold-level
+differences and runtime details are retained in the evaluation parity report.
+
+The results apply only to the audited REALDISP cohort and protocol. They do not
+establish clinical validity, anonymization, deployment fitness, or universal
+performance. The 3CH result is empirical compatibility for a reconstructed
+parser paired with separately trained 3CH checkpoints, not lineage proof.

@@ -134,3 +134,15 @@ Flow/TSTR parity, or exact paper reproduction.
 The public integration changes are limited to Flow model/training/generation boundaries, checkpoint validation, lazy package exports, CLI aliases and validation, one M3C test module, and the permitted M3C documents/contract. Existing M3B VAE modules, contracts, tests, and behavior remain intact.
 
 Raw SHA-256 hashes for the source evidence and final staged files are recorded in `contracts/flow_parity_report.json`. The source U-Net, rectified-flow equations, and duplicate-training-script identity were checked against the named source files; no source payloads or Results artifacts were copied.
+## Milestone 3D evaluation mapping
+
+| Source evidence | Public path | Decision |
+| --- | --- | --- |
+| `TSTR.py` and active patched four-scenario evaluator | `src/lrf_imu/evaluation/{core,scenarios,classifiers}.py` | Preserve population, RF/CNN, seed, and classifier-validation semantics with portable in-memory functions |
+| Historical metric/retention/confusion helpers | `src/lrf_imu/evaluation/metrics.py` | Preserve labels 0--3, zero-division behavior, fold-wise retention, `ddof=1`, and nanmean/nonzero-cell aggregation |
+| Synthetic-cache wrappers | `src/lrf_imu/evaluation/cache.py` | Explicit external cache identity and weights-free metadata; no implicit source root |
+| Active one-fold/all-fold wrappers | `src/lrf_imu/evaluation/cli.py` and root CLI | Explicit data/cache/output roots, dry-run, write permission, overwrite refusal, and resume |
+| Immutable stored evaluation artifacts | `contracts/evaluation_reference_map.json` and `evaluation_parity_report.json` | Small relative-path/metric evidence only; no Result payload copied |
+
+Gate A fixtures, all-fold execution, and fold-level historical comparisons are
+documented in `docs/EVALUATION_PARITY_REPORT.md`.
