@@ -1,5 +1,20 @@
-"""Public VAE training primitives."""
+"""Public VAE and Rectified Flow training primitives."""
 
+from .flow import (
+    FlowMatchingBatch,
+    FlowTrainingError,
+    FlowTrainingResult,
+    RectifiedFlowIMU,
+    compute_flow_loss,
+    compute_flow_matching_loss,
+    flow_interpolation,
+    flow_matching_batch,
+    interpolate_latents,
+    make_flow_matching_batch,
+    model_time,
+    reverse_euler_step,
+    train_flow,
+)
 from .vae import (
     MIGRATION_PROVENANCE,
     TrainingResult,
@@ -14,14 +29,27 @@ from .vae import (
 )
 
 __all__ = [
+    "FlowMatchingBatch",
+    "FlowTrainingError",
+    "FlowTrainingResult",
     "MIGRATION_PROVENANCE",
+    "RectifiedFlowIMU",
     "TrainingResult",
     "VAEProfile",
     "augment_batch",
+    "compute_flow_loss",
+    "compute_flow_matching_loss",
     "compute_vae_loss",
+    "flow_interpolation",
+    "flow_matching_batch",
+    "interpolate_latents",
+    "make_flow_matching_batch",
+    "model_time",
     "profile_from_config",
     "resolve_device",
+    "reverse_euler_step",
     "select_vae_profile",
     "set_seed",
+    "train_flow",
     "train_vae",
 ]

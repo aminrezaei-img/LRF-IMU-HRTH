@@ -177,3 +177,33 @@ PYTHONPATH=src python -m lrf_imu reconstruct --config configs/paper/six_channel_
 The VAE copy is compatibility evidence, not an exact paper-reproduction
 claim. Historical checkpoints, raw data, and Results outputs remain external
 and are never copied into this tree.
+
+## Milestone 3C: Rectified Flow integration
+
+The public package now exposes the staged Flow implementation through a lazy, metadata-first boundary. It preserves the accepted M3B VAE behavior and uses the source equations:
+
+```text
+zt = (1-t) z0 + t z1
+target = z1 - z0
+model time = 1000 t
+reverse Euler: z <- z - v dt
+```
+
+The paper profile is fixed at ten reverse-Euler steps. Historical subject-01 Flow checkpoints are supported only with their separately trained, matching 6CH or 3CH VAE checkpoint. The historical checkpoints validate as width 256, latent channels 48, four classes, and 89 U-Net state tensors.
+
+The safe command boundaries are:
+
+```text
+python -m lrf_imu flow-smoke
+python -m lrf_imu inspect-flow-checkpoint --checkpoint <6CH-flow-checkpoint>
+python -m lrf_imu generate --config <config> --vae-checkpoint <vae> --flow-checkpoint <flow> --class-id 0 --count 1 --steps 10 --seed 42 --device cpu
+python -m lrf_imu export-trajectories --flow-checkpoint <flow> --vae-checkpoint <vae> --subject 1 --activity 0 --base-seed 42 --device cpu
+```
+
+Generation and inspection report shapes, finite-value status, hashes, and schema metadata only. They do not print tensor values, write output implicitly, or copy checkpoints or participant artifacts into the release tree.
+
+Website trajectories use a deliberately separate profile: 100 reverse-Euler steps, `record_every=2`, 51 states, native 160-sample windows, 40-sample linear overlap-add, ten seconds at 50 Hz, and seed `base + subject*1000 + activity*100`. Website output is never labeled as paper/TSTR output.
+
+Milestone 3C validation passed Gates A-E and the website contract. The detailed metadata-only evidence is external at `<external-validation-root>/m3c_validation.json`; the committed parity contract is `contracts/flow_parity_report.json`.
+
+`exact_paper_reproduction` remains `false`, and the 128-versus-256 width conflict remains explicitly unresolved. See `docs/FLOW_PARITY_REPORT.md` and `docs/KNOWN_DISCREPANCIES.md`.

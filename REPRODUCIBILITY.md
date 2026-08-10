@@ -95,3 +95,37 @@ A clean wheel probe must run both the lrf-imu prepare-data console script and
 python -m lrf_imu prepare-data from a foreign working directory with no
 repository checkout on the import path. These probes use the synthetic fixture
 only and do not establish participant-level reproducibility.
+
+## Milestone 3C reproducibility record
+
+### Runtime and commands
+
+The verification used the bundled Anaconda Python runtime because the literal launcher is environment-dependent. All numerical checks were CPU-only and deterministic. Paths below are placeholders so this document is portable.
+
+```text
+python -m lrf_imu flow-smoke
+python -m lrf_imu inspect-flow-checkpoint --checkpoint <source-root>/Results/model_weights/flow_weights/6CH/full/subject_01/flow_unet_best.pt
+python -m lrf_imu inspect-flow-checkpoint --checkpoint <source-root>/Results/model_weights/flow_weights/3CH/ablation/subject_01/flow_unet_best.pt
+python -m lrf_imu generate --config <stage>/configs/paper/six_channel_160_40.yaml --vae-checkpoint <6CH-vae> --flow-checkpoint <6CH-flow> --class-id 0 --count 1 --steps 10 --seed 42 --device cpu
+python -m lrf_imu export-trajectories --flow-checkpoint <6CH-flow> --vae-checkpoint <6CH-vae> --subject 1 --activity 0 --base-seed 42 --device cpu
+```
+
+The generate and exporter commands were run without an output path. Both exited 0, reported `output_written=false`, and included no tensor values. A foreign-cwd run with a missing-Torch shim exited 2 with one CLI error line and no traceback.
+
+### Gates
+
+| Gate | Scope | Result | Numeric evidence |
+| --- | --- | --- | --- |
+| A | Widths 128 and 256; `[B,48,40]`; conditioning, interpolation, target, loss, one Euler step, ten-step trajectory, fixed seed | PASS | Formula and determinism max/mean error 0/0; finite CPU tensors |
+| B | Isolated original/public namespaces at widths 128 and 256 | PASS | Time embedding, class forward, interpolation, target, loss, Euler, and ten-step latent max/mean error 0/0; tolerance `1e-6` |
+| C | Historical subject-01 6CH and 3CH checkpoints plus paired VAEs | PASS | Velocity, Euler, ten-step latent, and paired decoder max/mean error 0/0; 89 Flow keys; wrong-width and cross-width pairings rejected |
+| D | Four classes, one sample per class, paper sampler, seed 42 | PASS | Initial noise finite; latent and decoded standardized max/mean error 0/0 for 3CH and 6CH |
+| E | REALDISP fold with subject 01 held out | PASS | Standardized and inverse-normalized physical outputs max/mean error 0/0; no arrays serialized |
+
+Gate E used the public M3A preparation contract and the accepted six-channel VAE configuration. The fold contained 2,399 training, 280 validation, and 243 held-out windows of shape `[channels,160]`; held-out class counts were cycling 86, jump_up 12, running 63, walking 82. The per-channel train-only standardizer was fitted over 2,399 windows, with mean/std shapes `[1,6,1]`, and persisted statistics remained false.
+
+### Verification
+
+Focused M3C plus M3B tests: 20 passed, 1 skipped. Complete public suite: 129 passed, 1 skipped. Ruff passed on changed modules and the M3C tests; mypy passed on the five changed Python modules. Compile/import and JSON/YAML/TOML/CFF parsing are recorded in the parity contract.
+
+The metadata-only evidence output is `<external-validation-root>/m3c_validation.json`. It contains checkpoint hashes, sizes, root-key/schema metadata, shapes, and aggregate error statistics, never tensor payloads, generated arrays, windows, or participant artifacts.

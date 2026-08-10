@@ -1,0 +1,1817 @@
+{
+  "commands_actually_run": [
+    "python -m lrf_imu flow-smoke",
+    "python -m lrf_imu inspect-flow-checkpoint --checkpoint <source-root>/Results/model_weights/flow_weights/6CH/full/subject_01/flow_unet_best.pt",
+    "python -m lrf_imu inspect-flow-checkpoint --checkpoint <source-root>/Results/model_weights/flow_weights/3CH/ablation/subject_01/flow_unet_best.pt",
+    "python -m lrf_imu generate --config <stage>/configs/paper/six_channel_160_40.yaml --vae-checkpoint <6CH-vae> --flow-checkpoint <6CH-flow> --class-id 0 --count 1 --steps 10 --seed 42 --device cpu",
+    "python -m lrf_imu export-trajectories --flow-checkpoint <6CH-flow> --vae-checkpoint <6CH-vae> --subject 1 --activity 0 --base-seed 42 --device cpu",
+    "python -m pytest -q -p no:cacheprovider --disable-warnings --basetemp=<external-pytest-basetemp>",
+    "ruff check --no-cache <changed-modules>",
+    "mypy --no-incremental <changed-modules>",
+    "foreign-cwd missing-Torch invocation (exit 2, no traceback)"
+  ],
+  "exact_paper_reproduction": false,
+  "external_metadata_outputs": [
+    "<external-validation-root>/m3c_validation.json",
+    "<external-validation-root>/flow_parity_report.json"
+  ],
+  "gates": {
+    "A": {
+      "batch": 2,
+      "cpu": true,
+      "latent_shape": [
+        48,
+        40
+      ],
+      "models": {
+        "128": {
+          "fixed_seed": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 0.0
+          },
+          "input": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "interpolation": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "mse_loss": {
+            "finite": true,
+            "value_omitted": true
+          },
+          "one_reverse_euler_step": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "prediction": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "prediction_class_conditioned": true,
+          "prediction_time_conditioned": true,
+          "target_velocity": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "ten_step_trajectory": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          }
+        },
+        "256": {
+          "fixed_seed": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 0.0
+          },
+          "input": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "interpolation": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "mse_loss": {
+            "finite": true,
+            "value_omitted": true
+          },
+          "one_reverse_euler_step": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "prediction": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "prediction_class_conditioned": true,
+          "prediction_time_conditioned": true,
+          "target_velocity": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          },
+          "ten_step_trajectory": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              2,
+              48,
+              40
+            ]
+          }
+        }
+      },
+      "status": "PASS"
+    },
+    "B": {
+      "namespace_isolation": true,
+      "records": {
+        "128": {
+          "class_conditioned_forward": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "interpolation": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "loss": {
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "tolerance": 1e-06
+          },
+          "one_reverse_euler_step": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "state_key_count": 89,
+          "state_keys_equal": true,
+          "target_velocity": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "ten_step_sampled_latent": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "time_embedding": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              128
+            ],
+            "tolerance": 1e-06
+          }
+        },
+        "256": {
+          "class_conditioned_forward": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "interpolation": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "loss": {
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "tolerance": 1e-06
+          },
+          "one_reverse_euler_step": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "state_key_count": 89,
+          "state_keys_equal": true,
+          "target_velocity": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "ten_step_sampled_latent": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "time_embedding": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              3,
+              256
+            ],
+            "tolerance": 1e-06
+          }
+        }
+      },
+      "status": "PASS"
+    },
+    "C": {
+      "mismatch_rejection": {
+        "cross_width_pair": {
+          "error_type": "FlowTrainingError",
+          "rejected": true
+        },
+        "wrong_width_inspection": {
+          "error_type": "CheckpointError",
+          "rejected": true
+        }
+      },
+      "records": {
+        "3CH": {
+          "flow_metadata_match": true,
+          "one_reverse_euler_step": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "paired_vae_decoder": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "original_shape": [
+              2,
+              3,
+              160
+            ],
+            "pass": true,
+            "public_shape": [
+              2,
+              3,
+              160
+            ],
+            "shape": [
+              2,
+              3,
+              160
+            ],
+            "tolerance": 1e-06
+          },
+          "state_key_count": 89,
+          "state_keys_equal": true,
+          "ten_step_latent": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "velocity": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          }
+        },
+        "6CH": {
+          "flow_metadata_match": true,
+          "one_reverse_euler_step": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "paired_vae_decoder": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "original_shape": [
+              2,
+              6,
+              160
+            ],
+            "pass": true,
+            "public_shape": [
+              2,
+              6,
+              160
+            ],
+            "shape": [
+              2,
+              6,
+              160
+            ],
+            "tolerance": 1e-06
+          },
+          "state_key_count": 89,
+          "state_keys_equal": true,
+          "ten_step_latent": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "velocity": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              2,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          }
+        }
+      },
+      "status": "PASS"
+    },
+    "D": {
+      "paper_sampler": {
+        "end_time": 0.0,
+        "exact_paper_reproduction": false,
+        "latent_shape": [
+          "B",
+          48,
+          40
+        ],
+        "num_steps": 10,
+        "paper_width_conflict_unresolved": true,
+        "profile": "paper",
+        "samples_per_class": 1,
+        "seed": 42,
+        "solver": "explicit_reverse_euler",
+        "start_time": 1.0,
+        "website_trajectory": false
+      },
+      "records": {
+        "3CH": {
+          "class_counts": {
+            "0": 1,
+            "1": 1,
+            "2": 1,
+            "3": 1
+          },
+          "count": 4,
+          "decoded_standardized": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              4,
+              3,
+              160
+            ],
+            "tolerance": 1e-06
+          },
+          "final_latent": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              4,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "initial_noise": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              4,
+              48,
+              40
+            ]
+          },
+          "inverse_normalized_physical": {
+            "available": false,
+            "reason": "fold standardizer is only available in Gate E"
+          },
+          "original_decoded": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              4,
+              3,
+              160
+            ]
+          },
+          "public_decoded": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              4,
+              3,
+              160
+            ]
+          },
+          "seed": 42,
+          "steps": 10
+        },
+        "6CH": {
+          "class_counts": {
+            "0": 1,
+            "1": 1,
+            "2": 1,
+            "3": 1
+          },
+          "count": 4,
+          "decoded_standardized": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              4,
+              6,
+              160
+            ],
+            "tolerance": 1e-06
+          },
+          "final_latent": {
+            "finite": true,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "pass": true,
+            "shape": [
+              4,
+              48,
+              40
+            ],
+            "tolerance": 1e-06
+          },
+          "initial_noise": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              4,
+              48,
+              40
+            ]
+          },
+          "inverse_normalized_physical": {
+            "available": false,
+            "reason": "fold standardizer is only available in Gate E"
+          },
+          "original_decoded": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              4,
+              6,
+              160
+            ]
+          },
+          "public_decoded": {
+            "dtype": "float32",
+            "finite": true,
+            "shape": [
+              4,
+              6,
+              160
+            ]
+          },
+          "seed": 42,
+          "steps": 10
+        }
+      },
+      "status": "PASS"
+    },
+    "E": {
+      "class_counts": null,
+      "held_out_subject": 1,
+      "sample": {
+        "class_counts": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "count": 4,
+        "decoded_standardized": {
+          "finite": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "pass": true,
+          "shape": [
+            4,
+            6,
+            160
+          ],
+          "tolerance": 1e-06
+        },
+        "final_latent": {
+          "finite": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "pass": true,
+          "shape": [
+            4,
+            48,
+            40
+          ],
+          "tolerance": 1e-06
+        },
+        "initial_noise": {
+          "dtype": "float32",
+          "finite": true,
+          "shape": [
+            4,
+            48,
+            40
+          ]
+        },
+        "inverse_normalized_physical": {
+          "finite": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "pass": true,
+          "shape": [
+            4,
+            6,
+            160
+          ],
+          "tolerance": 1e-06
+        },
+        "physical_original": {
+          "dtype": "float32",
+          "finite": true,
+          "shape": [
+            4,
+            6,
+            160
+          ]
+        },
+        "physical_public": {
+          "dtype": "float32",
+          "finite": true,
+          "shape": [
+            4,
+            6,
+            160
+          ]
+        },
+        "seed": 42,
+        "steps": 10
+      },
+      "standardizer": {
+        "mapping": {},
+        "type": "ChannelStandardizer"
+      },
+      "status": "PASS",
+      "summary": {
+        "audit": {
+          "canonical_bytes_policy": "np.ascontiguousarray(window).view(np.uint8).tobytes(order='C')",
+          "comparisons": {
+            "train_held_out_test": {
+              "comparison_type": "exact_hash_intersection",
+              "duplicate_hashes": [],
+              "has_duplicates": false,
+              "left_matching_window_count": 0,
+              "left_split": "train",
+              "near_duplicate_detection": false,
+              "right_matching_window_count": 0,
+              "right_split": "held_out_test",
+              "unique_duplicate_count": 0
+            },
+            "train_validation": {
+              "comparison_type": "exact_hash_intersection",
+              "duplicate_hashes": [],
+              "has_duplicates": false,
+              "left_matching_window_count": 0,
+              "left_split": "train",
+              "near_duplicate_detection": false,
+              "right_matching_window_count": 0,
+              "right_split": "validation",
+              "unique_duplicate_count": 0
+            },
+            "validation_held_out_test": {
+              "comparison_type": "exact_hash_intersection",
+              "duplicate_hashes": [],
+              "has_duplicates": false,
+              "left_matching_window_count": 0,
+              "left_split": "validation",
+              "near_duplicate_detection": false,
+              "right_matching_window_count": 0,
+              "right_split": "held_out_test",
+              "unique_duplicate_count": 0
+            }
+          },
+          "duplicate_comparisons": [],
+          "duplicate_hashes": {
+            "train_held_out_test": [],
+            "train_validation": [],
+            "validation_held_out_test": []
+          },
+          "has_cross_split_duplicates": false,
+          "has_duplicates": false,
+          "has_within_split_duplicates": false,
+          "hash_algorithm": "sha1",
+          "metadata": {
+            "algorithm": "SHA-1",
+            "canonical_bytes_policy": "np.ascontiguousarray(window).view(np.uint8).tobytes(order='C')",
+            "canonical_order": "C-contiguous",
+            "comparisons": [
+              "train_validation",
+              "train_held_out_test",
+              "validation_held_out_test"
+            ],
+            "compatibility_alias": null,
+            "compatibility_mode": null,
+            "counts": {
+              "held_out_test": 243,
+              "train": 2399,
+              "validation": 280
+            },
+            "digest_format": "lowercase hexadecimal",
+            "dtype_policy": "preserve dtype and byte order; no numeric conversion",
+            "dtypes": {
+              "held_out_test": "float32",
+              "train": "float32",
+              "validation": "float32"
+            },
+            "hash_algorithm": "sha1",
+            "historical_scope": "train_validation",
+            "historical_scope_used": false,
+            "include_within_split": true,
+            "near_duplicate_detection": false,
+            "privacy_claim": false,
+            "privacy_statement": "Exact-byte integrity only; this report is not a privacy guarantee.",
+            "public_scope_improvement": true,
+            "raw_values_persisted": false,
+            "scope": "public_all_split_pairs",
+            "scope_description": "Intentional public-release improvement over the observed train-versus-validation-only audit: all three split boundaries are checked for exact window reuse.",
+            "shape_policy": "inputs are [N, C, T]; each hashed window is [C, T]; shape is not hashed",
+            "shapes": {
+              "held_out_test": [
+                243,
+                6,
+                160
+              ],
+              "train": [
+                2399,
+                6,
+                160
+              ],
+              "validation": [
+                280,
+                6,
+                160
+              ]
+            },
+            "window_shape": [
+              6,
+              160
+            ]
+          },
+          "near_duplicate_detection": false,
+          "passed": true,
+          "privacy_claim": false,
+          "raw_values_persisted": false,
+          "schema_version": "3A.exact-window-duplicate-audit.1",
+          "scope": "public_all_split_pairs",
+          "splits": {
+            "held_out_test": {
+              "count": 243,
+              "dtype": "float32",
+              "shape": [
+                243,
+                6,
+                160
+              ],
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "train": {
+              "count": 2399,
+              "dtype": "float32",
+              "shape": [
+                2399,
+                6,
+                160
+              ],
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "validation": {
+              "count": 280,
+              "dtype": "float32",
+              "shape": [
+                280,
+                6,
+                160
+              ],
+              "window_shape": [
+                6,
+                160
+              ]
+            }
+          },
+          "within_split": {
+            "held_out_test": {
+              "comparison_type": "exact_hash_repetition",
+              "duplicate_hash_counts": {},
+              "duplicate_hashes": [],
+              "duplicate_window_count": 0,
+              "has_duplicates": false,
+              "near_duplicate_detection": false,
+              "split": "held_out_test",
+              "unique_duplicate_count": 0
+            },
+            "train": {
+              "comparison_type": "exact_hash_repetition",
+              "duplicate_hash_counts": {},
+              "duplicate_hashes": [],
+              "duplicate_window_count": 0,
+              "has_duplicates": false,
+              "near_duplicate_detection": false,
+              "split": "train",
+              "unique_duplicate_count": 0
+            },
+            "validation": {
+              "comparison_type": "exact_hash_repetition",
+              "duplicate_hash_counts": {},
+              "duplicate_hashes": [],
+              "duplicate_window_count": 0,
+              "has_duplicates": false,
+              "near_duplicate_detection": false,
+              "split": "validation",
+              "unique_duplicate_count": 0
+            }
+          },
+          "within_split_duplicates": []
+        },
+        "command": "prepare-data",
+        "config": {
+          "exact_paper_reproduction": false,
+          "identity_sha256": "85ee503e16757278744852636060645c64cf3876aac7020820a9135e19eba3dc",
+          "name": "lrf_imu_6ch_160_40",
+          "path": "configs/paper/six_channel_160_40.yaml",
+          "profile": "compatibility_default"
+        },
+        "data": {
+          "available_subjects": [
+            "01",
+            "02",
+            "03",
+            "05",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "16"
+          ],
+          "data_root": {
+            "kind": "external-data-root",
+            "path": "<external-data-root>",
+            "path_sha256": "8799a2228d367e1f4e55337b4524b29d91640b027e7a22956943f723bc5e0d20"
+          },
+          "dataset": "REALDISP",
+          "input_files": {
+            "01": {
+              "filename": "subject1_ideal.log",
+              "sha256": "25e22037acc94fe83b29720669cfa77726744a488cccc21c2e047230960135dc"
+            },
+            "02": {
+              "filename": "subject2_ideal.log",
+              "sha256": "952af399978d2ea536c6746356e005555234b12c3ad5983691949baf184e8e2f"
+            },
+            "03": {
+              "filename": "subject3_ideal.log",
+              "sha256": "c71a3cc4c34411f2f9c016b1b6a785c0c7f7cab2d65426ffc3ca22eec9635180"
+            },
+            "05": {
+              "filename": "subject5_ideal.log",
+              "sha256": "b3e580c93338a12b3a9e88a37331288575c5db0c59d0f9d066e07b8033c670df"
+            },
+            "08": {
+              "filename": "subject8_ideal.log",
+              "sha256": "bd93de3112c61dca6fdd7f1f9fd29dda0e9b917dc4e4e2f212dc7d5d5d69639c"
+            },
+            "09": {
+              "filename": "subject9_ideal.log",
+              "sha256": "de2c65648e5a84d184e995760fc233f8826c8836f67cbc14f0b6fe8189b3d124"
+            },
+            "10": {
+              "filename": "subject10_ideal.log",
+              "sha256": "e410f0519e8e1bb84d7ebda3b23ffdeb3c3a507624dd9c10bc166d0ee3ed2984"
+            },
+            "11": {
+              "filename": "subject11_ideal.log",
+              "sha256": "25026d0ad1e0a73e1106b5f188210707269ce0f9632c72a57af5563ff37a6bef"
+            },
+            "12": {
+              "filename": "subject12_ideal.log",
+              "sha256": "962758d5ba0be05b592e1d6b4d2dc045a56b39f33c41cec84c5422566c803aca"
+            },
+            "13": {
+              "filename": "subject13_ideal.log",
+              "sha256": "0e53e5365adb7c30b05f3b94cdce4cfcf57f33d2f975d0e42ab1ae0a1e1eb3fb"
+            },
+            "14": {
+              "filename": "subject14_ideal.log",
+              "sha256": "3291db3e8bb3c4059f20f45b403d409ebca6cdd4f4e5c7b033df19cc5f448d2c"
+            },
+            "16": {
+              "filename": "subject16_ideal.log",
+              "sha256": "6d78f4e45dbf98b62079c2146ca3c953fdb7ae98293ce7463eadcc936f501d60"
+            }
+          },
+          "placement": "ideal",
+          "raw_column_count": 120,
+          "sampling_frequency_hz": 50.0
+        },
+        "exact_paper_reproduction": false,
+        "modes": {
+          "audit_mode": "public_all_split_pairs",
+          "audit_public_scope_improvement": true,
+          "audit_scope": "public_all_split_pairs",
+          "compatibility_mode": "filter_before_runs"
+        },
+        "normalization": {
+          "channels": 6,
+          "ddof": 0,
+          "fit_axes": [
+            0,
+            2
+          ],
+          "fit_sample_count": 2399,
+          "fit_stage": "post_validation_training_subjects_only",
+          "fit_status": "fitted",
+          "held_out_subject": 1,
+          "mean_shape": [
+            1,
+            6,
+            1
+          ],
+          "metadata_sha256": "6782ec4d9efda8a688450bdbd853b38dd7b7d9a9dd55875fbd615b0c343d611c",
+          "method": "per_channel_zscore",
+          "minimum_standard_deviation": 1e-08,
+          "statistics_persisted": false,
+          "std_shape": [
+            1,
+            6,
+            1
+          ],
+          "training_only": true,
+          "training_subjects": [
+            2,
+            14,
+            16,
+            5,
+            3,
+            13,
+            9,
+            12,
+            8,
+            11
+          ],
+          "validation_subjects": [
+            10
+          ]
+        },
+        "preprocessing": {
+          "compatibility_mode": "filter_before_runs",
+          "complete_windows_only": true,
+          "filter_before_runs": true,
+          "hop_length": 40,
+          "hop_seconds": 0.8,
+          "padding": false,
+          "per_subject": {
+            "01": {
+              "class_counts": {
+                "cycling": 86,
+                "jump_up": 12,
+                "running": 63,
+                "walking": 82
+              },
+              "label_count": 243,
+              "window_count": 243,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "02": {
+              "class_counts": {
+                "cycling": 86,
+                "jump_up": 12,
+                "running": 63,
+                "walking": 82
+              },
+              "label_count": 243,
+              "window_count": 243,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "03": {
+              "class_counts": {
+                "cycling": 63,
+                "jump_up": 11,
+                "running": 57,
+                "walking": 63
+              },
+              "label_count": 194,
+              "window_count": 194,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "05": {
+              "class_counts": {
+                "cycling": 67,
+                "jump_up": 8,
+                "running": 70,
+                "walking": 77
+              },
+              "label_count": 222,
+              "window_count": 222,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "08": {
+              "class_counts": {
+                "cycling": 55,
+                "jump_up": 9,
+                "running": 60,
+                "walking": 62
+              },
+              "label_count": 186,
+              "window_count": 186,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "09": {
+              "class_counts": {
+                "cycling": 105,
+                "jump_up": 11,
+                "running": 65,
+                "walking": 98
+              },
+              "label_count": 279,
+              "window_count": 279,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "10": {
+              "class_counts": {
+                "cycling": 106,
+                "jump_up": 11,
+                "running": 65,
+                "walking": 98
+              },
+              "label_count": 280,
+              "window_count": 280,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "11": {
+              "class_counts": {
+                "cycling": 85,
+                "jump_up": 11,
+                "running": 52,
+                "walking": 122
+              },
+              "label_count": 270,
+              "window_count": 270,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "12": {
+              "class_counts": {
+                "cycling": 125,
+                "jump_up": 10,
+                "running": 52,
+                "walking": 122
+              },
+              "label_count": 309,
+              "window_count": 309,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "13": {
+              "class_counts": {
+                "cycling": 78,
+                "jump_up": 10,
+                "running": 75,
+                "walking": 104
+              },
+              "label_count": 267,
+              "window_count": 267,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "14": {
+              "class_counts": {
+                "cycling": 81,
+                "jump_up": 9,
+                "running": 60,
+                "walking": 73
+              },
+              "label_count": 223,
+              "window_count": 223,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            },
+            "16": {
+              "class_counts": {
+                "cycling": 65,
+                "jump_up": 11,
+                "running": 66,
+                "walking": 64
+              },
+              "label_count": 206,
+              "window_count": 206,
+              "window_dtype": "float32",
+              "window_shape": [
+                6,
+                160
+              ]
+            }
+          },
+          "window_length": 160,
+          "window_seconds": 3.2
+        },
+        "safety": {
+          "allowed_output_files": [
+            "prepare_data_metadata.json"
+          ],
+          "hashes_only_for_derived_payloads": true,
+          "metadata_only_output": true,
+          "participant_derived_windows_persisted": false,
+          "raw_signals_persisted": false,
+          "raw_values_persisted": false
+        },
+        "schema_version": "3A.prepare-data-summary.1",
+        "seed": 42,
+        "sensor": {
+          "channel_count": 6,
+          "channel_indices": [
+            80,
+            81,
+            82,
+            83,
+            84,
+            85
+          ],
+          "channel_names": [
+            "ax",
+            "ay",
+            "az",
+            "gx",
+            "gy",
+            "gz"
+          ],
+          "downstream_models": "separate_model_per_declared_channel_set",
+          "inference_policy": "declared_channel_set_only",
+          "inference_time_channel_drop": false,
+          "mode": "six_channel",
+          "reconstructed_three_channel": false,
+          "three_channel_lineage": "observed_six_channel_schema",
+          "training_mode": "separate_model"
+        },
+        "split": {
+          "available_subjects": [
+            "01",
+            "02",
+            "03",
+            "05",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "16"
+          ],
+          "canonical_cohort": [
+            "01",
+            "02",
+            "03",
+            "05",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "16"
+          ],
+          "classifier_window_validation_fraction": 0.2,
+          "cnn_split_not_run": true,
+          "cnn_validation_fraction": 0.2,
+          "counts": {
+            "held_out_test": 243,
+            "train": 2399,
+            "validation": 280
+          },
+          "dtypes": {
+            "held_out_test": "float32",
+            "train": "float32",
+            "validation": "float32"
+          },
+          "held_out_subject": "01",
+          "label_counts": {
+            "held_out_test": {
+              "cycling": 86,
+              "jump_up": 12,
+              "running": 63,
+              "walking": 82
+            },
+            "train": {
+              "cycling": 810,
+              "jump_up": 102,
+              "running": 620,
+              "walking": 867
+            },
+            "validation": {
+              "cycling": 106,
+              "jump_up": 11,
+              "running": 65,
+              "walking": 98
+            }
+          },
+          "protocol": "vae_subject_loso",
+          "random_state": "numpy.random.RandomState",
+          "seed": 42,
+          "shapes": {
+            "held_out_test": [
+              243,
+              6,
+              160
+            ],
+            "train": [
+              2399,
+              6,
+              160
+            ],
+            "validation": [
+              280,
+              6,
+              160
+            ]
+          },
+          "train_subjects": [
+            "02",
+            "14",
+            "16",
+            "05",
+            "03",
+            "13",
+            "09",
+            "12",
+            "08",
+            "11"
+          ],
+          "vae_subject_validation_fraction": 0.15,
+          "validation_fraction": 0.15,
+          "validation_subjects": [
+            "10"
+          ],
+          "validation_unit": "subject",
+          "window_counts_by_subject": {
+            "01": 243,
+            "02": 243,
+            "03": 194,
+            "05": 222,
+            "08": 186,
+            "09": 279,
+            "10": 280,
+            "11": 270,
+            "12": 309,
+            "13": 267,
+            "14": 223,
+            "16": 206
+          }
+        },
+        "window": {
+          "hop": 40,
+          "length": 160
+        }
+      }
+    }
+  },
+  "historical_checkpoints": {
+    "3CH": {
+      "flow": {
+        "epoch": 228,
+        "geometry": {
+          "channels": 3,
+          "latent_channels": 48,
+          "latent_time_steps": 40,
+          "model_width": 256,
+          "num_classes": 4,
+          "payload_values_included": false,
+          "tensor_dtypes": [
+            "torch.float32"
+          ],
+          "width_profile": "historical_checkpoint_compatibility_256"
+        },
+        "history": {
+          "keys": [
+            "config",
+            "epoch_flops_est",
+            "epoch_flops_per_sec_est",
+            "epoch_time_sec",
+            "epochs",
+            "perf",
+            "train_loss",
+            "train_samples_per_sec",
+            "train_steps_per_sec",
+            "train_time_sec",
+            "val_loss",
+            "val_samples_per_sec",
+            "val_steps_per_sec",
+            "val_time_sec"
+          ],
+          "length": 14,
+          "type": "dict"
+        },
+        "opt": {
+          "keys": [
+            "param_groups",
+            "state"
+          ],
+          "type": "dict"
+        },
+        "relative_path": "Results/model_weights/flow_weights/3CH/ablation/subject_01/flow_unet_best.pt",
+        "root_keys": [
+          "config",
+          "epoch",
+          "history",
+          "opt",
+          "unet",
+          "val_loss"
+        ],
+        "sha256": "8580a15fb3ce75d52e88de8a4151ba33e3e6db6762a2040f81a9269c031a2726",
+        "size_bytes": 185506434,
+        "unet_shape_sha256": "f80fcbe44b54999c8020fa125efadb7430e743c96500320f561cc5107fd0ec06",
+        "unet_tensor_key_count": 89,
+        "val_loss": 0.034181322902441025
+      },
+      "paired_vae": {
+        "channels": 3,
+        "input_length": 160,
+        "latent_channels": 48,
+        "latent_stride": 4,
+        "latent_time_steps": 40,
+        "payload_values_included": false,
+        "relative_path": "Results/model_weights/vae_weights/3CH/ablation/subject_01/vae_s4_z48.pt",
+        "sha256": "2e2431c91ff6ecdfdaa6866ca5fed7846cec05d539b6eb5966e6dbe2117b2bc2",
+        "size_bytes": 2990434,
+        "state_dict_key_count": 26
+      }
+    },
+    "6CH": {
+      "flow": {
+        "epoch": 228,
+        "geometry": {
+          "channels": 6,
+          "latent_channels": 48,
+          "latent_time_steps": 40,
+          "model_width": 256,
+          "num_classes": 4,
+          "payload_values_included": false,
+          "tensor_dtypes": [
+            "torch.float32"
+          ],
+          "width_profile": "historical_checkpoint_compatibility_256"
+        },
+        "history": {
+          "keys": [
+            "config",
+            "epoch_flops_est",
+            "epoch_flops_per_sec_est",
+            "epoch_time_sec",
+            "epochs",
+            "perf",
+            "train_loss",
+            "train_samples_per_sec",
+            "train_steps_per_sec",
+            "train_time_sec",
+            "val_loss",
+            "val_samples_per_sec",
+            "val_steps_per_sec",
+            "val_time_sec"
+          ],
+          "length": 14,
+          "type": "dict"
+        },
+        "opt": {
+          "keys": [
+            "param_groups",
+            "state"
+          ],
+          "type": "dict"
+        },
+        "relative_path": "Results/model_weights/flow_weights/6CH/full/subject_01/flow_unet_best.pt",
+        "root_keys": [
+          "config",
+          "epoch",
+          "history",
+          "opt",
+          "unet",
+          "val_loss"
+        ],
+        "sha256": "4e28a9dfd28fb21fab8df38a3e6b26c5c2bc24481be2cbc5e8ec50818e194841",
+        "size_bytes": 185506434,
+        "unet_shape_sha256": "f80fcbe44b54999c8020fa125efadb7430e743c96500320f561cc5107fd0ec06",
+        "unet_tensor_key_count": 89,
+        "val_loss": 0.0583379752933979
+      },
+      "paired_vae": {
+        "channels": 6,
+        "input_length": 160,
+        "latent_channels": 48,
+        "latent_stride": 4,
+        "latent_time_steps": 40,
+        "payload_values_included": false,
+        "relative_path": "Results/model_weights/vae_weights/6CH/full/subject_01/vae_s4_z48.pt",
+        "sha256": "7f11c6d4f6e5ab968a22f075ea5cfae1b2f32a1322a0656f019871eed2ba8e2b",
+        "size_bytes": 3005794,
+        "state_dict_key_count": 26
+      }
+    },
+    "mismatch_rejection": {
+      "cross_width_pair": {
+        "error_type": "FlowTrainingError",
+        "rejected": true
+      },
+      "wrong_width_inspection": {
+        "error_type": "CheckpointError",
+        "rejected": true
+      }
+    },
+    "pairing_rule": "6CH Flow with 6CH VAE and 3CH Flow with 3CH VAE only"
+  },
+  "limitations": [
+    "exact paper reproduction is intentionally not claimed",
+    "the 128-versus-256 scientific width conflict is unresolved",
+    "Gate E validates in-memory real-fold operations and does not serialize windows or generated arrays",
+    "the complete suite had one existing skip",
+    "Windows verification used an external pytest basetemp and temporary fixture outside staging"
+  ],
+  "paper_vs_website": {
+    "assertion": "website output is never labeled paper/TSTR",
+    "paper": {
+      "exact_paper_reproduction": false,
+      "profile": "paper",
+      "seed": 42,
+      "steps": 10,
+      "tstr_separation": true
+    },
+    "website": {
+      "metadata": {
+        "activity_id": 0,
+        "base_seed": 42,
+        "duration_seconds": 10.0,
+        "exact_paper_reproduction": false,
+        "native_segment_count": 4,
+        "native_window_samples": 160,
+        "num_steps": 100,
+        "overlap_samples": 40,
+        "paper_samples_per_class": 500,
+        "paper_sampling_steps": 10,
+        "paper_tstr_separation": true,
+        "profile": "website_trajectory",
+        "record_every": 2,
+        "seed": 1042,
+        "seed_formula": "base_seed + subject_id * 1000 + activity_id * 100",
+        "solver": "explicit_reverse_euler",
+        "state_count": 51,
+        "stored_steps": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          24,
+          26,
+          28,
+          30,
+          32,
+          34,
+          36,
+          38,
+          40,
+          42,
+          44,
+          46,
+          48,
+          50,
+          52,
+          54,
+          56,
+          58,
+          60,
+          62,
+          64,
+          66,
+          68,
+          70,
+          72,
+          74,
+          76,
+          78,
+          80,
+          82,
+          84,
+          86,
+          88,
+          90,
+          92,
+          94,
+          96,
+          98,
+          100
+        ],
+        "subject_id": 1,
+        "target_samples": 500
+      },
+      "payload_contract": {
+        "aggregation": "overlap_add_of_independent_native_windows",
+        "generation_profile": "website_trajectory",
+        "overlap": 40,
+        "paper_sampling_steps": 10,
+        "paper_tstr_samples": false,
+        "profile": "website_trajectory",
+        "state_count": 51,
+        "target_seconds": 10.0
+      },
+      "status": "PASS",
+      "website_output_not_paper_or_tstr": true
+    }
+  },
+  "paper_width_conflict_unresolved": true,
+  "public_staging": {
+    "added_implementation_files": [
+      "src/lrf_imu/models/flow.py",
+      "src/lrf_imu/training/flow.py",
+      "src/lrf_imu/generation/flow.py",
+      "src/lrf_imu/generation/__init__.py",
+      "tests/test_flow_m3c.py"
+    ],
+    "files": {
+      "src/lrf_imu/__init__.py": {
+        "sha256": "6208cd2d5aebe867a65b61ae64bc0f24da14ffcddb6a09863bbc7688fddcf5c7",
+        "size_bytes": 9744
+      },
+      "src/lrf_imu/checkpoints.py": {
+        "sha256": "4288e0a3cd62fc61a3d6212d3e94e4efd933f68833daf370ed05ec62be41dbc6",
+        "size_bytes": 24870
+      },
+      "src/lrf_imu/cli.py": {
+        "sha256": "9b274e75547462d44cc944e4d314da788a912e3a2a54f24621e18f98dd10d1bd",
+        "size_bytes": 29256
+      },
+      "src/lrf_imu/generation/__init__.py": {
+        "sha256": "d7f27e80158a084ba05d1810658d74cba27d84a20787b0dfdde014e117b76e13",
+        "size_bytes": 85
+      },
+      "src/lrf_imu/generation/flow.py": {
+        "sha256": "0a0e92bb758612eaf26f9c5889228291838d23eb0d7bec6f2df6b700256dd26e",
+        "size_bytes": 22074
+      },
+      "src/lrf_imu/models/__init__.py": {
+        "sha256": "7c1be35b017c057b1dc91c64f6db3970c31d6e0bb3ca86e13da688a35bb5d708",
+        "size_bytes": 902
+      },
+      "src/lrf_imu/models/flow.py": {
+        "sha256": "ef11cbb1cda5c4cb8889beed5f14f96632783bfb7867a3934389c88fa1478d14",
+        "size_bytes": 19443
+      },
+      "src/lrf_imu/training/__init__.py": {
+        "sha256": "5e15dfa3ebbd1cc19f1ef56824b19fbea351b46251ad0df49d3d252d44dda87e",
+        "size_bytes": 1178
+      },
+      "src/lrf_imu/training/flow.py": {
+        "sha256": "9fc3b1945a51680bf8683f23e340adc0ec34e806ef03e2380cef4581eed49a7a",
+        "size_bytes": 19711
+      },
+      "tests/test_flow_m3c.py": {
+        "sha256": "3849c642e613db69ebdadd62fd88a4e9cd555e553dc79d8d4401b8d0713a2030",
+        "size_bytes": 8860
+      }
+    },
+    "hash_convention": "raw file SHA-256 over final staged bytes",
+    "minimal_modifications": {
+      "checkpoints": "weights-only schema/geometry validation and explicit paired-channel checks",
+      "cli": "flow smoke, checkpoint inspection, explicit config/class/count/steps aliases, safe generation/export metadata",
+      "exports": "lazy public package exports without changing M3B VAE behavior",
+      "generation": "paper ten-step sampler and separate website trajectory profile",
+      "models": "source-compatible U-Net geometry with explicit 128/256 profile selection",
+      "tests": "focused M3C regression and contract coverage",
+      "training": "source flow-matching equations, reverse Euler, metadata-only results, and type-safe loss narrowing"
+    },
+    "modified_implementation_files": [
+      "src/lrf_imu/__init__.py",
+      "src/lrf_imu/checkpoints.py",
+      "src/lrf_imu/cli.py",
+      "src/lrf_imu/models/__init__.py",
+      "src/lrf_imu/training/__init__.py"
+    ],
+    "permitted_documentation_files": [
+      "README.md",
+      "REPRODUCIBILITY.md",
+      "MODEL_CARD.md",
+      "docs/ORIGINAL_TO_PUBLIC_MAPPING.md",
+      "docs/KNOWN_DISCREPANCIES.md",
+      "docs/MILESTONE_3C_HANDOFF.md",
+      "docs/FLOW_PARITY_REPORT.md",
+      "contracts/flow_parity_report.json"
+    ]
+  },
+  "safety": {
+    "checkpoint_payloads_copied": false,
+    "duplicate_or_cache_files_in_staging": false,
+    "generated_arrays_serialized": false,
+    "participant_artifacts_copied": false,
+    "results_copied": false,
+    "tensor_values_included": false,
+    "windows_serialized": false
+  },
+  "schema_version": "m3c.flow_parity_report.1",
+  "scope": {
+    "audit_head": "f38bebce36c4f21d857dc084ac8d06759c2c012d",
+    "commit_created": false,
+    "generated_artifacts_in_staging": false,
+    "public_baseline_branch": "release/v1.0.0-candidate",
+    "public_baseline_head": "ad21022354e5061ceeb888547eb34910ea730381",
+    "audit_mutated": false,
+    "immutable_source_mutated": false,
+    "public_head_unchanged": true,
+    "public_m3c_delta_file_count": 18,
+    "public_m3c_delta_applied_uncommitted": true,
+    "provenance_statement": "Validation did not mutate the protected audit or immutable source; public HEAD remained unchanged while the intentional 18-file M3C delta was applied and left uncommitted for review."
+  },
+  "source": {
+    "convention": {
+      "duplicate_training_scripts": [
+        "1_Rectified_Flow_training.py",
+        "rectified_flow_training.py"
+      ],
+      "duplicate_training_scripts_byte_identical": true,
+      "equation": "zt=(1-t)z0+t*z1; target=z1-z0",
+      "rectified_flow_source": "LRF/rectified_flow.py",
+      "sampler": "reverse Euler z <- z-v*dt",
+      "time_scale": 1000.0,
+      "unet_source": "models/unet_1d.py"
+    },
+    "files": {
+      "1_Rectified_Flow_training.py": {
+        "sha256": "9da925ec82f0704c4dec2e55c37730327d1aeea460f8a1abb3197be928d2cfb4",
+        "size_bytes": 31045
+      },
+      "LRF/rectified_flow.py": {
+        "sha256": "6a4698a810cdd3589bdc1b6df31a77dbe8c4c36754a29ffd455e26b629135b7a",
+        "size_bytes": 3241
+      },
+      "VAE/VAE_logic.py": {
+        "sha256": "3c989bb8242236d3107ae75a1533622d955d6e739d0b44103636897d01e80505",
+        "size_bytes": 74109
+      },
+      "models/unet_1d.py": {
+        "sha256": "a9aead0fde29283b64ebe45ddf505e4899fdfee9a259532a82fc1ace3f64afe1",
+        "size_bytes": 4682
+      },
+      "rectified_flow_training.py": {
+        "sha256": "9da925ec82f0704c4dec2e55c37730327d1aeea460f8a1abb3197be928d2cfb4",
+        "size_bytes": 31045
+      }
+    },
+    "hash_convention": "raw file SHA-256 over bytes"
+  },
+  "status": "PASS",
+  "verification": {
+    "cli_checkpoint_inspection_3ch": "exit 0",
+    "cli_checkpoint_inspection_6ch": "exit 0",
+    "cli_export_trajectories": "exit 0; output_written=false; tensor_values_included=false",
+    "cli_flow_smoke": "exit 0",
+    "cli_generate": "exit 0; output_written=false; tensor_values_included=false",
+    "complete_public_suite": {
+      "passed": 129,
+      "skipped": 1
+    },
+    "focused_tests": {
+      "passed": 20,
+      "skipped": 1
+    },
+    "metadata_only": true,
+    "missing_optional_torch_foreign_cwd": "exit 2; no traceback",
+    "mypy_changed_modules": "pass",
+    "ruff_changed_modules": "pass"
+  }
+}

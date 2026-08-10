@@ -477,3 +477,25 @@ The VAE schedule conflict remains open: the observed wrapper records L2/L1
 weights 0.5/0.1 and beta 0.08/0.04/0.995, while older manuscript evidence
 records 1.0/0.1 and 0.005/0.00001/0.7. M3B preserves both evidence sets and
 keeps exact_paper_reproduction: false.
+
+## Milestone 3C discrepancy supplement
+
+### Width conflict remains unresolved
+
+The historical subject-01 6CH and 3CH Flow checkpoints both validate at model width 256, latent channels 48, four classes, and 89 U-Net state tensors. The source/manuscript evidence also contains a width-128 convention. Gate A and Gate B exercise both widths; Gate C loads the historical width-256 payloads. This integration does not reinterpret, convert, or resolve the scientific 128/256 discrepancy.
+
+### Reproduction boundary
+
+The public implementation is operationally and numerically parity-checked, but `exact_paper_reproduction=false`. The missing or non-portable experiment context, checkpoint provenance, and unresolved width conflict prevent an exact-paper claim. No TSTR or evaluation scripts were migrated, and no participant windows, generated arrays, checkpoints, `.pt`, `.npz`, `.pkl`, Results, or caches were added to staging.
+
+### Channel pairing
+
+The 6CH and 3CH checkpoints are separate training products with separate matching VAE checkpoints. The loader rejects a requested width mismatch and the training boundary rejects a cross-channel VAE/Flow pair. The 3CH lineage is documented as a separate observed-channel model, not a reconstruction from six-channel data.
+
+### Paper versus website
+
+Paper/TSTR sampling is ten reverse-Euler steps. Website trajectory generation is a separate 100-step profile with 51 retained states and linear overlap-add. Website metadata carries `profile=website_trajectory` and `paper_tstr_samples=false`; it must not be used as a paper/TSTR reproduction claim.
+
+### Verification environment limitation
+
+On Windows, the default pytest temporary-directory ACLs were incompatible with the sandbox identity. Verification therefore used an explicitly external basetemp, disabled the cache provider, disabled bytecode writes, and a temporary isolated `tmp_path` fixture. The final complete suite passed 129 tests with one existing skip. The fixture and all temporary caches are outside staging and are not part of the patch.

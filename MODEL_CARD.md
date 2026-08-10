@@ -45,3 +45,19 @@ Rectified Flow base width, as well as incomplete provenance for some paper
 tables and figures. Historical validation metrics also do not exactly match the
 M3B public one-fold evaluation. These issues must be resolved before a later
 release makes exact reproduction or model-performance claims.
+
+## Milestone 3C Flow model card supplement
+
+### Model boundary
+
+The Flow model is a class-conditional 1-D latent velocity field over `[batch,48,40]`. The public implementation mirrors the source U-Net convention: sinusoidal time embedding, four-class embedding, average-pool downsampling, nearest-neighbor upsampling, residual/SE blocks, and explicit reverse Euler integration. Historical subject-01 checkpoints use width 256 and 89 state tensors.
+
+The checkpoint loader uses `weights_only=True` where supported, requires the exact six-key Flow root schema (`config`, `epoch`, `history`, `opt`, `unet`, `val_loss`), validates tensor geometry, and keeps checkpoint payload values out of reports. A Flow checkpoint and VAE checkpoint must have the same declared 3CH or 6CH width/channel pairing; cross-pairing is rejected.
+
+### Sampling profiles
+
+The paper/TSTR profile is ten reverse-Euler steps with the paper seed convention. The website profile is separate: 100 steps, every second state retained (51 states), native 160-sample windows, 40-sample linear overlap-add, four independent segments for ten seconds, and seed `base + subject*1000 + activity*100`. Website signals are explicitly marked `website_trajectory` and `paper_tstr_samples=false`.
+
+### Scientific status
+
+Source/public parity passed on synthetic probes, both historical checkpoint widths/channels, and one held-out REALDISP fold. This validates implementation parity, not a claim of exact paper reproduction. `exact_paper_reproduction=false`; the historical width-256 checkpoint versus manuscript/source width-128 discrepancy remains unresolved. No TSTR/evaluation script was migrated and no generated artifacts are included.

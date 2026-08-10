@@ -119,3 +119,18 @@ Behavioral parity is established for synthetic inputs, both named external
 subject-01 checkpoints, and one prepared external REALDISP fold. This mapping
 does not establish training-environment identity, historical metric identity,
 Flow/TSTR parity, or exact paper reproduction.
+
+## Milestone 3C Flow mapping supplement
+
+| Source evidence | Public staging implementation | Integration decision |
+| --- | --- | --- |
+| `models/unet_1d.py` | `src/lrf_imu/models/flow.py` | Preserve the source block topology and expose explicit 128/256 profiles; historical loading selects width 256 only when schema confirms it |
+| `LRF/rectified_flow.py` | `src/lrf_imu/training/flow.py` | Preserve posterior-mean/noise interpolation, `1000*t` model time, MSE target, and reverse Euler equations |
+| `1_Rectified_Flow_training.py` | `src/lrf_imu/training/flow.py` | Use one public implementation; the source duplicate `rectified_flow_training.py` is byte-identical and is not maintained as a second copy |
+| Source generation call used by `TSTR.py` | `src/lrf_imu/generation/flow.py` | Keep the paper sampler metadata-only and separate from website trajectory generation |
+| `1_train_flow.ps1` and running instructions | `src/lrf_imu/checkpoints.py` and CLI | Load explicit paired checkpoint files with weights-only validation and safe metadata inspection |
+| `8_export_website_trajectories.py` behavior | `export-trajectories` command/profile | Use a distinct website profile; never label it paper/TSTR |
+
+The public integration changes are limited to Flow model/training/generation boundaries, checkpoint validation, lazy package exports, CLI aliases and validation, one M3C test module, and the permitted M3C documents/contract. Existing M3B VAE modules, contracts, tests, and behavior remain intact.
+
+Raw SHA-256 hashes for the source evidence and final staged files are recorded in `contracts/flow_parity_report.json`. The source U-Net, rectified-flow equations, and duplicate-training-script identity were checked against the named source files; no source payloads or Results artifacts were copied.
