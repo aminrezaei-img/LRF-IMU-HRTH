@@ -1,22 +1,14 @@
-# Security policy
+# Security Policy
 
-This is a provisional Milestone 1 security boundary. It does not promise a
-support window or a complete security response process.
+If you find a security or privacy issue, please do not include sensitive details, credentials, participant information, or exploit material in a public issue.
 
-## Scope
+Report the problem privately when possible. If no private reporting channel is available, open a minimal public issue asking for a private contact and omit sensitive details.
 
-The public scope is limited to configuration, path primitives, documentation,
-tests, and empty skeleton directories. REALDISP data, participant-derived
-outputs, checkpoints, secrets, logs, and scientific implementation code are
-outside the repository and must remain outside it.
+When reporting a problem, include:
 
-## Reporting
+- the affected file or component;
+- a minimal reproduction using non-sensitive data;
+- the expected impact;
+- any relevant environment details.
 
-Do not publish credentials, private data, or exploit details in an issue. Use a
-private maintainer or hosting-service reporting channel. A later release must
-name and verify a dedicated security contact before treating this document as
-complete.
-
-When reporting a problem, include the affected path, a minimal reproduction
-that contains no sensitive data, and the impact. Redact local paths, account
-names, tokens, and participant-derived content.
+LRF-IMU is research software and does not provide a guaranteed security-support window.
