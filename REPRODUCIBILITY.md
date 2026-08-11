@@ -1,30 +1,32 @@
 # Reproducibility status
 
-## What this milestone establishes
+## Current evidence boundary
 
-The release history provides:
+This candidate contains portable preprocessing, VAE, Rectified Flow,
+generation, RF/CNN evaluation, paper-relevant numerical analyses, and a thin
+`reproduce-core` orchestration command. Synthetic contract tests and external
+REALDISP/checkpoint runs establish exact implementation parity for the
+deterministic scientific operations described in the parity reports.
 
-- portable roots and configuration loading under `src/lrf_imu/`;
-- three evidence-labeled YAML variants;
-- the pinned audit references at commit
-  `f38bebce36c4f21d857dc084ac8d06759c2c012d`; and
-- safety checks that reject local-path markers, secrets, and prohibited
-  generated artifacts outside the exact historical-reference exception.
+A clean checkout does not contain REALDISP, historical VAE/Flow checkpoints,
+generated arrays, trained evaluators, or historical `Results/` payloads.
+License-safe smokes run without those assets; historical result reproduction
+requires user-supplied data access and matching external checkpoints.
 
-## What it does not establish
+Evidence is reported at four levels:
 
-This tree does not contain the REALDISP data, historical checkpoints, Flow
-implementation, generation/classifier evaluation code, synthetic caches, result
-summaries, paper figures, or manuscript source. M3B adds a public VAE boundary
-and verifies it against the immutable implementation and named external
-checkpoints, but it cannot reproduce the scientific results from a clean
-checkout and must not claim exact paper equivalence.
+1. exact public/original implementation parity on identical inputs and states;
+2. exact result parity when the same immutable historical artifact is supplied;
+3. statistical/runtime or partial reproduction when fresh execution differs;
+4. blocked where the necessary historical lineage is unavailable.
 
-The configuration values are compatibility defaults selected from audited
-manuscript, wrapper, and checkpoint evidence. The unresolved VAE schedule and
-Flow-width discrepancies remain visible in each paper config's evidence block.
+No aggregate closeness overrides a differing fold. The authoritative values are
+in [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md), with
+machine-readable fold details in `contracts/`. Configuration values remain
+compatibility defaults where manuscript, wrapper, and checkpoint evidence
+conflict. `exact_paper_reproduction=false` remains unchanged.
 
-## Audited facts for later work
+## Audited data boundary
 
 Use the dataset and preprocessing boundary in [DATA_ACCESS.md](DATA_ACCESS.md):
 REALDISP ideal placement, right-thigh six-channel input, 50 Hz, four audited
@@ -38,7 +40,7 @@ with the pinned audit baseline of 4,619 files and 34,791,553,468 bytes. The
 additional 48 website-trajectory JSON files and four rewritten flow-trajectory
 images are excluded from this milestone and were not copied.
 
-## Verification boundary
+## Configuration and safety verification boundary
 
 The release smoke checks should:
 
@@ -49,7 +51,9 @@ The release smoke checks should:
    temporary base directory outside the repository; and
 5. verify the seven locked/reference hashes and repository/source integrity.
 
-No scientific training or evaluation command is part of this milestone.
+These checks validate configuration and release safety. Scientific result evidence
+is reported separately below and in
+[docs/RESULTS_REPRODUCTION.md](docs/RESULTS_REPRODUCTION.md).
 
 ## Milestone 3A evidence
 
@@ -78,7 +82,7 @@ full training, full evaluation, or exact-paper equivalence claim is included.
 
 The executable package declares the same two core runtime requirements in
 pyproject.toml and requirements.txt: PyYAML and the unpinned lower-bound
-declaration numpy>=1.20. The lower bound is a current minimum-safe
+declaration numpy>=1.21.3. The lower bound is a current minimum-safe
 compatibility choice for the supported Python floor, not a claim about the
 historical research environment.
 

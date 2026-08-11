@@ -1,34 +1,29 @@
 # Model card
 
-## Milestone 3B status
+## Model and release status
 
-An executable compatibility VAE boundary is included, but no trained model or
-checkpoint is included. The public LatentVAE1D preserves the observed 6CH/3CH
-state-dict geometry and is usable for explicit CPU encode/reconstruct probes
-when an external checkpoint is supplied. It does not establish paper benchmark
-parity or exact reproduction.
+LRF-IMU is a two-stage, class-conditioned latent generative pipeline. A VAE
+maps 160-sample IMU windows to a 48-by-40 latent representation; a Rectified
+Flow U-Net transports class-conditioned latent noise toward data before the VAE
+decoder returns a window. The paper/TSTR sampler uses ten reverse-Euler steps.
 
-## Audited method identity
+The public model supports separately trained 6CH and 3CH configurations.
+Historical checkpoints are not included. The 3CH preprocessing path is an
+explicit reconstruction of accelerometer columns, paired only with separately
+trained 3CH checkpoints; it is not an inference-time channel drop and is not
+proof of exact historical parser lineage.
 
-The paper audit describes LRF-IMU as a two-stage latent pipeline: a VAE
-compresses six-channel IMU windows and a class-conditional Rectified Flow
-operates in the latent space before decoding. M3B migrates only the VAE model,
-training semantics, and safe checkpoint boundary. Rectified Flow, sampling,
-classifier evaluation, and full result generation remain outside this release.
-
-## VAE compatibility evidence
-
-The public model supports independent declared 3CH and 6CH namespaces with
-[batch, channels, 160] -> [batch, 48, 40] geometry. Synthetic original/public
-comparisons and both named subject-01 checkpoints produced exact zero maximum
-errors for deterministic outputs. One external REALDISP fold also matched
-exactly on normalized VAE reconstruction outputs. See docs/VAE_PARITY_REPORT.md
-for hashes, tolerances, and limitations.
+Public/original deterministic VAE and Flow operations matched exactly on
+synthetic inputs, historical 6CH/3CH checkpoints, and a real fold. Core
+evaluation and analysis have exact, partial, and blocked components documented
+in [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md).
+`exact_paper_reproduction=false` remains unchanged.
 
 ## Intended and out-of-scope use
 
-The current contents are intended for release-boundary review, configuration
-inspection, and future reproducibility work. They are not intended for clinical
+The current contents are intended for research reproduction, controlled IMU
+generation experiments, evaluation, and inspection of the documented release
+boundary. They are not intended for clinical
 decision-making, participant monitoring, deployment, or claims about model
 quality.
 
@@ -43,8 +38,10 @@ data and derived artifacts are not included.
 The audit retains unresolved discrepancies in the VAE loss/KL schedule and
 Rectified Flow base width, as well as incomplete provenance for some paper
 tables and figures. Historical validation metrics also do not exactly match the
-M3B public one-fold evaluation. These issues must be resolved before a later
-release makes exact reproduction or model-performance claims.
+M3B public one-fold evaluation. These issues do not invalidate the explicitly
+bounded M3D results reported with their historical and runtime qualifiers. They
+must be resolved before claiming exact paper reproduction, artifact equivalence,
+or performance beyond the audited protocol.
 
 ## Milestone 3C Flow model card supplement
 
@@ -60,7 +57,15 @@ The paper/TSTR profile is ten reverse-Euler steps with the paper seed convention
 
 ### Scientific status
 
-Source/public parity passed on synthetic probes, both historical checkpoint widths/channels, and one held-out REALDISP fold. This validates implementation parity, not a claim of exact paper reproduction. `exact_paper_reproduction=false`; the historical width-256 checkpoint versus manuscript/source width-128 discrepancy remains unresolved. No TSTR/evaluation script was migrated and no generated artifacts are included.
+Source/public parity passed on synthetic probes, historical width-256 6CH and
+3CH checkpoints, and one held-out REALDISP fold. Width 128 was exercised only
+through synthetic/manuscript compatibility tests; no historical width-128
+checkpoint was validated. This validates implementation parity, not a claim of
+exact paper reproduction. `exact_paper_reproduction=false`; the width-256
+checkpoint versus manuscript/source width-128 discrepancy remains unresolved.
+Evaluation was outside the Milestone 3C parity gate and was added later without
+changing the accepted model implementation. No generated artifacts are included.
+
 ## Milestone 3D evaluation supplement
 
 The release now includes RF and CNN evaluation logic, but no evaluation model,

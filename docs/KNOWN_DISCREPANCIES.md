@@ -3,15 +3,16 @@
 ## Scope and release posture
 
 This register preserves unresolved evidence from the committed audit at
-`f38bebce36c4f21d857dc084ac8d06759c2c012d` and read-only inspection of the
-immutable source tree. It does not select a winning manuscript, wrapper, or
-artifact value. `Unknown`, `not observed`, and `not applicable` are deliberate
-states, not omissions.
+`f38bebce36c4f21d857dc084ac8d06759c2c012d`, later implementation-parity
+checks, and result-reproduction milestones. It does not select a winning
+manuscript, wrapper, or artifact value. `Unknown`, `not observed`, and
+`not applicable` are deliberate states, not omissions.
 
-Milestone 1 is documentation-only. No scientific implementation code,
-preprocessing, model, evaluation, checkpoint, raw data, synthetic cache, or
-`Results/` output was migrated. These discrepancies therefore remain release
-blockers for exact paper-reproduction claims; no code-equivalence claim exists.
+The public scientific code now has accepted preprocessing, VAE, Flow,
+generation, evaluation, and analysis boundaries, but the historical conflicts
+below remain blockers for an exact-paper claim. They do not negate exact
+public/original parity where identical inputs and states were directly tested.
+`exact_paper_reproduction=false` remains unchanged.
 
 ## Summary
 

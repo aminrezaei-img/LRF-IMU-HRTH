@@ -44,6 +44,20 @@ user-selected `data_root` to a configuration loader; do not encode a personal
 or machine-specific path in a config, script, notebook, or documentation file.
 Do not commit raw logs, preprocessed windows, or participant-derived synthetic
 data. Check the current dataset terms before sharing any derived artifact.
+Expected direct-child layout:
+
+```text
+<realdisp-root>/
+  subject1_ideal.log
+  subject2_ideal.log
+  subject3_ideal.log
+  ...
+  subject16_ideal.log
+```
+
+Only the audited subjects 1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, and 16 enter
+the canonical LOSO cohort. Numeric zero padding is accepted. The loader does not
+search nested directories and does not download missing files.
 
 ## Milestone 3A preparation contract
 
