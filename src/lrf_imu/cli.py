@@ -223,6 +223,9 @@ def build_parser() -> argparse.ArgumentParser:
     from .evaluation.cli import add_evaluation_parsers
 
     add_evaluation_parsers(subparsers)
+    from .analysis.cli import add_analysis_parsers
+
+    add_analysis_parsers(subparsers)
     return parser
 
 
@@ -704,6 +707,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             from .evaluation.cli import run_evaluate_loso
 
             return run_evaluate_loso(args)
+        from .analysis.cli import ANALYSIS_COMMANDS, run_analysis_command
+
+        if args.command in ANALYSIS_COMMANDS:
+            return run_analysis_command(args)
         parser.error("unknown command: {}".format(args.command))
     except (PreparationError, FileExistsError, NotADirectoryError, OSError, ValueError) as exc:
         print("lrf-imu: error: {}".format(exc), file=sys.stderr)

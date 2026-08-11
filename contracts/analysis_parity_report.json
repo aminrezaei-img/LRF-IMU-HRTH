@@ -1,0 +1,128 @@
+{
+  "schema_version": "m3e.analysis-parity.1",
+  "baseline_commit": "3982f9a0c9967665c5e9016bedacf3769e4cbd20",
+  "exact_paper_reproduction": false,
+  "statuses": {
+    "vae_only_ablation": "PARTIAL",
+    "window_sensitivity": "PASS",
+    "physical_threshold": "PARTIAL",
+    "spectral_summary": "PARTIAL",
+    "privacy_summaries": "PARTIAL",
+    "three_channel_vae_only": "BLOCKED"
+  },
+  "vae_only_ablation": {
+    "protocol": {
+      "sensor": "six_channel",
+      "subjects": [1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16],
+      "posterior_statistic": "mean",
+      "class_model": "flattened_diagonal_gaussian",
+      "standard_deviation_ddof": 0,
+      "standard_deviation_epsilon": 0.000001,
+      "rng": "one_sequential_numpy_default_rng",
+      "seed": 42,
+      "samples_per_class": 500,
+      "rf": {"n_estimators": 100, "random_state": 42, "n_jobs": 1}
+    },
+    "checkpoint_lineage": {
+      "historical_recorded_template": "VAE_weights/6CH/SPECTRAL_LOSS_OFF/full/subject_{subject}/vae_s4_z48.pt",
+      "historical_recorded_template_present": false,
+      "executed_surviving_template": "Results/model_weights/vae_weights/6CH/full/subject_{subject}/vae_s4_z48.pt",
+      "classification": "surviving_checkpoint_lineage_not_proven_identical_to_historical_ablation_lineage"
+    },
+    "aggregate": {
+      "historical_trtr_macro_f1_mean": 0.9850599213793273,
+      "historical_trtr_macro_f1_sample_sd": 0.021055553814059335,
+      "regenerated_trtr_macro_f1_mean": 0.9850599213793273,
+      "regenerated_trtr_macro_f1_sample_sd": 0.021055553814059335,
+      "historical_tstr_macro_f1_mean": 0.443404332428142,
+      "historical_tstr_macro_f1_sample_sd": 0.171058591263032,
+      "regenerated_tstr_macro_f1_mean": 0.448934617588917,
+      "regenerated_tstr_macro_f1_sample_sd": 0.177146792737596,
+      "historical_tstr_accuracy_mean": 0.555397831737243,
+      "historical_tstr_accuracy_sample_sd": 0.192216212068054,
+      "regenerated_tstr_accuracy_mean": 0.557122320987471,
+      "regenerated_tstr_accuracy_sample_sd": 0.199077411974191
+    },
+    "folds": [
+      {"subject": 1, "historical_tstr_macro_f1": 0.5294463837802408, "regenerated_tstr_macro_f1": 0.5144786794115653, "difference": -0.0149677043686755},
+      {"subject": 2, "historical_tstr_macro_f1": 0.32573070041346036, "regenerated_tstr_macro_f1": 0.3137424552149707, "difference": -0.01198824519848966},
+      {"subject": 3, "historical_tstr_macro_f1": 0.44057418254939673, "regenerated_tstr_macro_f1": 0.42612941845499985, "difference": -0.01444476409439688},
+      {"subject": 5, "historical_tstr_macro_f1": 0.4768470679411005, "regenerated_tstr_macro_f1": 0.47159090909090906, "difference": -0.00525615885019144},
+      {"subject": 8, "historical_tstr_macro_f1": 0.4252257368464152, "regenerated_tstr_macro_f1": 0.4712041618308798, "difference": 0.0459784249844646},
+      {"subject": 9, "historical_tstr_macro_f1": 0.7916295769640953, "regenerated_tstr_macro_f1": 0.7547945451928613, "difference": -0.036835031771234},
+      {"subject": 10, "historical_tstr_macro_f1": 0.5255039664705385, "regenerated_tstr_macro_f1": 0.5614218302777133, "difference": 0.0359178638071748},
+      {"subject": 11, "historical_tstr_macro_f1": 0.17134577325417022, "regenerated_tstr_macro_f1": 0.13174019010163163, "difference": -0.03960558315253859},
+      {"subject": 12, "historical_tstr_macro_f1": 0.5305980179803156, "regenerated_tstr_macro_f1": 0.6210453849597397, "difference": 0.0904473669794241},
+      {"subject": 13, "historical_tstr_macro_f1": 0.5687920594462651, "regenerated_tstr_macro_f1": 0.5653217109992811, "difference": -0.003470348446984},
+      {"subject": 14, "historical_tstr_macro_f1": 0.34501791445729235, "regenerated_tstr_macro_f1": 0.3571839381029517, "difference": 0.01216602364565935},
+      {"subject": 16, "historical_tstr_macro_f1": 0.19014060903441352, "regenerated_tstr_macro_f1": 0.198562187429502, "difference": 0.00842157839508848}
+    ],
+    "verdict": "All folds executed and TRTR matched exactly, but every synthetic TSTR fold differed; no parity claim is made because the checkpoint lineage named by the historical artifacts is unavailable."
+  },
+  "window_sensitivity": {
+    "reference_fold_files": 108,
+    "settings": 9,
+    "numeric_cells_compared": 171,
+    "maximum_absolute_difference": 0.0,
+    "aggregation": "fold_mean_and_sample_sd_ddof_1",
+    "tstr_macro_f1": {
+      "WIN80_HOP20": [0.9840284465263786, 0.030904902924535536],
+      "WIN80_HOP40": [0.9900427568186455, 0.018954834975783652],
+      "WIN80_HOP80": [0.9763735600681877, 0.042466241537090124],
+      "WIN160_HOP20": [0.9729793107686003, 0.05923802909424241],
+      "WIN160_HOP40": [0.9559351137229327, 0.08131648382593208],
+      "WIN160_HOP80": [0.9620412233870564, 0.06388062006716085],
+      "WIN240_HOP20": [0.9599238727501741, 0.08582073305515339],
+      "WIN240_HOP40": [0.9497380450059998, 0.07732683887088722],
+      "WIN240_HOP80": [0.9521842364665846, 0.07818553636184696]
+    }
+  },
+  "physical_threshold": {
+    "comparison": "acceleration_magnitude_strictly_greater_than_10_times_9.80665_m_s2",
+    "new_execution": {
+      "subject": 1,
+      "synthetic_windows": 2000,
+      "points": 320000,
+      "count_above_10g": 0,
+      "pct_above_10g": 0.0,
+      "maximum_m_s2": 66.12297460965006,
+      "coordinate_system": "training_fold_inverse_standardized_physical_m_s2"
+    },
+    "historical_all_fold_summary": {"fold_count": 12, "pct_above_10g_each_fold": 0.0},
+    "scope": "One historical synthetic cache was newly executed; all-fold status is a recomputation of the stored per-fold summary, not an all-fold raw-array rerun."
+  },
+  "spectral_summary": {
+    "input_scope": "stored_all_fold_mean_and_population_sd_psd_csv",
+    "mean_log_psd_correlation": 0.9662808140009495,
+    "mean_band_power_ratio_10_25hz": 0.4454827373533856,
+    "historical_rounded_values": {"mean_log_psd_correlation": 0.9663, "mean_band_power_ratio_10_25hz": 0.4455},
+    "high_frequency_attenuation_observed": true,
+    "channel_log_psd_correlations": [0.9174470781356634, 0.9694629347619097, 0.9599251510170811, 0.9799773440526657, 0.9860261023789687, 0.9848462736594081],
+    "scope": "The public numerical function recomputed statistics from stored aggregate PSD curves; raw fold window PSDs were not regenerated."
+  },
+  "privacy_summaries": {
+    "true_holdout_mia": {"folds": 12, "roc_auc_mean": 0.4951991169665239, "roc_auc_sample_sd": 0.02013706307515489, "threat_model": "nonmembers_excluded_before_flow_training"},
+    "posthoc_best_attack_mia": {"folds": 12, "roc_auc_mean": 0.5149888202556427, "roc_auc_sample_sd": 0.01602130223375582, "threat_model": "posthoc_split_best_of_distance_and_vae_reconstruction"},
+    "reconstruction": {"folds": 12, "configured_targets": 600, "actually_optimized_attempts": 240, "successful_attempts": 0, "success_rate_pct": 0.0, "criterion": "optimized_l2_strictly_less_than_0.10_times_random_baseline_l2"},
+    "scope": "Public functions recomputed stored fold summaries; the attacks were not rerun. The two MIA threat models are not combined.",
+    "claim_boundary": "Attack-specific empirical observations only; no anonymization or privacy guarantee."
+  },
+  "blocked": {
+    "three_channel_vae_only": "No mapped historical three-channel VAE-only fold artifacts exist for a direct comparison."
+  },
+  "selected_source_hashes_sha256": {
+    "vae_ablation_loso.py": "124401cf8ba3d76b0fa32e66b8955d3708962e05d1a9dbdd17f03c0ffc41a202",
+    "window_grid_aug_quality.py": "b73390fc85e9a353956e950d435b68b1f8fd702eea206e874e8707ed6b9eb56c",
+    "6_phyiscs_plausibility.py": "a9ff945b0c36b1f0703dc9f9b0057cf1c09d1637fd83d92086b8454a6056f76e",
+    "9_1_summarize_psd_efficiency_across_folds.py": "60b84d2a0badf8786d0a253cb729e9e306b92a9b29055cf558c5e65df1009838",
+    "membership_inference_holdout.py": "a6f5d137cc2d36a46379996b4480e91b3a2302fa549bdcb9660243c091ccbc97",
+    "12_privacy_memorization_audit.py": "82a7fbcd2c191194e7536556bedcc4e7665f7955083823c6a079573be09f76ce"
+  },
+  "artifact_policy": {
+    "participant_arrays_in_git": false,
+    "synthetic_arrays_in_git": false,
+    "checkpoints_in_git": false,
+    "historical_results_modified": false,
+    "external_outputs_metadata_only": true
+  }
+}

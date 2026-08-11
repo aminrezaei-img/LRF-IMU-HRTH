@@ -229,3 +229,23 @@ the requested scenarios. Synthetic caches require a validated adjacent
 identity/checksum manifest. Write mode requires an explicit output root, and
 fresh/resumed fold results share one aggregation schema. See
 `docs/EVALUATION_PARITY_REPORT.md`.
+
+## Milestone 3E: paper-relevant analyses
+
+Install the analysis and evaluation extras for these commands:
+
+```text
+python -m pip install -e ".[training,evaluation,analysis]"
+python -m lrf_imu evaluate-vae-only --data-root <realdisp-root> --vae-checkpoint <checkpoint> --held-out-subject 1 --dry-run
+python -m lrf_imu analyze-sensitivity --input <fold-records.json>
+python -m lrf_imu analyze-physical --input <physical-windows.npz> --units m_s2
+python -m lrf_imu analyze-spectral --real <real-windows.npz> --synthetic <synthetic-windows.npz>
+python -m lrf_imu analyze-privacy --input <fold-records.json> --threat-model <explicit-model>
+```
+
+Commands print metadata by default. Writing requires both `--write-results` and
+an explicit `--output`; participant or synthetic arrays are never written by
+these commands. The nine-setting sensitivity summary reproduced exactly. Other
+analysis results are explicitly PARTIAL where raw attacks/folds were not rerun
+or the historical checkpoint lineage is unavailable. See
+`docs/ANALYSIS_PARITY_REPORT.md`.

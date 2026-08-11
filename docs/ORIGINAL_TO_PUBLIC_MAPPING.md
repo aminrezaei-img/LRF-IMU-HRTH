@@ -146,3 +146,19 @@ Raw SHA-256 hashes for the source evidence and final staged files are recorded i
 
 Gate A fixtures, all-fold execution, and fold-level historical comparisons are
 documented in `docs/EVALUATION_PARITY_REPORT.md`.
+
+## Milestone 3E analysis mapping
+
+| Source evidence | Public path | Decision |
+| --- | --- | --- |
+| `vae_ablation_loso.py` | `src/lrf_imu/analysis/ablation.py` | Preserve posterior-mean encoding, flattened class-diagonal Gaussian, population SD + `1e-6`, sequential NumPy RNG, and RF protocol; portable public data/checkpoint boundary |
+| `window_grid_aug_quality.py` and stored 108-fold grid | `src/lrf_imu/analysis/sensitivity.py` | Numeric aggregation only; nine settings, fold mean and sample SD; no plotting |
+| `6_phyiscs_plausibility.py` | `src/lrf_imu/analysis/physical.py` | First three channels, physical m/s², gravity 9.80665, strict `>10g` |
+| `9_1_summarize_psd_efficiency_across_folds.py` | `src/lrf_imu/analysis/spectral.py` | Welch/log-PSD and trapezoidal band ratios; explicitly retain high-frequency attenuation |
+| `membership_inference_holdout.py` | `src/lrf_imu/analysis/privacy.py` | True-training-holdout minimum-distance MIA kept separate |
+| `12_privacy_memorization_audit.py` | `src/lrf_imu/analysis/privacy.py` | Post-hoc best-attack MIA and reconstruction criterion kept distinct; no privacy guarantee |
+| Historical command wrappers | `src/lrf_imu/analysis/cli.py` and root CLI | Explicit inputs, metadata output by default, explicit write permission |
+
+Selected immutable-source and result-artifact hashes, execution scope, and
+known differences are recorded in `contracts/analysis_parity_report.json`.
+No original file was copied unchanged, and no Results payload entered Git.

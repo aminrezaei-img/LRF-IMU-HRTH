@@ -514,3 +514,22 @@ bitwise historical parity. Aggregate proximity never overrides a differing
 fold. The public 3CH all-fold result strengthens empirical compatibility but
 does not resolve the historical parser-lineage gap. These limitations preserve
 `exact_paper_reproduction=false`.
+
+## Milestone 3E analysis discrepancies
+
+- Historical VAE-only result JSONs name checkpoints under
+  `VAE_weights/6CH/SPECTRAL_LOSS_OFF`, but that checkpoint lineage is absent.
+  All 12 public folds used the surviving mapped `Results/model_weights` lineage.
+  TRTR matched exactly; every TSTR fold differed, so VAE-only is PARTIAL.
+- Physical >10g was newly executed for subject 01 only. The other 11 zero-count
+  folds are supported by stored summaries, not a new raw-array rerun.
+- Spectral statistics were recomputed from stored all-fold PSD curves rather
+  than regenerated from raw fold windows.
+- Privacy attacks were not rerun. The true-holdout and post-hoc MIA summaries
+  remain separate. Reconstruction selected 50 targets per fold but the source
+  optimization loop processed only the first 20; both counts are retained.
+- No mapped historical 3CH VAE-only artifacts were available.
+
+These boundaries do not contradict the accepted preprocessing/VAE/Flow parity,
+and they do not resolve prior VAE-schedule, Flow-width, CUDA/CPU-generation, or
+3CH-parser-lineage discrepancies. `exact_paper_reproduction=false`.

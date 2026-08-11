@@ -74,3 +74,17 @@ The results apply only to the audited REALDISP cohort and protocol. They do not
 establish clinical validity, anonymization, deployment fitness, or universal
 performance. The 3CH result is empirical compatibility for a reconstructed
 parser paired with separately trained 3CH checkpoints, not lineage proof.
+
+## Milestone 3E analysis supplement
+
+The release includes numerical, no-plot analysis helpers for VAE-only ablation,
+segmentation sensitivity, acceleration plausibility, PSD comparison, and three
+explicit privacy threat-model summaries. It includes no checkpoint, participant
+window, synthetic array, trained evaluator, or historical Results payload.
+
+The sensitivity aggregation is exact against stored fold artifacts. VAE-only
+TSTR, physical, spectral, and privacy evidence remains explicitly PARTIAL for
+the reasons recorded in `docs/ANALYSIS_PARITY_REPORT.md`. In particular, the
+two MIA setups are not interchangeable, zero reconstruction success is not an
+anonymization guarantee, and high-frequency attenuation is documented rather
+than hidden. `exact_paper_reproduction=false`.

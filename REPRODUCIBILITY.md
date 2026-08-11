@@ -150,3 +150,22 @@ seed-42 generators. The previous reset-per-scenario run is invalidated and
 excluded. Cache manifests validate sensor/fold/config/checkpoint/sample identity
 and the generated-array SHA-256. The full metadata-only record is
 `contracts/evaluation_parity_report.json`.
+
+## Milestone 3E analysis record
+
+The VAE-only ablation executed all 12 six-channel folds with the source protocol.
+Historical versus regenerated TSTR macro-F1 was `0.443404 ± 0.171059` versus
+`0.448935 ± 0.177147`; every synthetic fold differed because the checkpoint
+lineage named by the historical result files is unavailable. TRTR reproduced
+exactly at `0.985060 ± 0.021056`.
+
+The public sensitivity aggregator reproduced 171/171 stored numeric cells
+exactly. A public physical execution found 0/320,000 subject-01 synthetic points
+above 10g. Stored all-fold PSD curves reproduced log-PSD correlation
+`0.966280814` and the attenuated 10–25 Hz power ratio `0.445482737`.
+
+Privacy summaries preserve separate threat models: true-holdout MIA was
+`0.495199 ± 0.020137`; the post-hoc best-attack audit was `0.514989 ± 0.016021`.
+Reconstruction had zero successes among 240 actual optimizations; the historical
+configuration records 600 selected targets because only the first 20 of 50 per
+fold entered the optimization loop. These are not privacy guarantees.
