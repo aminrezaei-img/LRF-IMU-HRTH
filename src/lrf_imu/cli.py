@@ -226,6 +226,9 @@ def build_parser() -> argparse.ArgumentParser:
     from .analysis.cli import add_analysis_parsers
 
     add_analysis_parsers(subparsers)
+    from .reproducibility import add_reproduce_parser
+
+    add_reproduce_parser(subparsers)
     return parser
 
 
@@ -707,6 +710,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             from .evaluation.cli import run_evaluate_loso
 
             return run_evaluate_loso(args)
+        if args.command == "reproduce-core":
+            from .reproducibility import run_reproduce_core
+
+            return run_reproduce_core(args)
         from .analysis.cli import ANALYSIS_COMMANDS, run_analysis_command
 
         if args.command in ANALYSIS_COMMANDS:

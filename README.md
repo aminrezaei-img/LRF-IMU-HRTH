@@ -249,3 +249,22 @@ these commands. The nine-setting sensitivity summary reproduced exactly. Other
 analysis results are explicitly PARTIAL where raw attacks/folds were not rerun
 or the historical checkpoint lineage is unavailable. See
 `docs/ANALYSIS_PARITY_REPORT.md`.
+
+## End-to-end core reproduction
+
+`reproduce-core` composes the accepted public preparation, checkpoint,
+ten-step generation, evaluation, aggregation, and optional historical-reference
+comparison stages. It supports one fold or the canonical 12 folds, dry-run,
+and checksum-validated resume. A real run writes only to the explicit external
+output root and requires `--write-results`:
+
+```text
+python -m lrf_imu reproduce-core --data-root <realdisp-root> --checkpoint-root <historical-source-or-model-weights-root> --output-root <external-output> --sensor six_channel --held-out-subject 1 --classifier rf --write-results
+```
+
+Generated sample caches remain external and are never suitable Git artifacts.
+The run manifest records config/checkpoint/cache hashes, runtime, seed, timing,
+attempts, interruption/failure state, and result hashes. An optional
+`--reference-report contracts/evaluation_parity_report.json` records fold-level
+differences without converting proximity into an exact-parity claim. See
+`docs/MILESTONE_4_HANDOFF.md`.

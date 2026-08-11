@@ -169,3 +169,43 @@ Privacy summaries preserve separate threat models: true-holdout MIA was
 Reconstruction had zero successes among 240 actual optimizations; the historical
 configuration records 600 selected targets because only the first 20 of 50 per
 fold entered the optimization loop. These are not privacy guarantees.
+
+## Milestone 4 orchestration record
+
+The orchestration layer contains no new scientific logic. It calls the accepted
+public modules in this order:
+
+```text
+prepare -> validate/load paired checkpoints -> ten-step paper generation
+        -> scenario evaluation -> fold aggregation -> optional reference comparison
+```
+
+A 12-fold no-write plan is available from any working directory:
+
+```text
+python -m lrf_imu reproduce-core --data-root <realdisp-root> --checkpoint-root <checkpoint-root> --output-root <external-output> --all-folds --dry-run
+```
+
+For an executable fold, add `--write-results`. Use `--resume` after a clean
+interruption or recorded failure. Resume is accepted only when the run
+fingerprint matches; a completed fold is skipped only when its result checksum
+matches, and a generated cache is reused only when its adjacent identity
+manifest and array checksum validate.
+
+The structured external output contains:
+
+- configuration SHA-256 and package/runtime metadata;
+- fold-specific VAE and Flow SHA-256 identities for generated caches;
+- paper sampler steps, seed, sample count, and standardized coordinate system;
+- preparation population counts but no participant windows;
+- fold duration, attempt count, failure/interruption status, and retry state;
+- metric-only fold JSON and an independently aggregated report.
+
+The command does not copy data or checkpoints and has no implicit dependency on
+the immutable research source. The source tree is one possible explicit
+checkpoint root only. Generated NPZ caches are external runtime artifacts and
+must not be added to Git.
+
+Reference comparison is descriptive. It preserves signed and absolute
+fold-level differences from the selected historical report and applies no
+acceptance tolerance. `exact_paper_reproduction` remains `false`.
