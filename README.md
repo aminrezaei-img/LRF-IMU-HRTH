@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml"><img src="https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://doi.org/10.1088/3049-477X/ae91ef"><img src="https://img.shields.io/badge/paper-10.1088%2F3049--477X%2Fae91ef-blue" alt="Paper DOI"></a>
+  <a href="https://huggingface.co/Aminrezaei/LRF-IMU"><img src="https://img.shields.io/badge/Hugging%20Face-checkpoints-FFD21E" alt="Hugging Face checkpoints"></a>
 </p>
 
 <p align="center">
@@ -139,7 +140,9 @@ Both commands run on CPU.
 
 ## 📦 Dataset
 
-REALDISP is not distributed with this repository. Obtain the dataset separately from its original source and point the preprocessing commands to your local copy.
+The experiments use the **[REALDISP Activity Recognition Dataset](https://archive.ics.uci.edu/dataset/305/realdisp+activity+recognition+dataset)** from the UCI Machine Learning Repository.
+
+REALDISP is not redistributed with this repository. The full dataset contains multiple body-worn sensors, activities, and placement scenarios; LRF-IMU uses the documented **12-participant, ideal-placement, right-thigh subset** and the four activities listed above. Download REALDISP from UCI and point the preprocessing commands to your local copy.
 
 Validate a participant-held-out fold with:
 
