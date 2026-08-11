@@ -4,30 +4,35 @@
        width="100%">
 </p>
 
-# LRF-IMU
+<h1 align="center">LRF-IMU</h1>
 
-[![CI](https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml/badge.svg)](https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml)
-[![Paper](https://img.shields.io/badge/paper-10.1088%2F3049--477X%2Fae91ef-blue)](https://doi.org/10.1088/3049-477X/ae91ef)
+<p align="center"><strong>Latent Rectified Flow for class-conditioned synthetic wearable IMU generation</strong></p>
 
-**Latent Rectified Flow for class-conditioned synthetic wearable IMU generation**
+<p align="center">
+  <a href="https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml"><img src="https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://doi.org/10.1088/3049-477X/ae91ef"><img src="https://img.shields.io/badge/paper-10.1088%2F3049--477X%2Fae91ef-blue" alt="Paper DOI"></a>
+</p>
 
-Research code accompanying:
+<p align="center">
+  <strong>A latent rectified flow approach to generate synthetic wearable data – a LABDA solution</strong><br>
+  Amin Rezaei · Morten Kjærgaard · Jasper Schipperijn<br>
+  <em>Machine Learning: Health</em> (2026) · <a href="https://doi.org/10.1088/3049-477X/ae91ef">DOI: 10.1088/3049-477X/ae91ef</a>
+</p>
 
-**A latent rectified flow approach to generate synthetic wearable data – a LABDA solution**  
-Amin Rezaei, Morten Kjærgaard, Jasper Schipperijn  
-*Machine Learning: Health* (2026)  
-[https://doi.org/10.1088/3049-477X/ae91ef](https://doi.org/10.1088/3049-477X/ae91ef)
+LRF-IMU provides a reproducible implementation of class-conditioned latent Rectified Flow for synthetic wearable inertial signals, including the paper's 6-channel IMU setting and separately trained 3-channel accelerometer-only ablation.
 
 ## 🔥 News
 
 - **2026-07-29** — Accepted Manuscript available online in *Machine Learning: Health* (IOP Publishing).
-- **2026-06-08** — R2 revision submitted to *Machine Learning: Health* (`MLHEALTH-100129.R2`).
+- **2026-06** — Paper accepted for publication in *Machine Learning: Health*.
+- **2026-06-08** — R2 revision submitted (`MLHEALTH-100129.R2`).
+- **2026-01-13** — Initial manuscript submitted to *Machine Learning: Health*.
 
 ## 📖 Introduction
 
 LRF-IMU is a class-conditioned generative framework for wearable inertial signals. It combines a variational autoencoder (VAE) with latent Rectified Flow to generate synthetic time-domain sensor windows for human activity recognition.
 
-The primary study configuration uses a **6-channel right-thigh IMU** with triaxial accelerometer and triaxial gyroscope signals. The paper also includes a separately trained **3-channel accelerometer-only ablation**, where both the VAE and Rectified Flow model are retrained using only `ax`, `ay`, and `az`.
+The primary study configuration uses a **6-channel right-thigh IMU** with triaxial accelerometer and triaxial gyroscope signals. The paper also includes a separately trained **3-channel accelerometer-only ablation**, where both the VAE and Rectified Flow model are retrained using only `ax`, `ay`, and `az`. The codebase includes data preparation, generation, downstream evaluation, analysis, and reproducibility workflows for both configurations.
 
 The core generation pipeline is:
 
