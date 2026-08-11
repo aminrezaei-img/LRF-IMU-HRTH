@@ -57,11 +57,11 @@ for the evidence boundary.
 
 ## Install and inspect the configuration layer
 
-The base runtime dependencies are PyYAML and NumPy (numpy>=1.20). The lower
+The base runtime dependencies are PyYAML>=6.0 and NumPy>=1.21.3. These lower
 bound is an unpinned, minimum-safe runtime declaration for the supported Python
 floor and APIs used by this package; it is not a historical environment claim.
-The test extra supplies pytest and the optional training extra supplies PyTorch
-for VAE operations.
+Optional extras provide pytest (`test`), PyTorch (`training`), scikit-learn
+(`evaluation`), SciPy (`analysis`), and release tools (`dev`).
 From the repository root,
 install the configuration layer and test tools with:
 

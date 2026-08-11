@@ -59,7 +59,7 @@ def test_runtime_dependencies_and_package_data_are_declared_consistently() -> No
     }
 
     assert project_dependencies == requirement_lines
-    assert project_dependencies == {"PyYAML", "numpy>=1.20"}
+    assert project_dependencies == {"PyYAML>=6.0", "numpy>=1.21.3"}
 
     pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'lrf_imu = ["resources/configs/paper/*.yaml"]' in pyproject
@@ -152,3 +152,38 @@ def test_pipeline_reads_non_default_vae_fraction_from_explicit_config(
     assert prepared.split.metadata.validation_fraction == 0.10
     assert prepared.summary["split"]["vae_subject_validation_fraction"] == 0.10
     assert prepared.summary["split"]["classifier_window_validation_fraction"] == 0.20
+
+def test_release_metadata_and_extras_are_explicit() -> None:
+    pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert 'requires-python = ">=3.10"' in pyproject
+    assert 'readme = "README.md"' in pyproject
+    assert 'requires = ["setuptools>=69", "wheel"]' in pyproject
+    assert 'license =' not in pyproject
+    for author in ("Amin Rezaei", "Morten Kjærgaard", "Jasper Schipperijn"):
+        assert f'{{name = "{author}"}}' in pyproject
+    for extra in (
+        'test = ["pytest>=7"]',
+        'training = ["torch>=2.0"]',
+        'evaluation = ["scikit-learn>=1.2"]',
+        'analysis = ["scipy>=1.10"]',
+        'dev = ["build>=1.0", "mypy>=1.8", "pytest>=7", "ruff>=0.6"]',
+    ):
+        assert extra in pyproject
+
+
+def test_citation_preserves_exact_scientific_identity() -> None:
+    citation = yaml.safe_load(
+        (REPOSITORY_ROOT / "CITATION.cff").read_text(encoding="utf-8")
+    )
+
+    assert citation["title"] == (
+        "A latent rectified flow approach to generate synthetic wearable data "
+        "– a LABDA solution"
+    )
+    assert citation["journal"] == "Machine Learning: Health"
+    assert citation["doi"] == "10.1088/3049-477X/ae91ef"
+    assert [
+        f'{author["given-names"]} {author["family-names"]}'
+        for author in citation["authors"]
+    ] == ["Amin Rezaei", "Morten Kjærgaard", "Jasper Schipperijn"]

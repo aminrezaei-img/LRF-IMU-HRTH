@@ -19,6 +19,7 @@ import pytest
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+MAX_PUBLIC_FILE_BYTES = 5 * 1024 * 1024
 SYNTHETIC_FIXTURE_ROOT = "tests/fixtures/synthetic"
 SYNTHETIC_LOG_ALLOWLIST = frozenset(
     {
@@ -450,3 +451,16 @@ def test_synthetic_fixture_tree_rejects_ignored_unmanifested_probes() -> None:
     finally:
         shutil.rmtree(sandbox_root, ignore_errors=True)
     assert not sandbox_root.exists()
+
+
+def test_no_physical_release_file_exceeds_five_mibibytes() -> None:
+    findings = [
+        f"{_relative_path(path)}: {path.stat().st_size} bytes"
+        for path in _iter_files()
+        if path.stat().st_size > MAX_PUBLIC_FILE_BYTES
+    ]
+    if findings:
+        pytest.fail(
+            "Found public repository files larger than 5 MiB:\n- "
+            + "\n- ".join(findings)
+        )

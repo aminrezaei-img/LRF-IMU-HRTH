@@ -1,22 +1,37 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "lrf-imu"
 version = "0.1.0"
 description = "Portable configuration, data preparation, VAE, and path framework for the LRF-IMU public release"
-requires-python = ">=3.7"
-dependencies = ["PyYAML", "numpy>=1.20"]
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Amin Rezaei"},
+    {name = "Morten Kjærgaard"},
+    {name = "Jasper Schipperijn"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = ["PyYAML>=6.0", "numpy>=1.21.3"]
 
 [project.scripts]
 lrf-imu = "lrf_imu.cli:main"
 
 [project.optional-dependencies]
-test = ["pytest"]
-training = ["torch"]
-evaluation = ["scikit-learn"]
-analysis = ["scipy"]
+test = ["pytest>=7"]
+training = ["torch>=2.0"]
+evaluation = ["scikit-learn>=1.2"]
+analysis = ["scipy>=1.10"]
+dev = ["build>=1.0", "mypy>=1.8", "pytest>=7", "ruff>=0.6"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

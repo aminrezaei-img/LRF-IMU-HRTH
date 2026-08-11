@@ -28,3 +28,16 @@ Confirm the dataset's current terms, audit all copied and newly migrated code,
 record third-party attributions, resolve institutional requirements, and choose
 a license that covers the actual public contents. Add a `LICENSE` file only
 after that review is complete.
+
+## Milestone 5 release-candidate decision
+
+**CONDITIONAL GO — CODE TECHNICALLY RELEASE READY, LICENSING DECISION REQUIRED.**
+
+This status is not a licence grant and does not authorize redistribution
+or reuse. No `LICENSE` file is included.
+
+Human review must resolve ownership and institutional authority for the public
+code, third-party-code compatibility and attributions, dependency licences,
+REALDISP access terms, model-weight and generated-data release rights, and
+manuscript or figure rights. Add a `LICENSE` file only after those decisions;
+do not infer authorization from technical release readiness.
