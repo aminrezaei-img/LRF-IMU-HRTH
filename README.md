@@ -22,7 +22,7 @@
 
 LRF-IMU provides a reproducible implementation of class-conditioned latent Rectified Flow for synthetic wearable inertial signals, including the paper's 6-channel IMU setting and separately trained 3-channel accelerometer-only ablation.
 
-## 🔥 News
+## 🔥 Timeline
 
 - **2026-07-29** — Accepted Manuscript available online in *Machine Learning: Health* (IOP Publishing).
 - **2026-06-29** — Paper accepted for publication in *Machine Learning: Health*.
