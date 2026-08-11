@@ -24,7 +24,7 @@ LRF-IMU provides a reproducible implementation of class-conditioned latent Recti
 ## 🔥 News
 
 - **2026-07-29** — Accepted Manuscript available online in *Machine Learning: Health* (IOP Publishing).
-- **2026-06** — Paper accepted for publication in *Machine Learning: Health*.
+- **2026-06-29** — Paper accepted for publication in *Machine Learning: Health*.
 - **2026-06-08** — R2 revision submitted (`MLHEALTH-100129.R2`).
 - **2026-01-13** — Initial manuscript submitted to *Machine Learning: Health*.
 
