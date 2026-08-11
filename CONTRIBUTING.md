@@ -1,32 +1,19 @@
 # Contributing
 
-This repository is at a deliberately narrow Milestone 1 boundary. Changes
-should keep it auditable, portable, and honest about what has not yet been
-migrated.
+Issues and pull requests are welcome for bug fixes, documentation improvements, reproducibility fixes, and clearly scoped extensions.
 
-## Before opening a change
+Before submitting a change:
 
-- Keep raw REALDISP data, preprocessed windows, checkpoints, caches, results,
-  logs, manuscript history, and secrets outside the repository.
-- Do not edit the seven byte-preserved files listed in
-  `docs/ORIGINAL_TO_PUBLIC_MAPPING.md` unless a later milestone explicitly
-  changes the archival decision and rechecks their hashes.
-- Use configurable roots and neutral placeholders; never commit workstation
-  paths or personal identifiers.
-- Do not add scientific model, preprocessing, generation, or evaluation code
-  under the Milestone 1 scope.
-- Avoid new dependencies unless the release scope and license review are
-  updated at the same time.
+- keep REALDISP data, participant-derived data, checkpoints, generated datasets, credentials, and other sensitive material out of the repository;
+- keep changes portable and avoid machine-specific paths;
+- add or update tests when behavior changes;
+- preserve the documented 6-channel and separately trained 3-channel model configurations unless a change is explicitly proposing a new experiment;
+- do not overstate reproducibility or scientific conclusions beyond the evidence in the paper and repository.
 
-## Suggested checks
+Run the relevant tests before opening a pull request:
 
-From the repository root, run the focused scanner and the configuration smoke
-checks described in `REPRODUCIBILITY.md`. Keep temporary test directories
-outside the repository and remove artifacts created by the checks.
+```bash
+python -m pytest
+```
 
-## Pull requests
-
-Describe the scope, evidence used, files changed, and known limitations. A
-change should not imply exact paper reproduction unless the unresolved audit
-discrepancies have been resolved with authoritative evidence. Use the pull
-request template for the safety and verification checklist.
+For larger scientific or behavioral changes, briefly describe the motivation, affected configuration, and validation performed.
