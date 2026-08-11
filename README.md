@@ -1,88 +1,92 @@
 # LRF-IMU
 
-**Latent Rectified Flow for synthetic wearable IMU generation**
+[![CI](https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml/badge.svg)](https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml)
+[![Paper](https://img.shields.io/badge/paper-10.1088%2F3049--477X%2Fae91ef-blue)](https://doi.org/10.1088/3049-477X/ae91ef)
 
-LRF-IMU is the research code accompanying:
+**Latent Rectified Flow for class-conditioned synthetic wearable IMU generation**
+
+Research code accompanying:
 
 **A latent rectified flow approach to generate synthetic wearable data – a LABDA solution**  
 Amin Rezaei, Morten Kjærgaard, Jasper Schipperijn  
-*Machine Learning: Health*  
+*Machine Learning: Health* (2026)  
 [https://doi.org/10.1088/3049-477X/ae91ef](https://doi.org/10.1088/3049-477X/ae91ef)
 
-LRF-IMU generates class-conditioned wearable accelerometer and gyroscope signals with a variational autoencoder (VAE) and latent Rectified Flow. The study was evaluated on right-thigh REALDISP recordings using a 12-fold leave-one-subject-out design.
+## 🔥 News
 
-## Overview
+- **2026-07-29** — Accepted Manuscript available online in *Machine Learning: Health* (IOP Publishing).
+- **2026-06-08** — R2 revision submitted to *Machine Learning: Health* (`MLHEALTH-100129.R2`).
 
-The generation pipeline is:
+## 📖 Introduction
+
+LRF-IMU is a class-conditioned generative framework for wearable inertial signals. It combines a variational autoencoder (VAE) with latent Rectified Flow to generate synthetic time-domain sensor windows for human activity recognition.
+
+The primary study configuration uses a **6-channel right-thigh IMU** with triaxial accelerometer and triaxial gyroscope signals. The paper also includes a separately trained **3-channel accelerometer-only ablation**, where both the VAE and Rectified Flow model are retrained using only `ax`, `ay`, and `az`.
+
+The core generation pipeline is:
 
 ```text
-IMU window
-    ↓
-VAE encoder
-    ↓
-latent representation [48 × 40]
-    ↓
+activity label + Gaussian noise
+              ↓
 class-conditioned Rectified Flow
-    ↓
-VAE decoder
-    ↓
-synthetic IMU window
+        in VAE latent space
+              ↓
+        frozen VAE decoder
+              ↓
+      synthetic IMU window
 ```
 
-The repository supports:
+Two sensor configurations are supported:
 
-- **6-channel IMU:** triaxial accelerometer + triaxial gyroscope;
-- **3-channel IMU:** separately trained accelerometer-only configuration;
-- four activity classes: walking, running, jump-up, and cycling;
-- 50 Hz signals;
-- 160-sample windows (3.2 s) with a 40-sample hop (0.8 s);
-- 12-fold participant-held-out evaluation;
-- Random Forest and CNN downstream evaluation;
-- segmentation-sensitivity, spectral, physical-plausibility, and privacy analyses.
+| Configuration | Channels | Input shape | Purpose |
+| --- | ---: | --- | --- |
+| Full IMU | 6 | `B × 6 × 160` | Main study configuration |
+| Accelerometer-only | 3 | `B × 3 × 160` | Sensor-reduction ablation |
 
-The paper-generation profile uses **10 reverse-Euler Rectified Flow steps**. A separate 100-step trajectory profile is provided for website visualization and is not used for the reported TSTR results.
+## 📊 Study setting
 
-## Published study
-
-For the six-channel Random Forest evaluation, the published study reported:
-
-| Evaluation | Macro-F1 |
-| --- | ---: |
-| Real training → real test (TRTR) | 0.985 ± 0.021 |
-| Synthetic training → real test (TSTR) | 0.956 ± 0.081 |
-| TSTR retention | 97.1% |
-| 2 real samples/class | 0.400 ± 0.088 |
-| Synthetic augmentation | 0.951 ± 0.087 |
-
-See [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md) for fold-level reproduction results and the distinction between exact, runtime-sensitive, partial, and blocked comparisons.
-
-## Reproducibility status
-
-The public implementation was compared directly with the original research implementation and historical model checkpoints.
-
-| Component | Status |
+| Item | Setting |
 | --- | --- |
-| Preprocessing and LOSO construction | Exact contract parity |
-| VAE operations | Exact numerical parity |
-| Historical 6CH/3CH VAE checkpoints | Exact numerical parity |
-| Rectified Flow operations | Exact numerical parity |
-| Historical 6CH/3CH Flow checkpoints | Exact numerical parity |
-| Deterministic 10-step generation | Exact numerical parity |
-| Evaluation using the same historical synthetic cache | Exact evaluator parity |
-| Fresh CPU-generated TSTR evaluation | Partial/runtime-sensitive reproduction |
-| Segmentation-sensitivity grid | Exact reproduction |
+| Dataset | REALDISP |
+| Sensor placement | Right thigh, ideal placement |
+| Participants | 12 complete participants |
+| Activities | Walking, running, jump-up, cycling |
+| Sampling rate | 50 Hz |
+| Window length | 160 samples / 3.2 s |
+| Hop | 40 samples / 0.8 s |
+| Overlap | 75% |
+| Validation | 12-fold leave-one-subject-out (LOSO) |
+| Normalization | Training-only z-score |
+| Generation | 10 reverse-Euler Rectified Flow steps |
 
-Fresh CPU generation and the historical CUDA-associated caches were produced in different runtime/device contexts, so bitwise synthetic-sample parity is not expected. The public evaluator reproduces the stored historical subject-01 result exactly when supplied the same immutable historical cache; fresh-generation differences are retained rather than hidden.
-
-Several historical configuration and artifact-lineage ambiguities remain documented in [`docs/KNOWN_DISCREPANCIES.md`](docs/KNOWN_DISCREPANCIES.md). Therefore:
+The participant IDs used in the study are:
 
 ```text
-exact_paper_reproduction = false
+1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16
 ```
 
-This does not change the directly verified implementation and checkpoint parity reported above.
+## 📈 Main results
 
-## Installation
+The table below summarizes the paper's downstream classification results across all 12 LOSO folds. Values are macro F1, mean ± SD.
+
+| Scenario | 6-ch RF | 3-ch RF | 6-ch CNN | 3-ch CNN |
+| --- | ---: | ---: | ---: | ---: |
+| TRTR — full real training | **0.985 ± 0.021** | **0.980 ± 0.027** | **1.000 ± 0.000** | **0.957 ± 0.083** |
+| Scarce — 2 real samples/class | 0.400 ± 0.088 | 0.467 ± 0.082 | 0.340 ± 0.190 | 0.441 ± 0.202 |
+| TSTR — synthetic-only training | **0.956 ± 0.081** | **0.980 ± 0.061** | 0.845 ± 0.195 | 0.954 ± 0.085 |
+| TSTR + scarce real data | **0.951 ± 0.087** | **0.979 ± 0.061** | 0.858 ± 0.145 | 0.969 ± 0.058 |
+
+For the main 6-channel Random Forest evaluation, synthetic-only training retained **97.1%** of the full-real baseline performance.
+
+### 3-channel accelerometer-only ablation
+
+The accelerometer-only experiment tests whether the pipeline remains useful when gyroscope channels are unavailable. This is not an inference-time channel drop: the **VAE and Rectified Flow models are retrained from scratch on the three accelerometer axes**.
+
+With all real training data, the 3-channel Random Forest reached **0.980 ± 0.027** macro F1. Under the extreme low-data setting of only two real windows per class, performance increased from **0.467 ± 0.082** to **0.979 ± 0.061** after synthetic augmentation, recovering approximately **99.9%** of the full-data 3-channel baseline. In the paper, 9 of 12 held-out participants reached macro F1 = 1.0 after augmentation in this setting.
+
+The corresponding generative audit also showed stable coverage under channel reduction: the 3-channel coverage ratio was **99.3% ± 2.3%**, with PCA area ratio **0.889 ± 0.072**.
+
+## 💿 Installation
 
 Clone the repository:
 
@@ -91,15 +95,24 @@ git clone https://github.com/aminsens/LRF-IMU.git
 cd LRF-IMU
 ```
 
-Install the full research environment:
+Create an environment and install the research dependencies:
 
 ```bash
+python -m venv .venv
+
+# Linux / macOS
+source .venv/bin/activate
+
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
 python -m pip install -e ".[training,evaluation,analysis,test]"
 ```
 
-Python 3.10 or newer is supported. Core configuration and preprocessing require NumPy and PyYAML; PyTorch, scikit-learn, SciPy, and testing tools are provided through optional package extras.
+Python 3.10 or newer is supported.
 
-## Quick start
+## 🚀 Quick start
 
 The model implementations can be tested without REALDISP or historical checkpoints:
 
@@ -110,11 +123,11 @@ python -m lrf_imu flow-smoke
 
 Both commands run on CPU.
 
-## REALDISP data
+## 📦 Dataset
 
-REALDISP is **not distributed with this repository**.
+REALDISP is not distributed with this repository. Obtain the dataset separately from its original source and point the preprocessing commands to your local copy.
 
-Obtain the dataset separately and validate a participant-held-out fold with:
+Validate a participant-held-out fold with:
 
 ```bash
 python -m lrf_imu prepare-data \
@@ -124,36 +137,26 @@ python -m lrf_imu prepare-data \
     --validate-only
 ```
 
-The audited study configuration uses:
+See [`DATA_ACCESS.md`](DATA_ACCESS.md) for the expected file layout and preprocessing assumptions.
 
-- ideal placement;
-- right-thigh sensor;
-- accelerometer + gyroscope channels;
-- subjects `1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16`;
-- walking, running, jump-up, and cycling.
+## 🧠 Model configurations
 
-See [`DATA_ACCESS.md`](DATA_ACCESS.md) for the expected file layout and access boundary.
+The paper configurations are provided under `configs/paper/`:
 
-## Historical checkpoints
-
-Historical VAE and Rectified Flow checkpoints are **not included** in the repository.
-
-If you have compatible checkpoints, inspect them with:
-
-```bash
-python -m lrf_imu inspect-vae-checkpoint \
-    --checkpoint <vae-checkpoint> \
-    --channels 6
-
-python -m lrf_imu inspect-flow-checkpoint \
-    --checkpoint <flow-checkpoint>
+```text
+configs/paper/
+├── six_channel_160_40.yaml
+├── accelerometer_only_160_40.yaml
+└── sensitivity_grid.yaml
 ```
 
-The public loaders validate checkpoint structure, tensor geometry, sensor configuration, and model compatibility before execution.
+Use `six_channel_160_40.yaml` for the full accelerometer + gyroscope experiment and `accelerometer_only_160_40.yaml` for the separately trained 3-channel ablation.
 
-## Generate synthetic IMU
+The reported TSTR results use **10 reverse-Euler steps**. The separate 100-step trajectory profile used for visualization is not part of the paper's TSTR inference protocol.
 
-With matching VAE and Flow checkpoints:
+## 🧪 Generate synthetic IMU
+
+With compatible VAE and Rectified Flow checkpoints:
 
 ```bash
 python -m lrf_imu generate \
@@ -167,9 +170,15 @@ python -m lrf_imu generate \
     --device cpu
 ```
 
-Generation is no-write by default. Arrays are written only when an explicit output path and write permission are supplied.
+For the accelerometer-only model, use:
 
-## Evaluate one LOSO fold
+```text
+configs/paper/accelerometer_only_160_40.yaml
+```
+
+with checkpoints trained for the 3-channel configuration.
+
+## 🧾 Evaluate a LOSO fold
 
 ```bash
 python -m lrf_imu evaluate \
@@ -182,19 +191,22 @@ python -m lrf_imu evaluate \
     --scenario tstr
 ```
 
-Synthetic caches are validated against their adjacent identity manifests before evaluation.
+The evaluator checks the supplied synthetic cache and its adjacent identity metadata before use.
 
-## Reproduce the core experiment
+## 🔁 Reproduce the experiment
 
-The public workflow composes:
+The end-to-end workflow is:
 
 ```text
-prepare
-  → load and validate checkpoints
-  → generate synthetic IMU
-  → evaluate scenarios
-  → aggregate folds
-  → optionally compare with historical references
+prepare REALDISP fold
+        ↓
+load VAE + Rectified Flow checkpoints
+        ↓
+generate class-conditioned synthetic windows
+        ↓
+evaluate TRTR / scarce / TSTR / TSTR+scarce
+        ↓
+aggregate across LOSO folds
 ```
 
 Example:
@@ -210,62 +222,71 @@ python -m lrf_imu reproduce-core \
     --write-results
 ```
 
-Use `--all-folds` for the canonical 12-fold experiment and `--resume` for checksum-validated continuation of interrupted runs.
+Use `--all-folds` for the 12-fold experiment and `--resume` for checksum-validated continuation of an interrupted run.
 
-Generated arrays and participant-derived data remain outside the repository. See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the full workflow and evidence boundaries.
+See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the full workflow.
 
-## Repository structure
+## ✅ Reproducibility notes
+
+The repository was checked against the original research implementation and historical model artifacts. The VAE, Rectified Flow implementation, checkpoint loading, and deterministic 10-step generation reproduce the corresponding original operations numerically when run with matching inputs and checkpoints.
+
+Evaluation also reproduces the stored historical subject-01 result exactly when supplied the same historical synthetic cache.
+
+Freshly generated samples are not expected to be bitwise identical across all runtime/device combinations. In particular, the historical synthetic caches were associated with CUDA generation while the reproducibility checks also exercised fresh CPU generation; same-seed CPU and CUDA random streams are not bitwise identical.
+
+Known historical configuration and artifact-lineage differences are documented in [`docs/KNOWN_DISCREPANCIES.md`](docs/KNOWN_DISCREPANCIES.md), and regenerated experiment results are summarized in [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md).
+
+## 📁 Project structure
 
 ```text
-src/lrf_imu/
-├── data/          REALDISP preparation and LOSO splitting
-├── models/        VAE and Rectified Flow models
-├── training/      training objectives and utilities
-├── generation/    latent-flow sampling
-├── evaluation/    RF/CNN evaluation
-└── analysis/      sensitivity, spectral, physical and privacy analyses
-
-configs/           experiment configurations
-contracts/         machine-readable parity and provenance records
-docs/              reproduction reports and scientific limitations
-tests/             synthetic fixtures and regression tests
+LRF-IMU/
+├── src/lrf_imu/
+│   ├── data/          # REALDISP preparation and LOSO splitting
+│   ├── models/        # VAE and Rectified Flow models
+│   ├── training/      # training objectives and utilities
+│   ├── generation/    # latent-flow sampling
+│   ├── evaluation/    # RF/CNN evaluation
+│   └── analysis/      # sensitivity, spectral, physical and privacy analyses
+├── configs/           # experiment configurations
+├── contracts/         # machine-readable parity and provenance records
+├── docs/              # scientific reproduction notes
+├── tests/             # synthetic fixtures and regression tests
+├── DATA_ACCESS.md
+├── MODEL_CARD.md
+├── REPRODUCIBILITY.md
+└── CITATION.cff
 ```
 
-The repository does **not** contain:
+Historical VAE/Rectified Flow checkpoints, REALDISP participant data, generated synthetic datasets, and historical result payloads are not stored in this repository.
 
-- REALDISP data;
-- participant-derived windows;
-- historical VAE or Flow checkpoints;
-- generated synthetic datasets;
-- trained evaluation models;
-- historical `Results/` payloads;
-- manuscript or publisher assets.
+## 📚 Documentation
 
-## Documentation
+- [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) — experiment workflow and reproducibility guidance
+- [`DATA_ACCESS.md`](DATA_ACCESS.md) — REALDISP access and expected layout
+- [`MODEL_CARD.md`](MODEL_CARD.md) — model scope and limitations
+- [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md) — regenerated experiment results
+- [`docs/KNOWN_DISCREPANCIES.md`](docs/KNOWN_DISCREPANCIES.md) — known historical configuration differences
+- [`docs/THREE_CHANNEL_LINEAGE.md`](docs/THREE_CHANNEL_LINEAGE.md) — accelerometer-only configuration lineage
 
-For most users:
-
-- [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) — complete reproduction workflow;
-- [`DATA_ACCESS.md`](DATA_ACCESS.md) — REALDISP preparation and access boundary;
-- [`MODEL_CARD.md`](MODEL_CARD.md) — model scope and limitations;
-- [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md) — regenerated results;
-- [`docs/KNOWN_DISCREPANCIES.md`](docs/KNOWN_DISCREPANCIES.md) — unresolved historical differences.
-
-The `contracts/` directory and remaining files under `docs/` preserve detailed parity and provenance evidence for readers who need the full audit trail.
-
-## Citation
+## 📝 Citation
 
 If you use LRF-IMU, please cite the associated paper:
 
-> Rezaei A, Kjærgaard M, Schipperijn J.  
-> *A latent rectified flow approach to generate synthetic wearable data – a LABDA solution.*  
-> *Machine Learning: Health*, 2026.  
-> DOI: [10.1088/3049-477X/ae91ef](https://doi.org/10.1088/3049-477X/ae91ef)
+```bibtex
+@article{rezaei2026lrfimu,
+  title     = {A latent rectified flow approach to generate synthetic wearable data -- a LABDA solution},
+  author    = {Rezaei, Amin and Kjærgaard, Morten and Schipperijn, Jasper},
+  journal   = {Machine Learning: Health},
+  year      = {2026},
+  doi       = {10.1088/3049-477X/ae91ef},
+  publisher = {IOP Publishing}
+}
+```
 
-Machine-readable citation metadata is provided in [`CITATION.cff`](CITATION.cff).
+Machine-readable citation metadata is also available in [`CITATION.cff`](CITATION.cff).
 
-## Scope and limitations
+## ⚠️ Scope and limitations
 
-The released models and evaluations cover the documented REALDISP protocol: one right-thigh placement, four activities, and 12 participants. The results do not establish performance for other sensor placements, populations, sampling rates, activities, clinical applications, or deployment settings.
+The reported experiments cover the documented REALDISP setting: ideal placement, one right-thigh sensor, four activities, and 12 participant-held-out folds. Results should not be assumed to transfer unchanged to other placements, populations, sampling rates, activities, devices, or clinical settings without further evaluation.
 
-The repository does not claim that generated samples are anonymized or that synthetic data provides a universal privacy guarantee.
+Synthetic samples should not be treated as automatically anonymized. The privacy analyses in the paper evaluate specific reconstruction and membership-inference threat models and do not establish a universal privacy guarantee.
