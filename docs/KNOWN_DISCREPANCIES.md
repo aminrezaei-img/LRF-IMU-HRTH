@@ -503,12 +503,13 @@ On Windows, the default pytest temporary-directory ACLs were incompatible with t
 ## Milestone 3D runtime/evaluation discrepancy
 
 Historical synthetic-cache metadata records CUDA generation, while the M3D
-validation host provided CPU-only PyTorch. The same seed does not produce the
-same noise across CPU and CUDA RNG streams. Fresh public TSTR folds therefore
-contain explicit differences from the stored historical artifacts. Supplying
-the immutable historical subject-01 cache to the public evaluator reproduces
-the unrounded RF result exactly, isolating this discrepancy to generation
-runtime/device rather than preprocessing, RF, or metric logic.
+validation host provided CPU-only PyTorch. The same seed does not establish
+identical draws across backends. Fresh public TSTR folds contain explicit
+differences from the stored historical artifacts, but the available comparison
+does not isolate device as their sole cause. Supplying the immutable historical
+subject-01 cache to the public evaluator reproduces the unrounded RF result
+exactly, validating the evaluator for that cached result without assigning a
+single cause to the fresh-generation differences.
 
 CNN results are also classified as stochastic/runtime reproduction, not
 bitwise historical parity. Aggregate proximity never overrides a differing

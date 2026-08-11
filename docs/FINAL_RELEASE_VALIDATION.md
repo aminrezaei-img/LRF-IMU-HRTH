@@ -1,13 +1,12 @@
-# Final local release-candidate validation
+# Final code-release validation
 
 ## Verdict
 
-**CONDITIONAL GO — TECHNICALLY READY, HUMAN DECISION REQUIRED**
+**GO — CODE-ONLY PUBLIC RELEASE READY**
 
-The local code candidate passed the software, scientific-smoke, packaging,
-and repository-safety gates described below. Public release still requires a
-human licensing and rights decision. Historical checkpoints are not
-distributed. `exact_paper_reproduction=false` remains in force.
+The validated repository passed the software, scientific-smoke, packaging, and
+repository-safety gates below and is ready for the selected code-only public
+release scope. Historical checkpoints remain external; `exact_paper_reproduction=false`.
 
 No remote, tag, push, upload, or publication action was performed.
 
@@ -28,7 +27,7 @@ and historical Results tree were read only.
 | 3A preprocessing | PASS | Portable REALDISP parsing/windowing, LOSO split, train-only normalization, 6CH, and explicitly reconstructed separate 3CH path were accepted. |
 | 3B VAE | PASS | Public/original operations and historical 6CH/3CH checkpoint execution were numerically identical for the accepted parity inputs. |
 | 3C Rectified Flow | PASS | Public/original Flow operations, checkpoint loading, ten-step generation, and one real fold were numerically identical for accepted parity inputs. The width-history conflict remains documented. |
-| 3D evaluation | PARTIAL historical-result agreement | All 12 RF folds ran for 6CH and 3CH; all 12 6CH CNN folds ran. Exact evaluator parity was established, while fresh CPU generation differs from historical CUDA RNG streams. Every nonzero fold-level difference remains in the contract. |
+| 3D evaluation | PARTIAL historical-result agreement | All 12 RF folds ran for 6CH and 3CH; all 12 6CH CNN folds ran. Exact evaluator parity was established. Fresh CPU outputs differ from historical CUDA-associated artifacts; the device/runtime context differs, but one cause was not established for every difference. Every nonzero fold-level difference remains in the contract. |
 | 3E analyses | PASS/PARTIAL/BLOCKED by analysis | Nine-setting sensitivity was exact. VAE-only, physical, PSD, and privacy scopes retain their documented partial limits; 3CH VAE-only remains blocked by missing historical artifacts. |
 | 4 orchestration | PASS | Thin prepare/load/generate/evaluate/aggregate/compare orchestration supports dry-run, explicit writes, interruption records, and identity-checked resume. |
 | 5 packaging/CI/safety | PASS locally | Package build/install and local CI-equivalent checks passed. GitHub Actions was not run remotely because nothing was pushed. |
@@ -47,7 +46,7 @@ and zero generated NPZ arrays at final validation.
 | --- | ---: | --- |
 | 6CH RF TRTR | 0.985060 +/- 0.021056 | Matches the unrounded historical evaluator evidence within stored precision. |
 | 6CH RF scarce | 0.400442 +/- 0.087757 | Fold-level comparison retained. |
-| 6CH RF TSTR | 0.961957 +/- 0.061189 | Historical 0.955942 +/- 0.081307; PARTIAL because fresh CPU and historical CUDA generation streams differ. |
+| 6CH RF TSTR | 0.961957 +/- 0.061189 | Historical 0.955942 +/- 0.081307; PARTIAL, with a different device/runtime context and fold-level differences retained. |
 | 6CH RF TSTR retention | 0.976976 +/- 0.065137 | Fold-wise ratios, not a ratio of aggregate means. |
 | 6CH RF TSTR + scarce | 0.959769 +/- 0.061493 | Historical 0.950708 +/- 0.087462; fold-level differences retained. |
 | 3CH RF TRTR | 0.980421 +/- 0.026714 | Strong empirical compatibility; not proof of exact historical parser lineage. |
@@ -143,18 +142,17 @@ payload directories. `git count-objects -vH` reported 367 loose objects,
 path/secret/artifact scanning, and ignored-residue checks passed. The
 authoritative repository retained zero remotes and zero tags.
 
-## Human decisions and remaining limits
+## Publication scope and remaining limits
 
-Before publication, a human must resolve code ownership and institutional
-licensing authority, third-party compatibility, REALDISP terms, model-weight
-and generated-data release rights, and manuscript/figure rights; select a
-licence; review final citation/release metadata; and explicitly authorize any
-remote, tag, upload, or publication. Historical checkpoints remain external.
+The publication decision covers repository code, configuration, documentation,
+and tests only. It does not distribute or grant rights to REALDISP, checkpoints,
+generated datasets, trained models, historical Results payloads, or
+paper/manuscript/figure assets. Historical checkpoints remain external.
 The VAE schedule disagreement, Flow width history, partial table provenance,
-CUDA-versus-CPU generation-stream difference, reconstructed 3CH parser
+device/runtime-associated generation differences, reconstructed 3CH parser
 lineage, and exact accepted-manuscript artifact provenance remain unresolved.
 They continue to prevent an exact-paper claim, so
 `exact_paper_reproduction=false` remains unchanged.
 
-The final local verdict is therefore **CONDITIONAL GO — TECHNICALLY READY,
-HUMAN DECISION REQUIRED**. This verdict authorizes no publication action.
+The final verdict is **GO — CODE-ONLY PUBLIC RELEASE READY**. This technical
+code-readiness verdict does not broaden rights to any excluded external asset.

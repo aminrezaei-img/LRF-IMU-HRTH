@@ -2,7 +2,7 @@
 
 ## Current evidence boundary
 
-This candidate contains portable preprocessing, VAE, Rectified Flow,
+This code-only release contains portable preprocessing, VAE, Rectified Flow,
 generation, RF/CNN evaluation, paper-relevant numerical analyses, and a thin
 `reproduce-core` orchestration command. Synthetic contract tests and external
 REALDISP/checkpoint runs establish exact implementation parity for the
@@ -142,10 +142,11 @@ counts, synthetic count, classifier settings, and fold-level historical
 comparison. Retention was computed fold-wise and aggregate SD used `ddof=1`.
 
 The fresh runtime was Python 3.12.4, PyTorch 2.7.1 CPU, scikit-learn 1.4.2,
-and NumPy 1.26.4. Historical cache metadata identifies CUDA generation; CPU
-and CUDA RNG streams differ. Consequently the public evaluator is exact on
-the immutable historical subject-01 cache, while fresh CPU TSTR results are
-PARTIAL and retain every nonzero fold-level difference.
+and NumPy 1.26.4. Historical cache metadata identifies CUDA generation, while
+the fresh run used CPU. The same seed does not establish identical draws across
+backends, and the available comparison does not isolate device as the sole cause.
+The evaluator is exact on the immutable historical subject-01 cache; fresh CPU
+TSTR results remain PARTIAL and retain every nonzero fold-level difference.
 
 The corrected 6CH CNN run seeds once per fold before model construction and
 executes scenarios in historical order; model initializations therefore consume

@@ -43,8 +43,9 @@ mixed/all-resumed LOSO aggregation is valid.
 ## Remaining limitations
 
 - Historical caches were generated on CUDA; fresh execution was CPU-only.
-  Fold-level RF differences are therefore recorded, not hidden behind close
-  aggregate means.
+  This context change coincides with fold-level RF differences but does not
+  establish device as their sole cause. The differences remain recorded rather
+  than hidden behind close aggregate means.
 - CNN training is runtime-sensitive and is not labelled exact historical
   parity. The corrected 6CH run is fold-level statistical/result agreement.
 - Optional 3CH CNN was not run after the required 6CH CNN completed.

@@ -51,19 +51,21 @@ the parity contract. The corrected 12-fold run generated fresh samples through
 the public VAE/Flow path, seeded once per fold before model construction, and
 ran scenarios in historical order.
 
-## Device-specific generation diagnosis
+## Device/runtime generation context
 
-Historical subject-01 cache metadata records CUDA generation. This validation
-environment had PyTorch 2.7.1 CPU only. CPU and CUDA use different random-number
-streams, so seed 42 does not imply identical initial noise across devices.
+Historical subject-01 cache metadata records CUDA generation; this validation
+environment had PyTorch 2.7.1 CPU only. The same seed does not establish
+identical draws across backends, and the available comparison does not isolate
+device as the sole cause of the fresh-run difference.
 Fresh subject-01 6CH RF TSTR macro-F1 was `0.823290`, versus the historical
 `0.739663`.
 
 Using the immutable historical subject-01 cache with the public evaluator
 reproduced the unrounded historical result exactly: accuracy `0.7489711934`,
 macro-F1 `0.7396629077`, retention `0.7396629003`, and per-class F1
-`[0.964706, 0.715909, 0.827586, 0.450450]`. This isolates the discrepancy to
-fresh runtime/device generation, not public preprocessing, RF, or metrics.
+`[0.964706, 0.715909, 0.827586, 0.450450]`. This validates the public evaluator
+for that cached result and rules it out as the source of the cached-result
+discrepancy; it does not assign a single cause to fresh-generation differences.
 
 The machine-readable contract contains every fold's reference/regenerated
 metrics, labeled per-class F1 values, normalized TSTR + scarce confusion

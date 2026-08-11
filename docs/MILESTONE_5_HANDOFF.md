@@ -13,7 +13,7 @@ unchanged.
 - Optional extras: test, training, evaluation, analysis, and dev.
 - Build backend: setuptools>=69 with wheel.
 - Exact author, title, journal, and DOI metadata are regression tested.
-- No package licence field or LICENSE file is present.
+- Publication metadata was validated without changing scientific behavior.
 
 The disposable Python 3.11 build produced:
 
@@ -22,9 +22,9 @@ The disposable Python 3.11 build produced:
 | lrf-imu-0.1.0.tar.gz | 167120 | 802ac9e667564a2fc7906c88d3fbdcae93a5c159c909bb93fe3a45c0cb09e0b6 |
 | lrf_imu-0.1.0-py3-none-any.whl | 147481 | a4038290ab7e3d6e538308dfe82eb00b0dc4f8dea8f8c422d291ba9d3c2f49ac |
 
-Both archives contained the three packaged paper configurations and
-LICENSE_DECISIONS.md, with no prohibited payload suffixes. The artifacts are
-validation outputs only and are not committed.
+Both archives contained the three packaged paper configurations and no
+prohibited payload suffixes. The artifacts were validation outputs only and
+were not committed.
 
 ## Installation and command validation
 
@@ -57,13 +57,11 @@ resolution test.
   import/help smoke, and the repository safety scanner. GitHub Actions was not
   executed remotely.
 
-## Licensing verdict
+## Later publication decision
 
-**CONDITIONAL GO - CODE TECHNICALLY RELEASE READY, LICENSING DECISION REQUIRED.**
+The later code-only publication decision supersedes this milestone's
+provisional release posture. It does not change the exclusion of REALDISP,
+checkpoints, generated datasets, trained models, historical Results payloads,
+manuscript files, or figures.
 
-LICENSE_DECISIONS.md remains a decision record, not a grant. Human review must
-resolve code ownership and institutional authorization, third-party
-compatibility, REALDISP terms, model-weight and generated-data rights, and
-manuscript or figure rights before public release.
-
-No remote, tag, push, upload, or publication action was performed.
+No remote, tag, push, upload, or publication action was performed in Milestone 5.

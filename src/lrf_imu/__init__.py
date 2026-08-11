@@ -26,7 +26,7 @@ from .config import (
 from .paths import FoldPaths, ProjectPaths, fold_paths, paths_from_mapping
 
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 _VAE_EXPORTS = frozenset(
     {

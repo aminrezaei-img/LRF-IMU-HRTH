@@ -177,13 +177,24 @@ def test_citation_preserves_exact_scientific_identity() -> None:
         (REPOSITORY_ROOT / "CITATION.cff").read_text(encoding="utf-8")
     )
 
-    assert citation["title"] == (
-        "A latent rectified flow approach to generate synthetic wearable data "
-        "– a LABDA solution"
-    )
-    assert citation["journal"] == "Machine Learning: Health"
-    assert citation["doi"] == "10.1088/3049-477X/ae91ef"
+    assert citation["title"] == "LRF-IMU"
+    assert citation["type"] == "software"
+    assert citation["version"] == "1.0.0"
+    assert "doi" not in citation
     assert [
         f'{author["given-names"]} {author["family-names"]}'
         for author in citation["authors"]
+    ] == ["Amin Rezaei", "Morten Kjærgaard", "Jasper Schipperijn"]
+
+    preferred = citation["preferred-citation"]
+    assert preferred["type"] == "article"
+    assert preferred["title"] == (
+        "A latent rectified flow approach to generate synthetic wearable data "
+        "– a LABDA solution"
+    )
+    assert preferred["journal"] == "Machine Learning: Health"
+    assert preferred["doi"] == "10.1088/3049-477X/ae91ef"
+    assert [
+        f'{author["given-names"]} {author["family-names"]}'
+        for author in preferred["authors"]
     ] == ["Amin Rezaei", "Morten Kjærgaard", "Jasper Schipperijn"]

@@ -1,6 +1,6 @@
 # Results reproduction
 
-This page is the concise scientific status for the local release candidate.
+This page is the concise scientific status for the public code release.
 It distinguishes implementation parity, deterministic result reproduction,
 runtime-sensitive agreement, and work that remains partial or blocked.
 `exact_paper_reproduction=false` remains the correct repository setting.
@@ -18,7 +18,7 @@ data/checkpoints. Data, checkpoints, generated arrays, and historical
 | VAE | Exact implementation parity | Public/original deterministic operations matched on synthetic inputs, historical 6CH/3CH checkpoints, and a real fold. |
 | Rectified Flow | Exact implementation parity | Public/original velocity, Euler, ten-step latent, and decoding operations matched for historical 6CH/3CH checkpoints. |
 | Historical subject-01 RF cache | Exact evaluator parity | The public evaluator reproduced the stored unrounded metrics when given the same immutable cache. |
-| Fresh all-fold RF generation | Partial result reproduction | CPU and historical CUDA random streams differ; every nonzero fold difference is retained. |
+| Fresh all-fold RF generation | Partial result reproduction | Device/runtime context differs from the historical CUDA-associated artifacts; every nonzero fold difference is retained without assigning one cause. |
 | CNN | Statistical/runtime agreement | Training is runtime-sensitive and is not described as bitwise parity. |
 | Paper analyses | Mixed PASS/PARTIAL/BLOCKED | Each analysis is labelled below; no aggregate proximity is promoted to exact parity. |
 
@@ -43,12 +43,12 @@ Fresh 6CH RF TSTR retention was `0.976976 +/- 0.065137`; fresh 3CH RF
 retention was `0.998303 +/- 0.057464`. Retention was computed per fold before
 aggregation. The optional 3CH CNN run was not completed.
 
-Subject 01 demonstrates the runtime distinction directly. Fresh CPU 6CH RF
-TSTR macro-F1 was `0.823290`, while the historical CUDA-generated result was
-`0.7396629077`. Supplying that exact historical cache to the public evaluator
-reproduced accuracy `0.7489711934`, macro-F1 `0.7396629077`, and retention
-`0.7396629003`. This diagnoses generation-device RNG as the source of the
-fresh-run difference, not the public RF or metric implementation.
+Subject 01 demonstrates that the two run contexts produced different results.
+Fresh CPU 6CH RF TSTR macro-F1 was `0.823290`; the historical CUDA-associated
+result was `0.7396629077`. Supplying the exact historical cache to the public
+evaluator reproduced accuracy `0.7489711934`, macro-F1 `0.7396629077`, and
+retention `0.7396629003`. This clears the public evaluator for that cached result
+but does not isolate device RNG as the sole cause of the fresh-run difference.
 
 Full fold-level values and signed differences are in
 [`contracts/evaluation_parity_report.json`](../contracts/evaluation_parity_report.json).
@@ -108,7 +108,7 @@ user-supplied REALDISP access and matching external VAE/Flow checkpoints.
 
 The historical VAE schedule differs between manuscript and wrapper evidence;
 Flow width is 128 in one manuscript lineage but 256 in historical checkpoints;
-fresh CPU and historical CUDA generation use different random streams; the
+fresh CPU and historical CUDA-associated artifacts used different run contexts; the
 historical 3CH parser lineage is incomplete; some analysis/table provenance is
 partial; and the accepted figure package is not identified. See
 [`KNOWN_DISCREPANCIES.md`](KNOWN_DISCREPANCIES.md).

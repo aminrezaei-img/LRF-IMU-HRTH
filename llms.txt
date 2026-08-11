@@ -1,6 +1,6 @@
 # LRF-IMU
 
-> Local code release candidate. `exact_paper_reproduction=false`; public release remains conditional on human licensing and rights decisions.
+> Code-only public release, version 1.0.0. `exact_paper_reproduction=false`.
 
 ## Paper identity
 
@@ -39,5 +39,5 @@ python -m lrf_imu reproduce-core --data-root <realdisp-root> --checkpoint-root <
 - Six-channel and reconstructed three-channel preprocessing use separately trained checkpoints; 3CH is not an inference-time channel drop or proof of exact historical parser lineage.
 - Paper/TSTR generation uses ten reverse-Euler steps. Website trajectories use a separate 100-step visualization profile.
 - Privacy results are threat-model-specific empirical observations, not anonymization or general privacy guarantees.
-- REALDISP data, participant-derived windows, checkpoints, generated arrays, trained evaluators, historical `Results/` payloads, and a licence grant are not included.
+- REALDISP data, participant-derived windows, checkpoints, generated arrays, trained evaluators, historical `Results/` payloads, manuscript files, and figures are not included.
 - Historical reproduction requires user-supplied REALDISP access and matching external checkpoints.

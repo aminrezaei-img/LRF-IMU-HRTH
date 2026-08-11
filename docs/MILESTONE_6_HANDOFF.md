@@ -17,8 +17,8 @@ CI, and accepted parity contracts were not changed.
   prohibited overclaims.
 - `docs/RESULTS_REPRODUCTION.md`: authoritative headline and analysis values,
   including every partial/blocked distinction.
-- `docs/RELEASE_CHECKLIST.md`: technical completion versus human licensing and
-  release decisions.
+- `docs/RELEASE_CHECKLIST.md`: code-only publication scope and validation
+  status.
 - `docs/KNOWN_DISCREPANCIES.md`: unresolved historical evidence.
 - `llms.txt`: concise machine-oriented repository map.
 
@@ -31,11 +31,10 @@ reverse-Euler steps; website trajectories use a distinct 100-step visualization
 profile. Privacy observations are threat-model-specific and do not establish
 anonymization. `exact_paper_reproduction=false` remains unchanged.
 
-## Release posture
+## Later publication decision
 
-The documentation preserves the Milestone 5 verdict:
-
-**CONDITIONAL GO - CODE TECHNICALLY RELEASE READY, LICENSING DECISION REQUIRED.**
-
-No licence grant, remote, tag, push, upload, or publication action is part of
-this milestone.
+The later decision sets the repository status to
+**GO — CODE-ONLY PUBLIC RELEASE READY**. The scope is code, configuration,
+documentation, and tests; it excludes external data, checkpoints, generated
+datasets, trained models, historical Results payloads, manuscript files, and
+figures.

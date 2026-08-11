@@ -1,34 +1,26 @@
 # Release checklist
 
-This checklist describes the local candidate. It does not authorize publication.
+This checklist governs the code-only public release.
 
-## Technical candidate
+## Validated repository
 
 - [x] Portable preprocessing, VAE, Flow, generation, evaluation, analysis, and thin reproducibility orchestration are present.
 - [x] Six-channel and separately trained three-channel model paths are distinct.
 - [x] REALDISP, checkpoints, generated arrays, trained evaluators, and historical Results payloads are excluded from Git.
-- [x] Package build, wheel/sdist install, foreign-working-directory commands, tests, and repository safety scans passed in Milestone 5.
+- [x] Package build, wheel/sdist install, foreign-working-directory commands, tests, and repository safety scans passed.
 - [x] CI requires neither REALDISP, historical checkpoints, CUDA, nor private results.
-- [x] Paper generation is identified as ten-step reverse Euler; website trajectories are a separate 100-step visualization profile.
+- [x] Paper generation is ten-step reverse Euler; website trajectories are a separate 100-step visualization profile.
 - [x] Result claims distinguish exact implementation parity, exact evaluator parity, statistical/runtime agreement, partial reproduction, and blocked work.
 - [x] `exact_paper_reproduction=false` remains in force.
-- [x] No remote, tag, push, upload, or publication action was performed.
 
-## Human decisions required before public release
+## Publication scope
 
-- [ ] Confirm code ownership and institutional authority to license the public code.
-- [ ] Review copied/adapted third-party code and dependency licence compatibility.
-- [ ] Confirm REALDISP terms for the documented workflow and any derived artifacts.
-- [ ] Decide whether historical model weights may be released; no checkpoint is included now.
-- [ ] Decide whether generated data may be distributed.
-- [ ] Resolve manuscript/figure rights and the accepted figure-package identity.
-- [ ] Select and approve a code licence, then add a `LICENSE` file.
-- [ ] Review final citation and release metadata.
-- [ ] Obtain explicit human approval before adding a remote, tag, or publishing.
+- [x] The public scope is repository code, configuration, documentation, and tests.
+- [x] The release does not include or grant rights to REALDISP, participant data, checkpoints, generated datasets, trained models, historical Results payloads, manuscript files, or figures.
+- [x] Historical checkpoints remain external and are not published by this repository.
+- [x] Citation metadata identifies software version 1.0.0 and the published paper separately.
+- [x] No remote, tag, push, upload, or publication action was performed during this preparation pass.
 
-## Current verdict
+## Verdict
 
-**CONDITIONAL GO - CODE TECHNICALLY RELEASE READY, LICENSING DECISION REQUIRED.**
-
-`LICENSE_DECISIONS.md` is a decision record, not a licence grant. Until the
-human items above are resolved, the repository is a local candidate only.
+**GO — CODE-ONLY PUBLIC RELEASE READY**

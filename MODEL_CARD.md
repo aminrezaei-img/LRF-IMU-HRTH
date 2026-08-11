@@ -72,8 +72,9 @@ The release now includes RF and CNN evaluation logic, but no evaluation model,
 checkpoint, participant data, or generated sample. All-fold 6CH/3CH RF and 6CH
 CNN runs were executed externally. Deterministic evaluation matches historical
 metrics when supplied the same stored cache. Fresh CPU-generated TSTR samples
-do not claim equivalence to historical CUDA-generated samples; fold-level
-differences and runtime details are retained in the evaluation parity report.
+were produced in a different device/runtime context from the historical
+CUDA-associated samples. The evidence does not isolate device as the sole cause;
+fold-level differences and runtime details remain in the parity report.
 
 The results apply only to the audited REALDISP cohort and protocol. They do not
 establish clinical validity, anonymization, deployment fitness, or universal

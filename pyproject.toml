@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lrf-imu"
-version = "0.1.0"
+version = "1.0.0"
 description = "Portable configuration, data preparation, VAE, and path framework for the LRF-IMU public release"
 readme = "README.md"
 requires-python = ">=3.10"

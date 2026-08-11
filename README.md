@@ -1,25 +1,27 @@
 # LRF-IMU
 
 LRF-IMU is a class-conditioned latent Rectified Flow framework for generating
-wearable accelerometer and gyroscope windows. This local release candidate
+wearable accelerometer and gyroscope windows. This public research-code release
 contains portable preprocessing, VAE, Flow, generation, evaluation, analysis,
-and end-to-end orchestration code for the accepted REALDISP study protocol. It addresses controlled generation and utility evaluation of activity-labelled IMU windows under a participant-held-out research design.
+and end-to-end orchestration for the published REALDISP study protocol. It
+supports controlled generation and utility evaluation of activity-labelled IMU
+windows under a participant-held-out research design.
 
 ## Release status
 
 The public/original implementations passed exact parity checks for
 preprocessing, VAE, Rectified Flow, deterministic generation operations, and a
 real held-out fold. Core LOSO evaluation and paper analyses were then rerun or
-compared fold by fold. Some fresh results are partial because historical CUDA
-and current CPU random streams differ or historical artifact lineage is
-incomplete. See [results reproduction](docs/RESULTS_REPRODUCTION.md).
+compared fold by fold. Some fresh results remain partial: the runs used different
+device/runtime contexts and some historical artifact lineage is incomplete, but
+the available evidence does not isolate one cause for every difference. See
+[results reproduction](docs/RESULTS_REPRODUCTION.md).
 
 `exact_paper_reproduction=false` is intentional. The repository does not
 include REALDISP data, historical checkpoints, generated arrays, trained
-evaluation models, or historical `Results/` payloads. Licensing also requires
-a human decision, so this is a technically validated local candidate rather
-than an authorized public release. See
-[`LICENSE_DECISIONS.md`](LICENSE_DECISIONS.md).
+evaluation models, or historical `Results/` payloads. This is a code-only
+release; it does not distribute or grant rights to external data, checkpoints,
+generated datasets, manuscript files, or figures.
 
 Start here:
 
@@ -31,7 +33,7 @@ Start here:
 
 ## Paper identity
 
-The paper record used by this release candidate is:
+The published paper associated with this software release is:
 
 - **Title:** *A latent rectified flow approach to generate synthetic wearable
   data – a LABDA solution*
@@ -39,10 +41,8 @@ The paper record used by this release candidate is:
 - **Journal:** *Machine Learning: Health*
 - **DOI:** [10.1088/3049-477X/ae91ef](https://doi.org/10.1088/3049-477X/ae91ef)
 
-The DOI and paper identity are recorded from supplied release metadata and the
-audited manuscript candidate. Publisher-side identity verification was not
-established in the audit, so this repository does not make a final publication
-or equivalence claim.
+The DOI identifies the published article. This code-only release does not
+redistribute or license the article, manuscript files, or publisher assets.
 
 ## What is included
 
@@ -130,8 +130,6 @@ temporary directory after installing the `test` extra:
 python -B -m pytest -q -p no:cacheprovider --basetemp <external-temp>
 ```
 
-The project intentionally has no `LICENSE` file yet; see
-[LICENSE_DECISIONS.md](LICENSE_DECISIONS.md).
 
 ## Evaluate one LOSO fold
 
