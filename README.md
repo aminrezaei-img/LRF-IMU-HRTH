@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="assets/lrf-imu-header.png"
+       alt="LRF-IMU latent Rectified Flow generation of wearable IMU signals"
+       width="100%">
+</p>
+
 # LRF-IMU
 
 [![CI](https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml/badge.svg)](https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml)
