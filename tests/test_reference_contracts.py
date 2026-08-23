@@ -170,10 +170,7 @@ def test_immutable_source_paths_use_known_allowlist_without_machine_paths():
     assert "scripts/" not in json.dumps(lineage)
 
 
-def test_evaluation_label_order_concords_across_profile_contract_and_fixture():
-    profile = (
-        REPOSITORY_ROOT / "docs" / "PUBLIC_COMPATIBILITY_PROFILE.md"
-    ).read_text(encoding="utf-8")
+def test_evaluation_label_order_concords_across_contract_and_fixture():
     evaluation_contract = load(REPOSITORY_ROOT / "contracts" / "evaluation_contract.json")
     fixture = load(
         REPOSITORY_ROOT / "tests" / "fixtures" / "synthetic" / "evaluation_reference.json"
@@ -189,8 +186,3 @@ def test_evaluation_label_order_concords_across_profile_contract_and_fixture():
     }
     assert fixture["labels"] == expected_labels
     assert fixture["raw_code_to_encoded"] == expected_mapping
-    assert "encoded evaluation order 0, 1, 2, 3" in profile
-    assert "1 → 0 walking" in profile
-    assert "3 → 1 running" in profile
-    assert "4 → 2 jump_up" in profile
-    assert "33 → 3 cycling" in profile

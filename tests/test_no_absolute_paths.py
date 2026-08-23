@@ -83,12 +83,30 @@ _USER_DRIVE = "C" + ":"
 _SOURCE_FOLDER = "PAPER" + "2"
 _USER_FOLDER = "Users"
 _ACCOUNT = "A" + "minR"
-PATH_MARKERS = (
-    ("source drive/data marker", _DRIVE + "/" + _SOURCE_FOLDER),
-    ("Windows source drive/data marker", _DRIVE + "\\" + _SOURCE_FOLDER),
-    ("user-root marker", _USER_DRIVE + "/" + _USER_FOLDER),
-    ("Windows user-root marker", _USER_DRIVE + "\\" + _USER_FOLDER),
-    ("local account marker", _ACCOUNT),
+PATH_MARKER_PATTERNS = (
+    (
+        "source drive/data marker",
+        re.compile(re.escape(_DRIVE + "/" + _SOURCE_FOLDER), re.IGNORECASE),
+    ),
+    (
+        "Windows source drive/data marker",
+        re.compile(re.escape(_DRIVE + "\\" + _SOURCE_FOLDER), re.IGNORECASE),
+    ),
+    (
+        "user-root marker",
+        re.compile(re.escape(_USER_DRIVE + "/" + _USER_FOLDER), re.IGNORECASE),
+    ),
+    (
+        "Windows user-root marker",
+        re.compile(re.escape(_USER_DRIVE + "\\" + _USER_FOLDER), re.IGNORECASE),
+    ),
+    (
+        "local account marker",
+        re.compile(
+            rf"(?<![A-Za-z0-9]){re.escape(_ACCOUNT)}(?![A-Za-z0-9])",
+            re.IGNORECASE,
+        ),
+    ),
 )
 
 
@@ -332,7 +350,6 @@ def _secret_findings(
 
 def test_no_absolute_or_personal_paths_in_public_text() -> None:
     findings: list[str] = []
-    folded_markers = tuple((name, marker.casefold()) for name, marker in PATH_MARKERS)
 
     for path in _iter_files():
         relative_path = _relative_path(path)
@@ -344,9 +361,8 @@ def test_no_absolute_or_personal_paths_in_public_text() -> None:
         if text is None:
             continue
         for line_number, line in enumerate(text.splitlines(), start=1):
-            folded_line = line.casefold()
-            for marker_name, marker in folded_markers:
-                if marker in folded_line:
+            for marker_name, marker_pattern in PATH_MARKER_PATTERNS:
+                if marker_pattern.search(line):
                     findings.append(
                         _line_evidence(
                             relative_path,
@@ -359,9 +375,18 @@ def test_no_absolute_or_personal_paths_in_public_text() -> None:
     if findings:
         pytest.fail(
             "Found machine-specific path or identity markers outside the exact "
-            "historical compatibility exception:\n- "
-            + "\n- ".join(findings)
+            "historical compatibility exception:\n- " + "\n- ".join(findings)
         )
+
+
+def test_local_account_marker_requires_token_boundaries() -> None:
+    marker_patterns = dict(PATH_MARKER_PATTERNS)
+    account_pattern = marker_patterns["local account marker"]
+    local_path = _USER_DRIVE + "\\" + _USER_FOLDER + "\\" + _ACCOUNT + "\\project"
+    public_identity = "https://huggingface.co/" + _ACCOUNT + "ezaei/LRF-IMU"
+
+    assert account_pattern.search(local_path)
+    assert not account_pattern.search(public_identity)
 
 
 def _collect_safety_findings(repository_root: Path = REPOSITORY_ROOT) -> list[str]:
@@ -404,6 +429,7 @@ def test_no_secrets_or_forbidden_generated_artifacts() -> None:
             "Found secrets, sensitive files, or forbidden generated artifacts:\n- "
             + "\n- ".join(findings)
         )
+
 
 def test_synthetic_log_allowlist_rejects_unlisted_paths() -> None:
     allowed = {
