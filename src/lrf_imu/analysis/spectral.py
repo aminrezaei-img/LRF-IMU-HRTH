@@ -52,7 +52,10 @@ def _band_power(values: np.ndarray, frequencies: np.ndarray, low: float, high: f
     mask = (frequencies >= low) & (frequencies <= high)
     if np.count_nonzero(mask) < 2:
         return 0.0
-    return float(np.trapz(values[mask], frequencies[mask]))
+    # NumPy 2 removed the historical ``np.trapz`` spelling. Keep the same
+    # trapezoidal integration semantics across supported NumPy versions.
+    integrate = getattr(np, "trapezoid", None) or np.trapz
+    return float(integrate(values[mask], frequencies[mask]))
 
 
 def spectral_statistics(

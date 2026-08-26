@@ -18,6 +18,9 @@ import numpy as np
 
 
 HARTH_COLUMNS = ("timestamp", "back_x", "back_y", "back_z", "thigh_x", "thigh_y", "thigh_z", "label")
+# Some HARTH v2.0 files include an additional integer ``index`` column after
+# the timestamp. It is an identifier, not a signal, and is safely ignored.
+HARTH_COLUMNS_WITH_INDEX = ("timestamp", "index", "back_x", "back_y", "back_z", "thigh_x", "thigh_y", "thigh_z", "label")
 TARGET_SAMPLE_RATE_HZ = 50.0
 TARGET_CLASS_NAMES = (
     "walking_slow", "walking_moderate", "walking_brisk", "running",
@@ -84,8 +87,9 @@ def _read_csv(path: Path, dataset: str, *, rate_tolerance_hz: float) -> HarthSub
     try:
         with path.open("r", encoding="utf-8-sig", newline="") as handle:
             reader = csv.DictReader(handle)
-            if reader.fieldnames is None or set(reader.fieldnames) != expected or tuple(reader.fieldnames) != HARTH_COLUMNS:
-                raise HARTHError("{} must have exactly the HARTH columns in documented order".format(path.name))
+            fieldnames = tuple(reader.fieldnames or ())
+            if fieldnames not in (HARTH_COLUMNS, HARTH_COLUMNS_WITH_INDEX):
+                raise HARTHError("{} must have the documented HARTH columns, with optional index".format(path.name))
             for row_number, row in enumerate(reader, start=2):
                 timestamp = _parse_timestamp(row["timestamp"], path, row_number)
                 try:
