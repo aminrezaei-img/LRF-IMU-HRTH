@@ -1,0 +1,131 @@
+# HARTH-family replacement configuration for the ten-class, thigh-accelerometer model.
+# Data is external and must be supplied with --data-root.
+name: lrf_imu_harth_10class_160_40
+
+release:
+  profile: harth_family_replacement
+  exact_paper_reproduction: false
+  note: >-
+    HARTH plus adult walking speed compatibility configuration. This is a
+    separately trained 3-channel, 10-class model and cannot use REALDISP
+    checkpoints.
+
+data_root: data/harth-family
+output_root: outputs
+checkpoint_root: checkpoints
+results_root: results
+seed: 42
+device: auto
+
+sensor:
+  dataset: HARTH-family
+  placement: thigh
+  name: thigh_accelerometer
+  # CSV label is the eighth column (the adapter addresses it by name).
+  label_column: 7
+  channel_indices: [0, 1, 2]
+  variant: thigh_accelerometer
+  training_mode: separate_model
+  inference_policy: declared_channel_set_only
+  allow_channel_drop: false
+
+channels: [thigh_x, thigh_y, thigh_z]
+# These are namespaced by the adapter as dataset:subject_id.
+subjects: [1]
+
+activity_codes: [101, 102, 103, 2, 4, 13, 14, 7, 6, 8]
+activity_mapping:
+  0: {code: 101, name: walking_slow}
+  1: {code: 102, name: walking_moderate}
+  2: {code: 103, name: walking_brisk}
+  3: {code: 2, name: running}
+  4: {code: 4, name: stair_climbing}
+  5: {code: 13, name: cycling_seated}
+  6: {code: 14, name: cycling_standing}
+  7: {code: 7, name: sitting}
+  8: {code: 6, name: standing}
+  9: {code: 8, name: lying}
+
+sampling_frequency_hz: 50
+window:
+  samples: 160
+  hop: 40
+
+normalization:
+  method: zscore
+  fit_on: training_subjects
+  axes: [sample, time]
+  apply_to_synthetic: true
+
+split:
+  protocol: leave_one_subject_out
+  held_out_subject: null
+  fold_id: null
+  validation_fraction: 0.20
+  vae_subject_validation_fraction: 0.15
+  classifier_window_validation_fraction: 0.20
+
+vae:
+  input_channels: 3
+  latent_dim_channels: 48
+  latent_stride: 4
+  latent_time_steps: 40
+  deterministic_reconstruction_pass: true
+  schedule_profile: observed_wrapper_compatibility
+  training:
+    batch_size: 256
+    learning_rate: 0.001
+    max_epochs: 1000
+    early_stop_min_epochs: 200
+    early_stop_patience: 100
+    use_amp_bf16: true
+    grad_clip: 1.0
+    l2_weight: 0.5
+    l1_weight: 0.1
+    beta_schedule: {init: 0.08, min: 0.04, decay: 0.995}
+    use_spectral_loss: false
+    fft_weight: 0.0
+    augmentation: {enabled: true, jitter: 0.008, scale: 0.04, time_mask: 0.05}
+
+flow:
+  latent_dim_channels: 48
+  latent_stride: 4
+  base_width: 256
+  width_profile: observed_wrapper_compatibility
+  training:
+    epochs: 300
+    learning_rate: 0.0005
+    early_stop_patience: 50
+    grad_clip: 1.0
+    optimizer: AdamW
+    optimizer_betas: [0.9, 0.95]
+    weight_decay: 0.0001
+    batch_size: 128
+    auto_batch: true
+  architecture:
+    channel_multipliers: [1, 2, 4]
+    residual_block_kernel_short: 3
+    residual_block_kernel_long: 31
+    normalization_groups: 8
+    squeeze_excitation_reduction: 4
+    downsampling: avg_pool_factor_2
+    upsampling: nearest_factor_2
+    num_classes: 10
+
+sampling: {ode_solver: Euler, steps: 10, start_time: 1.0, end_time: 0.0, windows_per_class: 500, seed: 42}
+classifiers: {primary: random_forest}
+
+sensitivity_grid: {enabled: false, window_samples: [], hop_samples: [], train_separately_per_setting: true}
+evidence:
+  tiers:
+    manuscript_reported: HARTH-family repository documentation
+    observed_wrapper: HARTH-family CSV schema and labels
+    observed_checkpoint_metadata: not_applicable_new_model
+    release_default: explicit replacement compatibility choice
+  defaults:
+    dataset_and_labels: {tier: observed_wrapper}
+    sensor_and_channels: {tier: observed_wrapper}
+    window_and_hop: {tier: observed_wrapper}
+    normalization: {tier: release_default}
+    split: {tier: release_default}
+    vae_and_flow_geometry: {tier: release_default}

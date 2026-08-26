@@ -103,6 +103,20 @@ def build_parser() -> argparse.ArgumentParser:
     prepare.add_argument("--write-metadata", action="store_true")
     prepare.add_argument("--overwrite", action="store_true")
 
+    harth_prepare = subparsers.add_parser(
+        "prepare-harth-data",
+        help="prepare the HARTH-family ten-class thigh-accelerometer input",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    harth_prepare.add_argument("--data-root", required=True, metavar="PATH")
+    harth_prepare.add_argument("--composition", default="harth_walking_speed", choices=(
+        "harth", "harth_walking_speed", "harth_walking_speed_har70plus"
+    ))
+    harth_prepare.add_argument("--held-out-subject", metavar="DATASET:ID")
+    harth_prepare.add_argument("--window-length", type=_positive_int, default=160)
+    harth_prepare.add_argument("--hop-length", type=_positive_int, default=40)
+    harth_prepare.add_argument("--seed", type=_non_negative_int, default=42)
+
     subparsers.add_parser(
         "vae-smoke",
         help="run a no-write CPU shape and determinism smoke for both VAE channel sets",
@@ -302,6 +316,25 @@ def _requested_channels(args: argparse.Namespace) -> Optional[int]:
     if values and any(value != values[0] for value in values[1:]):
         raise ValueError("--channels and --sensor-configuration select different channel counts")
     return values[0] if values else None
+
+
+def _run_prepare_harth_data(args: argparse.Namespace) -> int:
+    from .data.harth_pipeline import prepare_harth_data
+
+    prepared = prepare_harth_data(
+        args.data_root,
+        composition=args.composition,
+        held_out_subject=args.held_out_subject,
+        window_length=args.window_length,
+        hop_length=args.hop_length,
+        seed=args.seed,
+    )
+    print(json.dumps({
+        "command": "prepare-harth-data",
+        "execution": {"metadata_only": True, "participant_windows_serialized": False},
+        **prepared.summary,
+    }, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False))
+    return 0
 
 
 def _run_vae_smoke() -> int:
@@ -688,6 +721,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         if args.command == "prepare-data":
             return _run_prepare_data(args)
+        if args.command == "prepare-harth-data":
+            return _run_prepare_harth_data(args)
         if args.command == "vae-smoke":
             return _run_vae_smoke()
         if args.command == "inspect-vae-checkpoint":
