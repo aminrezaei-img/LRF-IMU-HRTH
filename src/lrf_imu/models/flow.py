@@ -461,6 +461,8 @@ def flow_model_metadata(
 
     if channels not in (3, 6):
         raise FlowModelError("paired VAE/flow channels must be 3 or 6")
+    if int(num_classes) <= 0:
+        raise FlowModelError("num_classes must be positive")
     if width_profile is None:
         profile = (
             HISTORICAL_CHECKPOINT_PROFILE
@@ -480,8 +482,8 @@ def flow_model_metadata(
     )
     if int(latent_channels) != LATENT_CHANNELS:
         raise FlowModelError("public flow latent channel count must be 48")
-    if int(num_classes) != NUM_CLASSES:
-        raise FlowModelError("public flow class count must be 4")
+    if int(num_classes) <= 0:
+        raise FlowModelError("num_classes must be positive")
     return {
         "channels": int(channels),
         "latent_channels": int(latent_channels),

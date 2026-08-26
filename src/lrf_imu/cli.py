@@ -103,6 +103,41 @@ def build_parser() -> argparse.ArgumentParser:
     prepare.add_argument("--write-metadata", action="store_true")
     prepare.add_argument("--overwrite", action="store_true")
 
+    harth_prepare = subparsers.add_parser(
+        "prepare-harth-data",
+        help="prepare the HARTH-family ten-class thigh-accelerometer input",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    harth_prepare.add_argument("--data-root", required=True, metavar="PATH")
+    harth_prepare.add_argument("--composition", default="harth_walking_speed", choices=(
+        "harth", "harth_walking_speed", "harth_walking_speed_har70plus"
+    ))
+    harth_prepare.add_argument("--held-out-subject", metavar="DATASET:ID")
+    harth_prepare.add_argument("--window-length", type=_positive_int, default=160)
+    harth_prepare.add_argument("--hop-length", type=_positive_int, default=40)
+    harth_prepare.add_argument("--seed", type=_non_negative_int, default=42)
+
+    for command, help_text in (("train-harth-vae", "train the HARTH-family 3-channel VAE"), ("train-harth-flow", "train the HARTH-family 10-class Flow")):
+        train_parser = subparsers.add_parser(command, help=help_text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        train_parser.add_argument("--data-root", required=True)
+        train_parser.add_argument("--composition", default="harth_walking_speed", choices=("harth", "harth_walking_speed", "harth_walking_speed_har70plus"))
+        train_parser.add_argument("--held-out-subject", required=True)
+        train_parser.add_argument("--config", default="configs/paper/harth_10class_160_40.yaml")
+        train_parser.add_argument("--output-dir", required=True)
+        train_parser.add_argument("--seed", type=_non_negative_int, default=42)
+        train_parser.add_argument("--epochs", type=_positive_int)
+        train_parser.add_argument("--max-train-batches", type=_positive_int)
+        train_parser.add_argument("--max-val-batches", type=_positive_int)
+        if command == "train-harth-flow":
+            train_parser.add_argument("--vae-checkpoint", required=True)
+
+    generate_harth = subparsers.add_parser("generate-harth", help="generate one 10-class HARTH window")
+    generate_harth.add_argument("--flow-checkpoint", required=True)
+    generate_harth.add_argument("--vae-checkpoint", required=True)
+    generate_harth.add_argument("--activity", required=True, help="class ID 0..9 or canonical class name")
+    generate_harth.add_argument("--seed", type=_non_negative_int, default=42)
+    generate_harth.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+
     subparsers.add_parser(
         "vae-smoke",
         help="run a no-write CPU shape and determinism smoke for both VAE channel sets",
@@ -302,6 +337,46 @@ def _requested_channels(args: argparse.Namespace) -> Optional[int]:
     if values and any(value != values[0] for value in values[1:]):
         raise ValueError("--channels and --sensor-configuration select different channel counts")
     return values[0] if values else None
+
+
+def _run_prepare_harth_data(args: argparse.Namespace) -> int:
+    from .data.harth_pipeline import prepare_harth_data
+
+    prepared = prepare_harth_data(
+        args.data_root,
+        composition=args.composition,
+        held_out_subject=args.held_out_subject,
+        window_length=args.window_length,
+        hop_length=args.hop_length,
+        seed=args.seed,
+    )
+    print(json.dumps({
+        "command": "prepare-harth-data",
+        "execution": {"metadata_only": True, "participant_windows_serialized": False},
+        **prepared.summary,
+    }, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False))
+    return 0
+
+
+def _run_harth_train(args: argparse.Namespace) -> int:
+    from .training.harth import train_harth_flow, train_harth_vae
+    function = train_harth_vae if args.command == "train-harth-vae" else train_harth_flow
+    values = vars(args).copy()
+    values.pop("command", None)
+    # The CLI uses the concise --config spelling; orchestration APIs use
+    # config_path to make the required file boundary explicit.
+    values["config_path"] = values.pop("config")
+    result = function(**values)
+    print(json.dumps(result, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False))
+    return 0
+
+
+def _run_generate_harth(args: argparse.Namespace) -> int:
+    from .training.harth import generate_harth_window
+    sample, metadata = generate_harth_window(args.flow_checkpoint, args.vae_checkpoint, args.activity, seed=args.seed, device=args.device)
+    metadata.update({"command": "generate-harth", "decoded_shape": list(sample.shape), "finite": bool(np.isfinite(sample).all()), "tensor_values_included": False})
+    print(json.dumps(metadata, indent=2, sort_keys=True, allow_nan=False))
+    return 0
 
 
 def _run_vae_smoke() -> int:
@@ -688,6 +763,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         if args.command == "prepare-data":
             return _run_prepare_data(args)
+        if args.command == "prepare-harth-data":
+            return _run_prepare_harth_data(args)
+        if args.command in {"train-harth-vae", "train-harth-flow"}:
+            return _run_harth_train(args)
+        if args.command == "generate-harth":
+            return _run_generate_harth(args)
         if args.command == "vae-smoke":
             return _run_vae_smoke()
         if args.command == "inspect-vae-checkpoint":

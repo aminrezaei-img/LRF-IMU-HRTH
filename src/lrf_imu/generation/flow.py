@@ -79,8 +79,8 @@ def class_labels(
 
     classes = int(num_classes)
     count = int(samples_per_class)
-    if classes != 4:
-        raise FlowGenerationError("the public flow contract declares exactly 4 classes")
+    if classes < 1:
+        raise FlowGenerationError("num_classes must be positive")
     if count < 1:
         raise FlowGenerationError("samples_per_class must be positive")
     return torch.arange(classes, device=device, dtype=torch.long).repeat_interleave(count)

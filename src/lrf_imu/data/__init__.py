@@ -18,6 +18,17 @@ from .audit import (
     hash_window,
 )
 from .normalization import ChannelStandardizer, fit_training_normalizer
+from .harth import (
+    EXCLUDED_SOURCE_LABELS,
+    HARTH_COLUMNS,
+    HARTHError,
+    HarthSubject,
+    SOURCE_LABEL_MAPS,
+    TARGET_CLASS_NAMES,
+    discover_harth_files,
+    load_harth_subjects,
+)
+from .harth_pipeline import PreparedHarthData, prepare_harth_data
 from .pipeline import (
     METADATA_FILENAME,
     PREPARATION_SCHEMA_VERSION,
@@ -70,6 +81,13 @@ __all__ = [
     "ACTIVITY_NAMES",
     "ActivityMappingError",
     "ActivitySpec",
+    "EXCLUDED_SOURCE_LABELS",
+    "HARTH_COLUMNS",
+    "HARTHError",
+    "HarthSubject",
+    "PreparedHarthData",
+    "SOURCE_LABEL_MAPS",
+    "TARGET_CLASS_NAMES",
     "CANONICAL_SUBJECTS",
     "ChannelStandardizer",
     "DEFAULT_HOP_LENGTH",
@@ -99,6 +117,7 @@ __all__ = [
     "VaeSplitResult",
     "WindowingError",
     "audit_window_duplicates",
+    "discover_harth_files",
     "discover_realdisp_logs",
     "discover_subject_logs",
     "encode_activity_labels",
@@ -106,11 +125,13 @@ __all__ = [
     "extract_subject_id",
     "fit_training_normalizer",
     "hash_window",
+    "load_harth_subjects",
     "load_realdisp_log",
     "load_realdisp_subjects",
     "load_subject_data",
     "make_windows",
     "prepare_data",
+    "prepare_harth_data",
     "prepare_realdisp_data",
     "prepare_realdisp_fold",
     "sensor_schema_for_mode",

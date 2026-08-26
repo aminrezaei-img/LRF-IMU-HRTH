@@ -331,6 +331,10 @@ def _loader(
 ) -> DataLoader:
     if isinstance(data, DataLoader):
         return data
+    # Orchestration callers may provide a bounded iterable over batches for
+    # development smoke runs; do not reinterpret it as an indexable Dataset.
+    if not isinstance(data, Dataset) and hasattr(data, "__iter__") and hasattr(data, "__len__"):
+        return cast(DataLoader, data)
     return DataLoader(
         cast(Dataset, data),
         batch_size=batch_size,
