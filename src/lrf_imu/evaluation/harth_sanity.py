@@ -62,7 +62,7 @@ def _write_report(
             "- interpretation: descriptive gross-mismatch and collapse diagnostics; not equivalence or benchmark evidence.\n\n"
         )
     if rows:
-        keys = list(rows[0])
+        keys = list(dict.fromkeys(key for row in rows for key in row))
         with (output / filename).open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=keys)
             writer.writeheader()
