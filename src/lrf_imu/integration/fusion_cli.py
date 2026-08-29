@@ -41,6 +41,15 @@ def _mapping_records(root: str) -> list[dict]:
     return rows
 
 
+def _resolved_interval_id(record: Mapping[str, Any]) -> str | None:
+    value = record.get("resolved_interval_id")
+    if value in (None, ""):
+        value = record.get("interval_id")
+    if value in (None, ""):
+        return None
+    return str(value)
+
+
 def _result_record(result: SegmentResult | Mapping[str, Any]) -> dict[str, Any]:
     return dict(result.record if isinstance(result, SegmentResult) else result)
 
@@ -72,20 +81,27 @@ def run_synthesize(args) -> int:
         max_person_days=args.max_person_days,
     )
     mappings = _mapping_records(args.mapping_root)
-    by_id = {
-        (
-            str(r.get("persona_id")),
-            str(r.get("date")),
-            str(r.get("resolved_interval_id")),
-        ): r
-        for r in mappings
-    }
+    by_id = {}
+    for mapping in mappings:
+        interval_id = _resolved_interval_id(mapping)
+        if interval_id is None:
+            continue
+        by_id[
+            (
+                str(mapping.get("persona_id")),
+                str(mapping.get("date")),
+                interval_id,
+            )
+        ] = mapping
     records = []
     for raw in source:
+        interval_id = _resolved_interval_id(raw)
+        if interval_id is None:
+            continue
         key = (
             str(raw.get("persona_id", raw.get("persona"))),
             str(raw.get("date", raw.get("day"))),
-            str(raw.get("resolved_interval_id", raw.get("interval_id"))),
+            interval_id,
         )
         if key not in by_id:
             raise FusionError(f"no physical mapping for interval {key[2]}")
