@@ -1,8 +1,11 @@
 import copy
 import json
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 
+from lrf_imu.integration import fusion_cli
 from lrf_imu.integration.fusion import (
     FusionError,
     StitchConfig,
@@ -150,3 +153,39 @@ def test_unavailable_result_has_serializable_payload():
     payload = _result_payload(result, "segment_000001")
     assert payload["record"]["status"] == "IMU_UNAVAILABLE"
     json.dumps(payload)
+
+
+def test_synthesize_ignores_idless_dayforge_summary_records(monkeypatch, capsys):
+    interval = rec(1)
+    summary = {
+        "persona_id": interval["persona_id"],
+        "date": interval["date"],
+        "resolved_interval_id": None,
+    }
+    mapping = [
+        interval,
+        {
+            "persona_id": interval["persona_id"],
+            "date": interval["date"],
+            "resolved_interval_id": "",
+            "imu_eligible": "False",
+        },
+    ]
+    monkeypatch.setattr(
+        fusion_cli, "load_resolved_intervals", lambda *args, **kwargs: [interval, summary]
+    )
+    monkeypatch.setattr(fusion_cli, "_mapping_records", lambda root: mapping)
+    args = SimpleNamespace(
+        dayforge_root="dayforge",
+        mapping_root="mapping",
+        persona=None,
+        date=None,
+        max_person_days=None,
+        stitch_overlap=40,
+        dry_run=True,
+        seed=42,
+    )
+
+    assert fusion_cli.run_synthesize(args) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["intervals"] == 1
