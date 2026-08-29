@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from copy import deepcopy
 import json
 import math
@@ -137,6 +138,38 @@ def build_parser() -> argparse.ArgumentParser:
     generate_harth.add_argument("--activity", required=True, help="class ID 0..9 or canonical class name")
     generate_harth.add_argument("--seed", type=_non_negative_int, default=42)
     generate_harth.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+
+    map_dayforge = subparsers.add_parser(
+        "map-dayforge-physical-states",
+        help="map final DayForge intervals to conservative HARTH physical states",
+    )
+    map_dayforge.add_argument("--dayforge-root", required=True)
+    map_dayforge.add_argument("--config", default="configs/paper/dayforge_harth_mapping.yaml")
+    map_dayforge.add_argument("--output-dir", required=True)
+    map_dayforge.add_argument("--persona")
+    map_dayforge.add_argument("--date")
+    map_dayforge.add_argument("--max-person-days", type=_positive_int)
+
+    synth = subparsers.add_parser(
+        "synthesize-dayforge",
+        help="generate exact-duration, segmented DayForge/IMU fusion output",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    synth.add_argument("--dayforge-root", required=True)
+    synth.add_argument("--mapping-root", required=True)
+    synth.add_argument("--vae-checkpoint")
+    synth.add_argument("--flow-checkpoint")
+    synth.add_argument("--normalization-metadata")
+    synth.add_argument("--output-dir", required=True)
+    synth.add_argument("--seed", type=_non_negative_int, default=42)
+    synth.add_argument("--persona")
+    synth.add_argument("--date")
+    synth.add_argument("--max-person-days", type=_positive_int)
+    synth.add_argument("--stitch-overlap", type=_non_negative_int, default=40)
+    synth.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    synth.add_argument("--batch-size", type=_positive_int, default=1)
+    synth.add_argument("--resume", action="store_true")
+    synth.add_argument("--dry-run", action="store_true")
 
     subparsers.add_parser(
         "vae-smoke",
@@ -376,6 +409,79 @@ def _run_generate_harth(args: argparse.Namespace) -> int:
     sample, metadata = generate_harth_window(args.flow_checkpoint, args.vae_checkpoint, args.activity, seed=args.seed, device=args.device)
     metadata.update({"command": "generate-harth", "decoded_shape": list(sample.shape), "finite": bool(np.isfinite(sample).all()), "tensor_values_included": False})
     print(json.dumps(metadata, indent=2, sort_keys=True, allow_nan=False))
+    return 0
+
+
+def _run_map_dayforge(args: argparse.Namespace) -> int:
+    from .integration import (
+        audit_mappings,
+        load_mapping_config,
+        load_resolved_intervals,
+        map_interval,
+    )
+
+    intervals = load_resolved_intervals(
+        args.dayforge_root,
+        persona=args.persona,
+        date=args.date,
+        max_person_days=args.max_person_days,
+    )
+    mapping_config = load_mapping_config(args.config)
+    mapped = [map_interval(item, mapping_config) for item in intervals]
+    summary = audit_mappings(mapped)
+    output = Path(args.output_dir).expanduser().resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    fields = [
+        "persona_id",
+        "date",
+        "resolved_interval_id",
+        "source_episode_id",
+        "start_time",
+        "end_time",
+        "duration_seconds",
+        "interval_type",
+        "semantic_activity",
+        "mobility_mode",
+        "route_distance_m",
+        "route_duration_s",
+        "route_speed_kmh",
+        "realization_status",
+        "physical_state_class_id",
+        "physical_state_class_name",
+        "imu_eligible",
+        "mapping_status",
+        "mapping_rule",
+        "mapping_confidence",
+        "imu_unavailable_reason",
+        "mapping_version",
+    ]
+    with (output / "physical_state_mapping.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(mapped)
+    (output / "mapping_summary.json").write_text(
+        json.dumps(
+            {
+                "mapping_version": mapping_config.version,
+                "config": str(Path(args.config).expanduser().resolve()),
+                "summary": summary,
+                "records": len(mapped),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (output / "mapping_report.md").write_text(
+        "# DayForge to HARTH physical-state mapping\n\n"
+        "Semantic activities and sensor states are distinct. Ambiguous intervals "
+        "remain unavailable rather than being forced into a class.\n\n"
+        + json.dumps(summary, indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 
 
@@ -769,6 +875,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _run_harth_train(args)
         if args.command == "generate-harth":
             return _run_generate_harth(args)
+        if args.command == "map-dayforge-physical-states":
+            return _run_map_dayforge(args)
+        if args.command == "synthesize-dayforge":
+            from .integration.fusion_cli import run_synthesize
+
+            return run_synthesize(args)
         if args.command == "vae-smoke":
             return _run_vae_smoke()
         if args.command == "inspect-vae-checkpoint":
@@ -783,6 +895,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _run_generate(args)
         if args.command == "export-trajectories":
             return _run_export_trajectories(args)
+        if args.command in {"evaluate-harth-vae", "evaluate-harth-flow"}:
+            from .evaluation.cli import run_harth_sanity
+
+            return run_harth_sanity(args)
         if args.command == "evaluate":
             from .evaluation.cli import run_evaluate
 

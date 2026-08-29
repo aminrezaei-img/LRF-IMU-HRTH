@@ -68,6 +68,27 @@ def add_evaluation_parsers(subparsers: Any) -> None:
     _add_common(loso)
     loso.add_argument("--synthetic-root", metavar="PATH")
 
+    for command, help_text in (
+        ("evaluate-harth-vae", "run HARTH VAE signal sanity checks"),
+        ("evaluate-harth-flow", "run HARTH Flow signal sanity checks"),
+    ):
+        parser = subparsers.add_parser(
+            command,
+            help=help_text,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        )
+        parser.add_argument("--data-root", required=True)
+        parser.add_argument("--composition", default="harth_walking_speed")
+        parser.add_argument("--held-out-subject", required=True)
+        parser.add_argument("--config", required=True)
+        parser.add_argument("--vae-checkpoint", required=True)
+        parser.add_argument("--output-dir", required=True)
+        parser.add_argument("--seed", type=int, default=42)
+        parser.add_argument("--max-windows", type=int)
+        if command == "evaluate-harth-flow":
+            parser.add_argument("--flow-checkpoint", required=True)
+            parser.add_argument("--samples-per-class", type=int, default=100)
+
 
 def _scenarios(args: argparse.Namespace) -> tuple[str, ...]:
     return tuple(args.scenario or ("trtr", "scarce", "tstr", "tstr_scarce"))
@@ -240,10 +261,35 @@ def run_evaluate_loso(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_harth_sanity(args: argparse.Namespace) -> int:
+    from .harth_sanity import evaluate_harth_flow, evaluate_harth_vae
+
+    common = {
+        "data_root": args.data_root,
+        "composition": args.composition,
+        "held_out_subject": args.held_out_subject,
+        "config": args.config,
+        "vae_checkpoint": args.vae_checkpoint,
+        "output_dir": args.output_dir,
+        "seed": args.seed,
+    }
+    if args.command == "evaluate-harth-vae":
+        result = evaluate_harth_vae(**common, max_windows=args.max_windows)
+    else:
+        result = evaluate_harth_flow(
+            **common,
+            flow_checkpoint=args.flow_checkpoint,
+            samples_per_class=args.samples_per_class,
+        )
+    print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
+    return 0
+
+
 __all__ = [
     "CANONICAL_SUBJECTS",
     "add_evaluation_parsers",
     "evaluate_one",
+    "run_harth_sanity",
     "run_evaluate",
     "run_evaluate_loso",
 ]
