@@ -3,6 +3,8 @@ message: "If you use LRF-IMU, cite this software release and the preferred paper
 title: "LRF-IMU"
 type: software
 version: "1.0.0"
+repository-code: "https://github.com/aminrezaei-img/LRF-IMU-HRTH"
+url: "https://github.com/aminrezaei-img/LRF-IMU-HRTH"
 authors:
   - family-names: Rezaei
     given-names: Amin
@@ -18,6 +20,8 @@ keywords:
   - inertial measurement units
   - latent rectified flow
   - synthetic data generation
+  - HARTH
+  - DayForge
 preferred-citation:
   type: article
   title: "A latent rectified flow approach to generate synthetic wearable data – a LABDA solution"

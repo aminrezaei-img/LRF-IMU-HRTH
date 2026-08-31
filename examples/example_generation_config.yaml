@@ -1,0 +1,7 @@
+command: python -m lrf_imu generate-harth
+activity: sitting
+seed: 42
+device: cpu
+vae_checkpoint: checkpoints/vae_s3_z48.pt
+flow_checkpoint: checkpoints/flow_unet_best.pt
+output: output/example-generation.json

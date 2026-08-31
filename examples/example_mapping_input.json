@@ -1,0 +1,14 @@
+{
+  "persona_id": "example-persona",
+  "date": "2026-01-01",
+  "interval_id": "example-persona:2026-01-01:0:dwell",
+  "source_episode_index": 0,
+  "interval_type": "DWELL",
+  "start_time": "2026-01-01T09:00:00",
+  "end_time": "2026-01-01T10:00:00",
+  "duration_seconds": 3600,
+  "activity_type": "work",
+  "mode": null,
+  "realization_status": "REALIZED_EXACT",
+  "physical_state_hint": "sitting"
+}

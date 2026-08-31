@@ -2,6 +2,11 @@
 
 This runbook describes the frozen runtime sequence. It does not train models or execute DayForge.
 
+For the final handoff evidence contract, use
+[`dayforge_mapping.md`](dayforge_mapping.md). The mapping command accepts the
+semantic DayForge root and the separate derived in-bed handoff root; both are
+read-only inputs.
+
 Set the package path for a checkout:
 
 ```bash
@@ -72,6 +77,7 @@ python -m lrf_imu evaluate-harth-flow \
 ```bash
 python -m lrf_imu map-dayforge-physical-states \
   --dayforge-root <VALIDATED_DAYFORGE_ROOT> \
+  --derived-root <IN_BED_HANDOFF_ROOT> \
   --config configs/paper/dayforge_harth_mapping.yaml \
   --output-dir <MAPPING_OUTPUT>
 ```

@@ -1,293 +1,308 @@
-<p align="center">
-  <img src="assets/lrf-imu-header.png"
-       alt="LRF-IMU latent Rectified Flow generation of wearable IMU signals"
-       width="100%">
-</p>
+# LRF-IMU-HARTH
 
-<h1 align="center">LRF-IMU</h1>
+LRF-IMU-HARTH is a research software release for generating synthetic thigh
+accelerometer windows with a class-conditioned latent Rectified Flow model.
+It contains the Paper 3 HARTH-family replacement path, VAE and Flow training
+and evaluation, conservative DayForge-to-HARTH mapping, and exact-duration
+sensor synthesis with stitching and provenance.
 
-<p align="center"><strong>Latent Rectified Flow for class-conditioned synthetic wearable IMU generation</strong></p>
+The repository also retains the earlier REALDISP-oriented implementation and
+its parity records. Those paths are documented separately; the Paper 3 path is
+the `harth_walking_speed` composition described below.
 
-<p align="center">
-  <a href="https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml"><img src="https://github.com/aminsens/LRF-IMU/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://doi.org/10.1088/3049-477X/ae91ef"><img src="https://img.shields.io/badge/paper-10.1088%2F3049--477X%2Fae91ef-blue" alt="Paper DOI"></a>
-  <a href="https://huggingface.co/Aminrezaei/LRF-IMU"><img src="https://img.shields.io/badge/Hugging%20Face-checkpoints-FFD21E" alt="Hugging Face checkpoints"></a>
-</p>
-
-<p align="center">
-  <strong>A latent rectified flow approach to generate synthetic wearable data – a LABDA solution</strong><br>
-  Amin Rezaei · Morten Kjærgaard · Jasper Schipperijn<br>
-  <em>Machine Learning: Health</em> (2026) · <a href="https://doi.org/10.1088/3049-477X/ae91ef">DOI: 10.1088/3049-477X/ae91ef</a>
-</p>
-
-LRF-IMU provides a reproducible implementation of class-conditioned latent Rectified Flow for synthetic wearable inertial signals, including the paper's 6-channel IMU setting and separately trained 3-channel accelerometer-only ablation.
-
-## 🔥 Timeline
-
-- **2026-07-29** — Accepted Manuscript available online in *Machine Learning: Health* (IOP Publishing).
-- **2026-06-29** — Paper accepted for publication in *Machine Learning: Health*.
-- **2026-06-08** — R2 revision submitted (`MLHEALTH-100129.R2`).
-- **2026-05-26** — R2 revision request (`MLHEALTH-100129.R2`).
-- **2026-05-11** — R1 revision submitted (`MLHEALTH-100129.R1`).
-- **2026-04-13** — R1 revision request (`MLHEALTH-100129.R1`).
-- **2025-12-31** — Initial manuscript submitted to *Machine Learning: Health*.
-
-## 📖 Introduction
-
-LRF-IMU is a class-conditioned generative framework for wearable inertial signals. It combines a variational autoencoder (VAE) with latent Rectified Flow to generate synthetic time-domain sensor windows for human activity recognition.
-
-The primary study configuration uses a **6-channel right-thigh IMU** with triaxial accelerometer and triaxial gyroscope signals. The paper also includes a separately trained **3-channel accelerometer-only ablation**, where both the VAE and Rectified Flow model are retrained using only `ax`, `ay`, and `az`. The codebase includes data preparation, generation, downstream evaluation, analysis, and reproducibility workflows for both configurations.
-
-The core generation pipeline is:
+## Paper 3 pipeline
 
 ```text
-activity label + Gaussian noise
-              ↓
-class-conditioned Rectified Flow
-        in VAE latent space
-              ↓
-        frozen VAE decoder
-              ↓
-      synthetic IMU window
+HARTH + Adult Walking Speed
+            ↓
+      preprocessing
+            ↓
+  ten-class physical-state taxonomy
+            ↓
+            VAE
+            ↓
+   latent Rectified Flow
+            ↓
+ synthetic 3-axis thigh accelerometer window
 ```
 
-Two sensor configurations are supported:
-
-| Configuration | Channels | Input shape | Purpose |
-| --- | ---: | --- | --- |
-| Full IMU | 6 | `B × 6 × 160` | Main study configuration |
-| Accelerometer-only | 3 | `B × 3 × 160` | Sensor-reduction ablation |
-
-## 📊 Study setting
-
-| Item | Setting |
-| --- | --- |
-| Dataset | REALDISP |
-| Sensor placement | Right thigh, ideal placement |
-| Participants | 12 complete participants |
-| Activities | Walking, running, jump-up, cycling |
-| Sampling rate | 50 Hz |
-| Window length | 160 samples / 3.2 s |
-| Hop | 40 samples / 0.8 s |
-| Overlap | 75% |
-| Validation | 12-fold leave-one-subject-out (LOSO) |
-| Normalization | Training-only z-score |
-| Generation | 10 reverse-Euler Rectified Flow steps |
-
-The participant IDs used in the study are:
+The Paper 3 application layer is separate from model training:
 
 ```text
-1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, 16
+DayForge semantic/contextual evidence
+            ↓
+     Module B physical-state mapping
+            ↓
+    Module C exact-duration generation
+            ↓
+       stitching and fusion
+            ↓
+   synthetic accelerometer timeline
 ```
 
-## 📈 Main results
+The final DayForge-to-LRF multimodal orchestration is downstream of this
+repository's core generator. It is not required to install or use the
+generator itself.
 
-The table below summarizes the paper's downstream classification results across all 12 LOSO folds. Values are macro F1, mean ± SD.
+## Features
 
-| Scenario | 6-ch RF | 3-ch RF | 6-ch CNN | 3-ch CNN |
-| --- | ---: | ---: | ---: | ---: |
-| TRTR — full real training | **0.985 ± 0.021** | **0.980 ± 0.027** | **1.000 ± 0.000** | **0.957 ± 0.083** |
-| Scarce — 2 real samples/class | 0.400 ± 0.088 | 0.467 ± 0.082 | 0.340 ± 0.190 | 0.441 ± 0.202 |
-| TSTR — synthetic-only training | **0.956 ± 0.081** | **0.980 ± 0.061** | 0.845 ± 0.195 | 0.954 ± 0.085 |
-| TSTR + scarce real data | **0.951 ± 0.087** | **0.979 ± 0.061** | 0.858 ± 0.145 | 0.969 ± 0.058 |
+- HARTH plus Adult Walking Speed preprocessing with subject-level LOSO splits.
+- Three-channel thigh input at 50 Hz with 160-sample windows and 40-sample hop.
+- A VAE with latent geometry `[batch, 48, 40]`.
+- Ten-class latent Rectified Flow generation and Module A signal sanity checks.
+- Module B mapping for realized mobility, `physical_state_hint`, and the
+  derived `in_bed_or_lying_opportunity` handoff.
+- Module C exact-duration generation, deterministic per-window seeds,
+  multi-window stitching, provenance, and failure audits.
+- Metadata-only validation and reproducibility records; participant data and
+  large model files remain external.
 
-For the main 6-channel Random Forest evaluation, synthetic-only training retained **97.1%** of the full-real baseline performance.
+## Scientific scope
 
-### 3-channel accelerometer-only ablation
+The Paper 3 baseline uses HARTH and Adult Walking Speed. HAR70+ is not part of
+the default `harth_walking_speed` composition. The model is a research
+generator, not a clinical instrument, sleep detector, anonymization guarantee,
+or deployment-ready monitoring system. Synthetic signals should be evaluated
+for the intended task and should not be treated as measurements from a real
+participant.
 
-The accelerometer-only experiment tests whether the pipeline remains useful when gyroscope channels are unavailable. This is not an inference-time channel drop: the **VAE and Rectified Flow models are retrained from scratch on the three accelerometer axes**.
+The production freeze is the annotated tag
+`paper3_lrf_dayforge_handoff_v1` at commit
+`150b4de6e58365fdda5fc7279192c136d4e8b064`. Packaging does not change that
+scientific behavior.
 
-With all real training data, the 3-channel Random Forest reached **0.980 ± 0.027** macro F1. Under the extreme low-data setting of only two real windows per class, performance increased from **0.467 ± 0.082** to **0.979 ± 0.061** after synthetic augmentation, recovering approximately **99.9%** of the full-data 3-channel baseline. In the paper, 9 of 12 held-out participants reached macro F1 = 1.0 after augmentation in this setting.
+## HARTH taxonomy
 
-The corresponding generative audit also showed stable coverage under channel reduction: the 3-channel coverage ratio was **99.3% ± 2.3%**, with PCA area ratio **0.889 ± 0.072**.
+The class IDs are fixed and must be preserved:
 
-## 💿 Installation
+| ID | Class |
+| ---: | --- |
+| 0 | `walking_slow` |
+| 1 | `walking_moderate` |
+| 2 | `walking_brisk` |
+| 3 | `running` |
+| 4 | `stair_climbing` |
+| 5 | `cycling_seated` |
+| 6 | `cycling_standing` |
+| 7 | `sitting` |
+| 8 | `standing` |
+| 9 | `lying` |
 
-Clone the repository:
+See [data and taxonomy](docs/data_and_taxonomy.md) for source-label and
+exclusion details.
 
-```bash
-git clone https://github.com/aminsens/LRF-IMU.git
-cd LRF-IMU
-```
+## Installation
 
-Create an environment and install the research dependencies:
+The package supports Python 3.10 or newer. The core package needs PyYAML and
+NumPy. Training uses PyTorch; evaluation and analysis add the optional
+scikit-learn and SciPy dependencies.
 
 ```bash
 python -m venv .venv
-
-# Linux / macOS
 source .venv/bin/activate
-
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-
 python -m pip install --upgrade pip
 python -m pip install -e ".[training,evaluation,analysis,test]"
 ```
 
-Python 3.10 or newer is supported.
+On Windows PowerShell, activate the environment with
+`.venv\Scripts\Activate.ps1`. The validated production runs used the existing
+Conda `py311` environment with CUDA-enabled PyTorch; do not infer CUDA support
+from the host alone.
 
-## 🚀 Quick start
+## Quick start
 
-The model implementations can be tested without REALDISP or historical checkpoints:
+These no-data checks exercise the model interfaces on CPU:
 
 ```bash
 python -m lrf_imu vae-smoke
 python -m lrf_imu flow-smoke
 ```
 
-Both commands run on CPU.
-
-## 📦 Dataset
-
-The experiments use the **[REALDISP Activity Recognition Dataset](https://archive.ics.uci.edu/dataset/305/realdisp+activity+recognition+dataset)** from the UCI Machine Learning Repository.
-
-REALDISP is not redistributed with this repository. The full dataset contains multiple body-worn sensors, activities, and placement scenarios; LRF-IMU uses the documented **12-participant, ideal-placement, right-thigh subset** and the four activities listed above. Download REALDISP from UCI and point the preprocessing commands to your local copy.
-
-Validate a participant-held-out fold with:
+For a small decoded HARTH window, supply compatible VAE and Flow checkpoints:
 
 ```bash
-python -m lrf_imu prepare-data \
-    --data-root <realdisp-root> \
-    --held-out-subject 1 \
-    --sensor-configuration six_channel \
-    --validate-only
+python -m lrf_imu generate-harth \
+  --flow-checkpoint <flow-checkpoint> \
+  --vae-checkpoint <vae-checkpoint> \
+  --activity sitting \
+  --seed 42 \
+  --device cpu
 ```
 
-See [`DATA_ACCESS.md`](DATA_ACCESS.md) for the expected file layout and preprocessing assumptions.
+The command returns metadata for one `[1, 3, 160]` window. It does not write
+raw arrays unless a caller explicitly captures or extends the output workflow.
 
-## 🧠 Model configurations
+## Data preparation
 
-The paper configurations are provided under `configs/paper/`:
-
-```text
-configs/paper/
-├── six_channel_160_40.yaml
-├── accelerometer_only_160_40.yaml
-└── sensitivity_grid.yaml
-```
-
-Use `six_channel_160_40.yaml` for the full accelerometer + gyroscope experiment and `accelerometer_only_160_40.yaml` for the separately trained 3-channel ablation.
-
-The reported TSTR results use **10 reverse-Euler steps**. The separate 100-step trajectory profile used for visualization is not part of the paper's TSTR inference protocol.
-
-## 🧪 Generate synthetic IMU
-
-With compatible VAE and Rectified Flow checkpoints:
+Place the acquired HARTH-family data outside the repository and use the
+canonical composition:
 
 ```bash
-python -m lrf_imu generate \
-    --config configs/paper/six_channel_160_40.yaml \
-    --vae-checkpoint <vae-checkpoint> \
-    --flow-checkpoint <flow-checkpoint> \
-    --class-id 0 \
-    --count 1 \
-    --steps 10 \
-    --seed 42 \
-    --device cpu
+python -m lrf_imu prepare-harth-data \
+  --data-root <harth-family-root> \
+  --composition harth_walking_speed \
+  --held-out-subject harth:S006 \
+  --window-length 160 \
+  --hop-length 40 \
+  --seed 42
 ```
 
-For the accelerometer-only model, use:
+The production baseline uses three thigh accelerometer channels, 50 Hz,
+training-subject-only per-channel z-score normalization, and exact duplicate
+audits across train, validation, and held-out windows. See
+[data and taxonomy](docs/data_and_taxonomy.md) and
+[reproducibility](docs/reproducibility.md).
 
-```text
-configs/paper/accelerometer_only_160_40.yaml
-```
+The validated external run recorded 55 namespaced subjects: 46 training, 8
+validation, and held-out `harth:S006`, with 159,575 training, 18,533
+validation, and 8,497 held-out windows. These numbers are a provenance record,
+not values to force when using another dataset snapshot.
 
-with checkpoints trained for the 3-channel configuration.
+## Training and evaluation
 
-## 🧾 Evaluate a LOSO fold
+Use the frozen Paper 3 configuration:
 
 ```bash
-python -m lrf_imu evaluate \
-    --data-root <realdisp-root> \
-    --sensor six_channel \
-    --classifier rf \
-    --held-out-subject 1 \
-    --synthetic-cache <external-cache> \
-    --scenario trtr \
-    --scenario tstr
+python -m lrf_imu train-harth-vae \
+  --data-root <harth-family-root> \
+  --composition harth_walking_speed \
+  --held-out-subject harth:S006 \
+  --config configs/paper/harth_10class_160_40.yaml \
+  --output-dir <vae-output> \
+  --seed 42
+
+python -m lrf_imu train-harth-flow \
+  --data-root <harth-family-root> \
+  --composition harth_walking_speed \
+  --held-out-subject harth:S006 \
+  --config configs/paper/harth_10class_160_40.yaml \
+  --vae-checkpoint <vae-checkpoint> \
+  --output-dir <flow-output> \
+  --seed 42
 ```
 
-The evaluator checks the supplied synthetic cache and its adjacent identity metadata before use.
-
-## 🔁 Reproduce the experiment
-
-The end-to-end workflow is:
-
-```text
-prepare REALDISP fold
-        ↓
-load VAE + Rectified Flow checkpoints
-        ↓
-generate class-conditioned synthetic windows
-        ↓
-evaluate TRTR / scarce / TSTR / TSTR+scarce
-        ↓
-aggregate across LOSO folds
-```
-
-Example:
+Module A sanity evaluation is explicit and descriptive:
 
 ```bash
-python -m lrf_imu reproduce-core \
-    --data-root <realdisp-root> \
-    --checkpoint-root <checkpoint-root> \
-    --output-root <external-output> \
-    --sensor six_channel \
-    --held-out-subject 1 \
-    --classifier rf \
-    --write-results
+python -m lrf_imu evaluate-harth-vae \
+  --data-root <harth-family-root> \
+  --composition harth_walking_speed \
+  --held-out-subject harth:S006 \
+  --config configs/paper/harth_10class_160_40.yaml \
+  --vae-checkpoint <vae-checkpoint> \
+  --output-dir <vae-report>
+
+python -m lrf_imu evaluate-harth-flow \
+  --data-root <harth-family-root> \
+  --composition harth_walking_speed \
+  --held-out-subject harth:S006 \
+  --config configs/paper/harth_10class_160_40.yaml \
+  --vae-checkpoint <vae-checkpoint> \
+  --flow-checkpoint <flow-checkpoint> \
+  --output-dir <flow-report> \
+  --samples-per-class 100
 ```
 
-Use `--all-folds` for the 12-fold experiment and `--resume` for checksum-validated continuation of an interrupted run.
+The production Flow configuration records `early_stop_patience`, but the
+current `train_flow` loop executes its configured fixed schedule. This is
+documented behavior of the frozen baseline, not a reason to alter the release.
+See [training](docs/training.md).
 
-See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the full workflow.
+## DayForge integration
 
-## ✅ Reproducibility notes
+Module B consumes resolved DayForge mobility intervals and optional read-only
+evidence roots:
 
-The repository was checked against the original research implementation and historical model artifacts. The VAE, Rectified Flow implementation, checkpoint loading, and deterministic 10-step generation reproduce the corresponding original operations numerically when run with matching inputs and checkpoints.
-
-Evaluation also reproduces the stored historical subject-01 result exactly when supplied the same historical synthetic cache.
-
-Freshly generated samples are not expected to be bitwise identical across all runtime/device combinations. In particular, the historical synthetic caches were associated with CUDA generation while the reproducibility checks also exercised fresh CPU generation; same-seed CPU and CUDA random streams are not bitwise identical.
-
-Known historical configuration and artifact-lineage differences are documented in [`docs/KNOWN_DISCREPANCIES.md`](docs/KNOWN_DISCREPANCIES.md), and regenerated experiment results are summarized in [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md).
-
-## 📁 Project structure
-
-```text
-LRF-IMU/
-├── src/lrf_imu/
-│   ├── data/          # REALDISP preparation and LOSO splitting
-│   ├── models/        # VAE and Rectified Flow models
-│   ├── training/      # training objectives and utilities
-│   ├── generation/    # latent-flow sampling
-│   ├── evaluation/    # RF/CNN evaluation
-│   └── analysis/      # sensitivity, spectral, physical and privacy analyses
-├── configs/           # experiment configurations
-├── contracts/         # machine-readable parity and provenance records
-├── docs/              # scientific reproduction notes
-├── tests/             # synthetic fixtures and regression tests
-├── DATA_ACCESS.md
-├── MODEL_CARD.md
-├── REPRODUCIBILITY.md
-└── CITATION.cff
+```bash
+python -m lrf_imu map-dayforge-physical-states \
+  --dayforge-root <validated-dayforge-root> \
+  --derived-root <in-bed-handoff-root> \
+  --config configs/paper/dayforge_harth_mapping.yaml \
+  --output-dir <mapping-output>
 ```
 
-Historical VAE/Rectified Flow checkpoints, REALDISP participant data, generated synthetic datasets, and historical result payloads are not stored in this repository.
+The mapping CLI writes a CSV, JSON summary, and Markdown report. The JSON
+summary includes baseline, hint-enabled, and combined coverage views. The
+mapping rules are conservative: walking hints do not select a speed class,
+cycling hints do not infer cycling posture, passive transport is unavailable,
+and in-bed opportunity is not physiological sleep.
 
-## 📚 Documentation
+Module C can then be exercised for one selected person-day:
 
-- [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) — experiment workflow and reproducibility guidance
-- [`DATA_ACCESS.md`](DATA_ACCESS.md) — REALDISP access and expected layout
-- [`MODEL_CARD.md`](MODEL_CARD.md) — model scope and limitations
-- [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md) — regenerated experiment results
-- [`docs/KNOWN_DISCREPANCIES.md`](docs/KNOWN_DISCREPANCIES.md) — known historical configuration differences
-- [`docs/THREE_CHANNEL_LINEAGE.md`](docs/THREE_CHANNEL_LINEAGE.md) — accelerometer-only configuration lineage
+```bash
+python -m lrf_imu synthesize-dayforge \
+  --dayforge-root <validated-dayforge-root> \
+  --mapping-root <mapping-output> \
+  --vae-checkpoint <vae-checkpoint> \
+  --flow-checkpoint <flow-checkpoint> \
+  --normalization-metadata <normalization-json> \
+  --output-dir <fusion-output> \
+  --persona <persona-id> \
+  --date <YYYY-MM-DD> \
+  --seed 42 \
+  --device cuda
+```
 
-## 📝 Citation
+Do not interpret this interface as a command to generate the full DayForge
+cohort. See [DayForge mapping](docs/dayforge_mapping.md) and
+[stitching and fusion](docs/stitching_and_fusion.md).
 
-If you use LRF-IMU, please cite the associated paper:
+## Reproducible runners
+
+The thin wrappers call the canonical CLI and validate checkpoint files before
+execution:
+
+```bash
+bash scripts/run_lrf_imu.sh \
+  --vae-checkpoint <vae-checkpoint> \
+  --flow-checkpoint <flow-checkpoint> \
+  --class sitting \
+  --seed 42 \
+  --output output/example.json
+
+bash scripts/run_paper3_dayforge.sh \
+  --dayforge-root <validated-dayforge-root> \
+  --derived-root <in-bed-handoff-root> \
+  --mapping-output output/mapping
+```
+
+PowerShell equivalents are provided beside the Bash wrappers. Training uses
+the canonical commands above; no second training implementation is included.
+See [generation](docs/generation.md) and [validation](docs/validation.md).
+
+## Validation and output structure
+
+Run the release checks from a checkout:
+
+```bash
+bash scripts/validate_release.sh
+```
+
+The checks cover tests, compilation, CLI help, and static repository hygiene.
+The release produces metadata such as `vae_run_meta.json`,
+`flow_run_meta.json`, `mapping_summary.json`, segment manifests, and signal
+validation reports. Generated arrays, participant data, checkpoints, and
+runtime logs belong outside normal Git history.
+
+See:
+
+- [methodology](docs/methodology.md)
+- [architecture](docs/architecture.md)
+- [data and taxonomy](docs/data_and_taxonomy.md)
+- [training](docs/training.md)
+- [generation](docs/generation.md)
+- [DayForge mapping](docs/dayforge_mapping.md)
+- [stitching and fusion](docs/stitching_and_fusion.md)
+- [reproducibility](docs/reproducibility.md)
+- [validation](docs/validation.md)
+- [checkpoints](docs/checkpoints.md)
+- [model card](MODEL_CARD.md)
+- [data access](DATA_ACCESS.md)
+
+## Citation
+
+Please cite the paper and this software release. Machine-readable metadata is
+provided in [CITATION.cff](CITATION.cff).
 
 ```bibtex
 @article{rezaei2026lrfimu,
@@ -295,15 +310,20 @@ If you use LRF-IMU, please cite the associated paper:
   author    = {Rezaei, Amin and Kjærgaard, Morten and Schipperijn, Jasper},
   journal   = {Machine Learning: Health},
   year      = {2026},
-  doi       = {10.1088/3049-477X/ae91ef},
-  publisher = {IOP Publishing}
+  doi       = {10.1088/3049-477X/ae91ef}
 }
 ```
 
-Machine-readable citation metadata is also available in [`CITATION.cff`](CITATION.cff).
+## Limitations and development status
 
-## ⚠️ Scope and limitations
+This is a code-and-documentation release. HARTH-family data, DayForge data,
+production checkpoints, and generated IMU arrays are not bundled. No public
+checkpoint download URL or DOI is invented here. The project has no license
+file; a license decision is required before redistribution under a chosen
+open-source license.
 
-The reported experiments cover the documented REALDISP setting: ideal placement, one right-thigh sensor, four activities, and 12 participant-held-out folds. Results should not be assumed to transfer unchanged to other placements, populations, sampling rates, activities, devices, or clinical settings without further evaluation.
-
-Synthetic samples should not be treated as automatically anonymized. The privacy analyses in the paper evaluate specific reconstruction and membership-inference threat models and do not establish a universal privacy guarantee.
+The Paper 3 scientific modules are frozen and production-tested. Future work
+may publish model artifacts through an appropriate research repository, but
+that publication is separate from this source release. Do not change the
+taxonomy, evidence hierarchy, exact-duration semantics, or checkpoint lineage
+as part of packaging work.

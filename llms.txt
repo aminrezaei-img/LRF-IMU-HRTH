@@ -1,43 +1,107 @@
-# LRF-IMU
+# LRF-IMU-HARTH agent guide
 
-> Code-only public release, version 1.0.0. `exact_paper_reproduction=false`.
+## PROJECT PURPOSE
 
-## Paper identity
+This repository is research software for a class-conditioned latent Rectified
+Flow generator of three-axis thigh accelerometer windows. The Paper 3 path
+uses HARTH plus Adult Walking Speed under the `harth_walking_speed` composition.
+The earlier REALDISP path remains documented separately.
 
-- Title: A latent rectified flow approach to generate synthetic wearable data – a LABDA solution
-- Authors: Amin Rezaei; Morten Kjærgaard; Jasper Schipperijn
-- Journal: Machine Learning: Health
-- DOI: 10.1088/3049-477X/ae91ef
+## PIPELINE
 
-## Repository map
+HARTH-family data -> 160/40 windows -> training-only normalization -> VAE
+latent `[48,40]` -> ten-class Rectified Flow -> VAE decode -> `[N,3,160]`
+signals at 50 Hz.
 
-- `README.md`: researcher entry point, installation, and core commands.
-- `DATA_ACCESS.md`: external REALDISP access responsibility and expected ideal-log layout.
-- `REPRODUCIBILITY.md`: evidence levels, workflow, manifests, and limitations.
-- `MODEL_CARD.md`: model scope, intended use, and unsupported claims.
-- `docs/RESULTS_REPRODUCTION.md`: regenerated evaluation and analysis results.
-- `docs/KNOWN_DISCREPANCIES.md`: unresolved historical evidence conflicts.
-- `configs/paper/`: six-channel, accelerometer-only, and sensitivity configurations.
-- `src/lrf_imu/`: preprocessing, VAE, Rectified Flow, generation, evaluation, analysis, and reproducibility orchestration.
-- `contracts/`: machine-readable source, parity, and runtime evidence.
-- `tests/`: synthetic fixtures, parity checks, packaging tests, and safety scanners.
+Paper 3 application: DayForge evidence -> Module B mapping -> Module C exact-
+duration generation -> stitching/fusion -> synthetic sensor timeline.
 
-## Core commands
+## IMPORTANT PATHS
+
+- `src/lrf_imu/data/`: HARTH-family and legacy data preparation.
+- `src/lrf_imu/models/`: VAE and Flow architectures.
+- `src/lrf_imu/training/`: training loops and orchestration.
+- `src/lrf_imu/evaluation/`: Module A sanity/evaluation.
+- `src/lrf_imu/integration/physical_state.py`: Module B evidence mapping.
+- `src/lrf_imu/integration/dayforge.py`: read-only DayForge/evidence adapter.
+- `src/lrf_imu/integration/fusion.py`: existing Module C synthesis/stitching.
+- `configs/paper/harth_10class_160_40.yaml`: frozen Paper 3 model contract.
+- `configs/paper/dayforge_harth_mapping.yaml`: Module B mapping policy.
+- `docs/`: methodology, architecture, reproducibility, and validation notes.
+
+## TAXONOMY
+
+IDs are fixed: 0 `walking_slow`, 1 `walking_moderate`, 2 `walking_brisk`,
+3 `running`, 4 `stair_climbing`, 5 `cycling_seated`, 6 `cycling_standing`,
+7 `sitting`, 8 `standing`, 9 `lying`. Do not add a sleep class.
+
+## MODULE RESPONSIBILITIES
+
+- Module A checks VAE/Flow geometry, finite values, reconstruction, latent and
+  spectral diagnostics. It is descriptive sanity evaluation, not equivalence.
+- Module B maps realized mobility and conservative DayForge evidence. It owns
+  `physical_state_hint` and `in_bed_or_lying_opportunity` provenance.
+- Module C already implements exact-duration generation, deterministic seeds,
+  crop/stitch behavior, provenance, and failure audits. Do not reimplement it.
+
+## PRODUCTION CHECKPOINTS
+
+- VAE filename: `vae_s3_z48.pt`; SHA-256:
+  `6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9`.
+- Flow filename: `flow_unet_best.pt`; SHA-256:
+  `F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164`.
+- Scientific freeze: commit `150b4de6e58365fdda5fc7279192c136d4e8b064`,
+  tag `paper3_lrf_dayforge_handoff_v1`.
+
+## KEY COMMANDS
 
 ```text
-python -m pip install ".[training,evaluation,analysis,test]"
 python -m lrf_imu vae-smoke
 python -m lrf_imu flow-smoke
-python -m lrf_imu prepare-data --data-root <realdisp-root> --held-out-subject 1 --sensor-configuration six_channel --validate-only
-python -m lrf_imu evaluate --data-root <realdisp-root> --sensor six_channel --classifier rf --held-out-subject 1 --scenario trtr
-python -m lrf_imu reproduce-core --data-root <realdisp-root> --checkpoint-root <checkpoint-root> --output-root <external-output> --all-folds --dry-run
+python -m lrf_imu prepare-harth-data --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006
+python -m lrf_imu train-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --output-dir <output>
+python -m lrf_imu train-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <output>
+python -m lrf_imu evaluate-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <output>
+python -m lrf_imu evaluate-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --flow-checkpoint <flow> --output-dir <output>
+python -m lrf_imu map-dayforge-physical-states --dayforge-root <dayforge> --derived-root <in-bed> --config configs/paper/dayforge_harth_mapping.yaml --output-dir <mapping>
+python -m lrf_imu synthesize-dayforge --dayforge-root <dayforge> --mapping-root <mapping> --vae-checkpoint <vae> --flow-checkpoint <flow> --normalization-metadata <normalization> --output-dir <fusion> --persona <id> --date <date>
 ```
 
-## Evidence and artifact boundary
+## TEST COMMANDS
 
-- Audited task: REALDISP ideal placement, right-thigh IMU, 50 Hz, four activities, 12 LOSO folds, main window/hop 160/40.
-- Six-channel and reconstructed three-channel preprocessing use separately trained checkpoints; 3CH is not an inference-time channel drop or proof of exact historical parser lineage.
-- Paper/TSTR generation uses ten reverse-Euler steps. Website trajectories use a separate 100-step visualization profile.
-- Privacy results are threat-model-specific empirical observations, not anonymization or general privacy guarantees.
-- REALDISP data, participant-derived windows, checkpoints, generated arrays, trained evaluators, historical `Results/` payloads, manuscript files, and figures are not included.
-- Historical reproduction requires user-supplied REALDISP access and matching external checkpoints.
+```text
+python -m pytest -p no:cacheprovider -q
+python -m compileall -q src
+git diff --check
+python -m ruff check src tests
+```
+
+## REPRODUCIBILITY CONTRACT
+
+Use seed 42 unless an experiment says otherwise. Preserve 50 Hz, three
+channels, 160-sample windows, 40-sample hop, training-only normalization,
+LOSO subject separation, exact `[start,end)` duration semantics, checkpoint
+hashes, and source immutability. Same-seed output is expected to match only
+under the tested runtime conditions; different devices/kernels may vary.
+
+## DAYFORGE INTERFACE
+
+DayForge is read-only input. `physical_state_hint` is optional contextual
+evidence with values walking, running, cycling, stairs, sitting, standing,
+lying, mixed, or unknown. `in_bed_or_lying_opportunity` is an additive,
+sensor-facing opportunity and is not physiological sleep.
+
+## SCIENTIFIC GUARDRAILS
+
+- Do not casually change the ten-class HARTH taxonomy.
+- Do not treat DayForge semantic activity as HARTH ground truth.
+- Do not map passive transport to sitting solely because a person is seated.
+- Do not infer walking speed from `physical_state_hint` alone.
+- Do not infer cycling posture from a cycling hint alone.
+- Do not treat `in_bed_or_lying_opportunity` as physiological sleep.
+- Do not generate IMU for unavailable or non-realized mobility.
+- Do not repeat one synthetic tile to fill a long interval.
+- Preserve exact-duration `[start,end)` semantics.
+- Do not modify VAE/Flow checkpoints during integration tasks.
+- Do not optimize mapping coverage by weakening evidence rules.
+- Module C stitching/fusion already exists.

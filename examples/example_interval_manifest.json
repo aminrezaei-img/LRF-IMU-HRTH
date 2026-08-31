@@ -1,0 +1,22 @@
+{
+  "array_file": "segment_000000.npz",
+  "segment_id": "segment_000000",
+  "record": {
+    "persona_id": "example-persona",
+    "date": "2026-01-01",
+    "resolved_interval_id": "example-persona:2026-01-01:0:dwell",
+    "physical_state_class_id": 7,
+    "physical_state_class_name": "sitting",
+    "sample_rate_hz": 50,
+    "sample_count": 3000,
+    "status": "GENERATED"
+  },
+  "provenance": {
+    "global_seed": 42,
+    "interval_convention": "[start,end)",
+    "mapping_version": "dayforge_harth_v1",
+    "mapping_source": "physical_state_hint",
+    "stitch_method": "linear_crossfade",
+    "window_seeds": [123456789]
+  }
+}

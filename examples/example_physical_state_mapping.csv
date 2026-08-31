@@ -1,0 +1,2 @@
+persona_id,date,resolved_interval_id,physical_state_hint,in_bed_or_lying_opportunity,physical_state_class_id,physical_state_class_name,mapping_source,mapping_conflict,imu_eligible
+example-persona,2026-01-01,example-persona:2026-01-01:0:dwell,sitting,false,7,sitting,physical_state_hint,false,true
