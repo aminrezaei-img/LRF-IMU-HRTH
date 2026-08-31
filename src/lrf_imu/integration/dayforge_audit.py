@@ -23,6 +23,12 @@ def audit_mappings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
         b["duration_seconds"] += float(
             r.get("duration_seconds", r.get("duration", 0)) or 0
         )
+    source_counts = Counter(r.get("mapping_source", "none") for r in rows)
+    source_durations = Counter()
+    for row in rows:
+        source_durations[row.get("mapping_source", "none")] += float(
+            row.get("duration_seconds", row.get("duration", 0)) or 0
+        )
     return {
         "total_resolved_intervals": len(rows),
         "total_resolved_duration_seconds": total,
@@ -32,6 +38,15 @@ def audit_mappings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
         "unavailable_duration_seconds": total - mapped_duration,
         "interval_mapping_coverage": len(mapped) / len(rows) if rows else 0.0,
         "duration_mapping_coverage": mapped_duration / total if total else 0.0,
+        "mapping_source_counts": dict(source_counts),
+        "mapping_source_duration_seconds": dict(source_durations),
+        "mapping_conflicts": sum(bool(r.get("mapping_conflict")) for r in rows),
+        "physical_state_hint_intervals": sum(
+            r.get("physical_state_hint") is not None for r in rows
+        ),
+        "derived_in_bed_intervals": sum(
+            bool(r.get("in_bed_or_lying_opportunity")) for r in rows
+        ),
         "by_class": by_class,
         "by_reason": dict(
             Counter(

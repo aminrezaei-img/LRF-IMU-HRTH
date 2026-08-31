@@ -1,6 +1,10 @@
 from .dayforge import (
+    DERIVED_IN_BED_STATE,
     DayForgeInputError,
+    PHYSICAL_STATE_HINT_VALUES,
     discover_dayforge_json,
+    load_in_bed_opportunities,
+    load_physical_state_hints,
     load_resolved_intervals,
 )
 from .dayforge_audit import audit_mappings
@@ -28,6 +32,7 @@ from .fusion import (
 __all__ = [
     "CLASS_NAMES",
     "CHANNEL_NAMES",
+    "DERIVED_IN_BED_STATE",
     "DayForgeInputError",
     "FusionError",
     "MappingConfig",
@@ -39,7 +44,10 @@ __all__ = [
     "generate_segment",
     "load_resolved_intervals",
     "load_mapping_config",
+    "load_in_bed_opportunities",
+    "load_physical_state_hints",
     "map_interval",
+    "PHYSICAL_STATE_HINT_VALUES",
     "stable_seed",
     "stitch_windows",
     "target_samples",
