@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 from copy import deepcopy
+from dataclasses import replace
 import json
 import math
 import numpy as np
@@ -149,6 +150,10 @@ def build_parser() -> argparse.ArgumentParser:
     map_dayforge.add_argument("--persona")
     map_dayforge.add_argument("--date")
     map_dayforge.add_argument("--max-person-days", type=_positive_int)
+    map_dayforge.add_argument(
+        "--derived-root",
+        help="optional read-only root containing in_bed_opportunity.json handoff files",
+    )
 
     synth = subparsers.add_parser(
         "synthesize-dayforge",
@@ -425,8 +430,24 @@ def _run_map_dayforge(args: argparse.Namespace) -> int:
         persona=args.persona,
         date=args.date,
         max_person_days=args.max_person_days,
+        derived_root=getattr(args, "derived_root", None),
     )
     mapping_config = load_mapping_config(args.config)
+    baseline_config = replace(
+        mapping_config,
+        use_physical_state_hint=False,
+        use_derived_in_bed_opportunity=False,
+    )
+    hint_config = replace(
+        mapping_config,
+        use_derived_in_bed_opportunity=False,
+    )
+    baseline_summary = audit_mappings(
+        [map_interval(item, baseline_config) for item in intervals]
+    )
+    hint_summary = audit_mappings(
+        [map_interval(item, hint_config) for item in intervals]
+    )
     mapped = [map_interval(item, mapping_config) for item in intervals]
     summary = audit_mappings(mapped)
     output = Path(args.output_dir).expanduser().resolve()
@@ -446,12 +467,20 @@ def _run_map_dayforge(args: argparse.Namespace) -> int:
         "route_duration_s",
         "route_speed_kmh",
         "realization_status",
+        "physical_state_hint",
+        "physical_state_hint_provenance",
+        "in_bed_or_lying_opportunity",
+        "in_bed_or_lying_opportunity_evidence",
         "physical_state_class_id",
         "physical_state_class_name",
         "imu_eligible",
         "mapping_status",
         "mapping_rule",
         "mapping_confidence",
+        "mapping_source",
+        "mapping_conflict",
+        "mapping_conflict_reason",
+        "mapping_provenance",
         "imu_unavailable_reason",
         "mapping_version",
     ]
@@ -464,7 +493,25 @@ def _run_map_dayforge(args: argparse.Namespace) -> int:
             {
                 "mapping_version": mapping_config.version,
                 "config": str(Path(args.config).expanduser().resolve()),
+                "derived_root": (
+                    str(Path(args.derived_root).expanduser().resolve())
+                    if getattr(args, "derived_root", None)
+                    else None
+                ),
                 "summary": summary,
+                "baseline_summary": baseline_summary,
+                "physical_state_hint_summary": hint_summary,
+                "combined_summary": summary,
+                "coverage_difference": {
+                    "hint_vs_baseline_duration": hint_summary["duration_mapping_coverage"]
+                    - baseline_summary["duration_mapping_coverage"],
+                    "combined_vs_hint_duration": summary["duration_mapping_coverage"]
+                    - hint_summary["duration_mapping_coverage"],
+                    "hint_vs_baseline_intervals": hint_summary["interval_mapping_coverage"]
+                    - baseline_summary["interval_mapping_coverage"],
+                    "combined_vs_hint_intervals": summary["interval_mapping_coverage"]
+                    - hint_summary["interval_mapping_coverage"],
+                },
                 "records": len(mapped),
             },
             indent=2,

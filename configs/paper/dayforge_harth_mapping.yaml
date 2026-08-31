@@ -2,6 +2,8 @@ mapping_version: dayforge_harth_v1
 walking_speed: {slow_max_kmh: 4.0, brisk_min_kmh: 5.5}
 cycling: {generic_route_class: cycling_seated, allow_standing_without_explicit_evidence: false}
 direct_semantic_mapping: {sleep: lying, lying_in_bed: lying}
+physical_state_hint: {enabled: true}
+derived_in_bed_opportunity: {enabled: true}
 sitting_whitelist: []
 standing_whitelist: []
 unsupported_passive_modes: [car, vehicle, bus, transit, train, tram, taxi, passenger]
