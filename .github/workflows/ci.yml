@@ -26,6 +26,7 @@ jobs:
         run: >-
           python -B -m pytest -p no:cacheprovider
           tests/test_config.py tests/test_packaging.py
+          tests/test_core_release_boundary.py tests/test_production_artifacts.py
           tests/test_no_absolute_paths.py tests/test_synthetic_fixture_integrity.py
           tests/test_windowing.py
 
@@ -45,5 +46,6 @@ jobs:
           "$RUNNER_TEMP/lrf-imu-wheel/bin/python" -m pip install dist/*.whl
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/lrf-imu-wheel/bin/python" -c "import lrf_imu"
+          "$RUNNER_TEMP/lrf-imu-wheel/bin/python" -c "from lrf_imu.artifacts import load_artifact_manifest; load_artifact_manifest()"
           "$RUNNER_TEMP/lrf-imu-wheel/bin/python" -m lrf_imu --help
           "$RUNNER_TEMP/lrf-imu-wheel/bin/lrf-imu" --help

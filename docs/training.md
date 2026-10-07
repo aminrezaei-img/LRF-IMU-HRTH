@@ -8,6 +8,11 @@ CUDA 12.1, and an NVIDIA RTX 4070 Laptop GPU. Training can use another
 compatible CUDA environment, but the runtime and checkpoint provenance should
 be recorded.
 
+`environment/production-reconstructed.yml` pins the critical production
+versions and the package versions used to revalidate the cleaned release. The
+file is explicitly reconstructed because the original complete environment
+lock was not preserved.
+
 Install the package with:
 
 ```bash
@@ -53,6 +58,21 @@ python -m lrf_imu train-harth-flow \
 ```
 
 Module A evaluation commands are documented in [validation](validation.md).
+
+The thin end-to-end wrappers execute these same commands without adding a
+second scientific implementation:
+
+```bash
+bash scripts/run_harth_training_pipeline.sh \
+  --data-root <harth-family-root> \
+  --output-root <training-output>
+```
+
+```powershell
+scripts/run_harth_training_pipeline.ps1 `
+  -DataRoot <harth-family-root> `
+  -OutputRoot <training-output>
+```
 
 ## Fixed-schedule note
 

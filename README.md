@@ -1,79 +1,66 @@
 # LRF-IMU-HARTH
 
-LRF-IMU-HARTH is a research software release for generating synthetic thigh
-accelerometer windows with a class-conditioned latent Rectified Flow model.
-It contains the Paper 3 HARTH-family replacement path, VAE and Flow training
-and evaluation, conservative DayForge-to-HARTH mapping, and exact-duration
-sensor synthesis with stitching and provenance.
+LRF-IMU-HARTH is the model repository for a class-conditioned latent
+Rectified Flow generator of synthetic right-thigh accelerometry. This core
+release contains the complete HARTH-family path from frozen raw data through
+preprocessing, VAE training, Flow training, evaluation, and model-only signal
+generation.
 
-The repository also retains the earlier REALDISP-oriented implementation and
-its parity records. Those paths are documented separately; the Paper 3 path is
-the `harth_walking_speed` composition described below.
+Application-specific mapping, cohort scheduling, timeline fusion, and
+participant-day indexing are deliberately outside this repository. The core
+model neither knows nor needs the downstream cohort that requests a signal.
 
-## Paper 3 pipeline
+## Frozen production lineage
+
+The accepted model was trained once and then reused unchanged by downstream
+studies. It is one global checkpoint pair—not one model per persona and not a
+separate set of “210-day weights”.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `vae_s3_z48.pt` | `6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9` |
+| `flow_unet_best.pt` | `F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164` |
+| `normalization_harth_s006.json` | `F8F5E51085211BE731895744CB002815158CB5E59172E8D0BF7064A77274295B` |
+
+Scientific identities:
+
+- training code: `81b123eab079f5cde7400fee5620e3bffb85a673`;
+- accepted generation code: `150b4de6e58365fdda5fc7279192c136d4e8b064`;
+- training data: `ntnu-ai-lab/harth-ml-experiments` at
+  `dad2cfbe89a26f72f19770419469ac037de200df`;
+- composition: `harth_walking_speed`;
+- held-out subject: `harth:S006`;
+- global seed: `42`.
+
+The model-training, preprocessing, and fixed-window generation files in this
+branch are byte-identical to those at the training commit. Repository cleanup
+does not change the scientific implementation.
+
+## Pipeline
 
 ```text
-HARTH + Adult Walking Speed
-            ↓
-      preprocessing
-            ↓
-  ten-class physical-state taxonomy
-            ↓
-            VAE
-            ↓
-   latent Rectified Flow
-            ↓
- synthetic 3-axis thigh accelerometer window
+HARTH + Adult Walking Speed CSV files
+                  ↓
+       schema and label validation
+                  ↓
+  subject-safe LOSO split (held out S006)
+                  ↓
+  160-sample windows / 40-sample hop / 50 Hz
+                  ↓
+ training-subject-only per-axis normalization
+                  ↓
+        three-channel VAE training
+                  ↓
+       latent representation [48, 40]
+                  ↓
+ ten-class latent Rectified Flow training
+                  ↓
+ reverse-Euler sampling and VAE decoding
+                  ↓
+ synthetic window [batch, 3, 160]
 ```
 
-The Paper 3 application layer is separate from model training:
-
-```text
-DayForge semantic/contextual evidence
-            ↓
-     Module B physical-state mapping
-            ↓
-    Module C exact-duration generation
-            ↓
-       stitching and fusion
-            ↓
-   synthetic accelerometer timeline
-```
-
-The final DayForge-to-LRF multimodal orchestration is downstream of this
-repository's core generator. It is not required to install or use the
-generator itself.
-
-## Features
-
-- HARTH plus Adult Walking Speed preprocessing with subject-level LOSO splits.
-- Three-channel thigh input at 50 Hz with 160-sample windows and 40-sample hop.
-- A VAE with latent geometry `[batch, 48, 40]`.
-- Ten-class latent Rectified Flow generation and Module A signal sanity checks.
-- Module B mapping for realized mobility, `physical_state_hint`, and the
-  derived `in_bed_or_lying_opportunity` handoff.
-- Module C exact-duration generation, deterministic per-window seeds,
-  multi-window stitching, provenance, and failure audits.
-- Metadata-only validation and reproducibility records; participant data and
-  large model files remain external.
-
-## Scientific scope
-
-The Paper 3 baseline uses HARTH and Adult Walking Speed. HAR70+ is not part of
-the default `harth_walking_speed` composition. The model is a research
-generator, not a clinical instrument, sleep detector, anonymization guarantee,
-or deployment-ready monitoring system. Synthetic signals should be evaluated
-for the intended task and should not be treated as measurements from a real
-participant.
-
-The production freeze is the annotated tag
-`paper3_lrf_dayforge_handoff_v1` at commit
-`150b4de6e58365fdda5fc7279192c136d4e8b064`. Packaging does not change that
-scientific behavior.
-
-## HARTH taxonomy
-
-The class IDs are fixed and must be preserved:
+## Fixed ten-class taxonomy
 
 | ID | Class |
 | ---: | --- |
@@ -88,58 +75,64 @@ The class IDs are fixed and must be preserved:
 | 8 | `standing` |
 | 9 | `lying` |
 
-See [data and taxonomy](docs/data_and_taxonomy.md) for source-label and
-exclusion details.
-
 ## Installation
 
-The package supports Python 3.10 or newer. The core package needs PyYAML and
-NumPy. Training uses PyTorch; evaluation and analysis add the optional
-scikit-learn and SciPy dependencies.
+The validated production environment used Python 3.11.11, PyTorch 2.5.1,
+CUDA 12.1, and an NVIDIA GeForce RTX 4070 Laptop GPU. A reconstructed and
+subsequently validated environment description is provided at
+[`environment/production-reconstructed.yml`](environment/production-reconstructed.yml).
+It is not represented as a lost byte-for-byte historical environment lock.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
 python -m pip install -e ".[training,evaluation,analysis,test]"
 ```
 
-On Windows PowerShell, activate the environment with
-`.venv\Scripts\Activate.ps1`. The validated production runs used the existing
-Conda `py311` environment with CUDA-enabled PyTorch; do not infer CUDA support
-from the host alone.
+## Acquire the frozen release assets
 
-## Quick start
-
-These no-data checks exercise the model interfaces on CPU:
+Large files are GitHub Release assets rather than Git blobs. After the
+`paper3-harth-production-v1` release is published, download and verify the
+complete bundle with:
 
 ```bash
-python -m lrf_imu vae-smoke
-python -m lrf_imu flow-smoke
+python -m lrf_imu fetch-production-artifacts \
+  --output-dir production-artifacts
 ```
 
-For a small decoded HARTH window, supply compatible VAE and Flow checkpoints:
+Download only the exact model checkpoint pair:
 
 ```bash
-python -m lrf_imu generate-harth \
-  --flow-checkpoint <flow-checkpoint> \
-  --vae-checkpoint <vae-checkpoint> \
-  --activity sitting \
-  --seed 42 \
-  --device cpu
+python -m lrf_imu fetch-production-artifacts \
+  --output-dir production-artifacts \
+  --models-only
 ```
 
-The command returns metadata for one `[1, 3, 160]` window. It does not write
-raw arrays unless a caller explicitly captures or extends the output workflow.
+Verify an existing bundle without downloading:
 
-## Data preparation
+```bash
+python -m lrf_imu verify-production-artifacts \
+  --artifact-dir production-artifacts
+```
 
-Place the acquired HARTH-family data outside the repository and use the
-canonical composition:
+Every file is checked against the packaged manifest at
+[`src/lrf_imu/resources/manifests/production_harth_v1.json`](src/lrf_imu/resources/manifests/production_harth_v1.json).
+A mismatched file is rejected before use.
+
+The clean scientific metadata and training summary are in that manifest. The
+configuration and normalisation are packaged in Git at
+`configs/paper/harth_10class_160_40.yaml` and
+`src/lrf_imu/resources/normalization/harth_s006.json`. Recovered metadata with
+private workstation paths is preserved only in the private lineage lock and
+is intentionally not uploaded.
+
+The training-data ZIP contains the exact 55 tracked CSV files used by the
+model, plus the upstream README and MIT licence. Extract it so that the
+resulting data root contains `harth/` and `adult_walking_speed/`.
+
+## Reproduce preprocessing
 
 ```bash
 python -m lrf_imu prepare-harth-data \
-  --data-root <harth-family-root> \
+  --data-root <extracted-data-root> \
   --composition harth_walking_speed \
   --held-out-subject harth:S006 \
   --window-length 160 \
@@ -147,183 +140,100 @@ python -m lrf_imu prepare-harth-data \
   --seed 42
 ```
 
-The production baseline uses three thigh accelerometer channels, 50 Hz,
-training-subject-only per-channel z-score normalization, and exact duplicate
-audits across train, validation, and held-out windows. See
-[data and taxonomy](docs/data_and_taxonomy.md) and
-[reproducibility](docs/reproducibility.md).
+The accepted run produced 159,575 training windows, 18,533 validation windows,
+and 8,497 held-out windows. These counts are an integrity check for the frozen
+data/configuration, not values that the software forces.
 
-The validated external run recorded 55 namespaced subjects: 46 training, 8
-validation, and held-out `harth:S006`, with 159,575 training, 18,533
-validation, and 8,497 held-out windows. These numbers are a provenance record,
-not values to force when using another dataset snapshot.
-
-## Training and evaluation
-
-Use the frozen Paper 3 configuration:
+## Train the VAE and Flow
 
 ```bash
 python -m lrf_imu train-harth-vae \
-  --data-root <harth-family-root> \
+  --data-root <extracted-data-root> \
   --composition harth_walking_speed \
   --held-out-subject harth:S006 \
   --config configs/paper/harth_10class_160_40.yaml \
-  --output-dir <vae-output> \
+  --output-dir output/vae \
   --seed 42
 
 python -m lrf_imu train-harth-flow \
-  --data-root <harth-family-root> \
+  --data-root <extracted-data-root> \
   --composition harth_walking_speed \
   --held-out-subject harth:S006 \
   --config configs/paper/harth_10class_160_40.yaml \
-  --vae-checkpoint <vae-checkpoint> \
-  --output-dir <flow-output> \
+  --vae-checkpoint output/vae/vae_s3_z48.pt \
+  --output-dir output/flow \
   --seed 42
 ```
 
-Module A sanity evaluation is explicit and descriptive:
+The Flow training loop intentionally follows the accepted fixed 300-epoch
+schedule. See [training](docs/training.md) for the preserved scheduling note.
+GPU training can be scientifically equivalent without producing a
+byte-identical checkpoint across all hardware and library versions; the exact
+accepted checkpoint pair is therefore published as immutable release assets.
+
+## Evaluate and generate
 
 ```bash
 python -m lrf_imu evaluate-harth-vae \
-  --data-root <harth-family-root> \
+  --data-root <extracted-data-root> \
   --composition harth_walking_speed \
   --held-out-subject harth:S006 \
   --config configs/paper/harth_10class_160_40.yaml \
-  --vae-checkpoint <vae-checkpoint> \
-  --output-dir <vae-report>
+  --vae-checkpoint production-artifacts/vae_s3_z48.pt \
+  --output-dir output/vae-evaluation
 
 python -m lrf_imu evaluate-harth-flow \
-  --data-root <harth-family-root> \
+  --data-root <extracted-data-root> \
   --composition harth_walking_speed \
   --held-out-subject harth:S006 \
   --config configs/paper/harth_10class_160_40.yaml \
-  --vae-checkpoint <vae-checkpoint> \
-  --flow-checkpoint <flow-checkpoint> \
-  --output-dir <flow-report> \
+  --vae-checkpoint production-artifacts/vae_s3_z48.pt \
+  --flow-checkpoint production-artifacts/flow_unet_best.pt \
+  --output-dir output/flow-evaluation \
   --samples-per-class 100
-```
 
-The production Flow configuration records `early_stop_patience`, but the
-current `train_flow` loop executes its configured fixed schedule. This is
-documented behavior of the frozen baseline, not a reason to alter the release.
-See [training](docs/training.md).
-
-## DayForge integration
-
-Module B consumes resolved DayForge mobility intervals and optional read-only
-evidence roots:
-
-```bash
-python -m lrf_imu map-dayforge-physical-states \
-  --dayforge-root <validated-dayforge-root> \
-  --derived-root <in-bed-handoff-root> \
-  --config configs/paper/dayforge_harth_mapping.yaml \
-  --output-dir <mapping-output>
-```
-
-The mapping CLI writes a CSV, JSON summary, and Markdown report. The JSON
-summary includes baseline, hint-enabled, and combined coverage views. The
-mapping rules are conservative: walking hints do not select a speed class,
-cycling hints do not infer cycling posture, passive transport is unavailable,
-and in-bed opportunity is not physiological sleep.
-
-Module C can then be exercised for one selected person-day:
-
-```bash
-python -m lrf_imu synthesize-dayforge \
-  --dayforge-root <validated-dayforge-root> \
-  --mapping-root <mapping-output> \
-  --vae-checkpoint <vae-checkpoint> \
-  --flow-checkpoint <flow-checkpoint> \
-  --normalization-metadata <normalization-json> \
-  --output-dir <fusion-output> \
-  --persona <persona-id> \
-  --date <YYYY-MM-DD> \
+python -m lrf_imu generate-harth \
+  --flow-checkpoint production-artifacts/flow_unet_best.pt \
+  --vae-checkpoint production-artifacts/vae_s3_z48.pt \
+  --activity sitting \
   --seed 42 \
   --device cuda
 ```
 
-Do not interpret this interface as a command to generate the full DayForge
-cohort. See [DayForge mapping](docs/dayforge_mapping.md) and
-[stitching and fusion](docs/stitching_and_fusion.md).
+Generation returns one `[1, 3, 160]` window and its checkpoint/class/seed
+metadata. The Python API is `lrf_imu.training.harth.generate_harth_window`.
 
-## Reproducible runners
-
-The thin wrappers call the canonical CLI and validate checkpoint files before
-execution:
+## Validation
 
 ```bash
-bash scripts/run_lrf_imu.sh \
-  --vae-checkpoint <vae-checkpoint> \
-  --flow-checkpoint <flow-checkpoint> \
-  --class sitting \
-  --seed 42 \
-  --output output/example.json
-
-bash scripts/run_paper3_dayforge.sh \
-  --dayforge-root <validated-dayforge-root> \
-  --derived-root <in-bed-handoff-root> \
-  --mapping-output output/mapping
+python -m pytest -p no:cacheprovider -q
+python scripts/check_syntax.py
+python -m ruff check src/lrf_imu/artifacts.py src/lrf_imu/cli.py scripts/check_syntax.py \
+  tests/test_core_release_boundary.py tests/test_production_artifacts.py
+git diff --check
 ```
 
-PowerShell equivalents are provided beside the Bash wrappers. Training uses
-the canonical commands above; no second training implementation is included.
-See [generation](docs/generation.md) and [validation](docs/validation.md).
+PowerShell and Bash validation wrappers are available in `scripts/`.
 
-## Validation and output structure
+## Repository boundary
 
-Run the release checks from a checkout:
+This repository stops at model-only windows. It contains no contextual
+mapping policy, participant/persona data, interval eligibility decisions,
+cohort scheduler, long-interval stitching, multimodal fusion, or fused output.
+Those responsibilities belong to a separately versioned integration project,
+which consumes this release by tag and SHA-256 identity.
 
-```bash
-bash scripts/validate_release.sh
-```
+See [repository boundary](docs/repository_boundary.md),
+[architecture](docs/architecture.md), [training](docs/training.md),
+[generation](docs/generation.md), [reproducibility](docs/reproducibility.md),
+and [checkpoints](docs/checkpoints.md).
 
-The checks cover tests, compilation, CLI help, and static repository hygiene.
-The release produces metadata such as `vae_run_meta.json`,
-`flow_run_meta.json`, `mapping_summary.json`, segment manifests, and signal
-validation reports. Generated arrays, participant data, checkpoints, and
-runtime logs belong outside normal Git history.
+## Citation and licence status
 
-See:
+Citation metadata is provided in [CITATION.cff](CITATION.cff). The upstream
+training-data snapshot retains its own README and MIT licence. This software
+repository currently has no owner-selected licence; redistribution rights for
+the software are therefore not implied until the repository owner adds one.
 
-- [methodology](docs/methodology.md)
-- [architecture](docs/architecture.md)
-- [data and taxonomy](docs/data_and_taxonomy.md)
-- [training](docs/training.md)
-- [generation](docs/generation.md)
-- [DayForge mapping](docs/dayforge_mapping.md)
-- [stitching and fusion](docs/stitching_and_fusion.md)
-- [reproducibility](docs/reproducibility.md)
-- [validation](docs/validation.md)
-- [checkpoints](docs/checkpoints.md)
-- [model card](MODEL_CARD.md)
-- [data access](DATA_ACCESS.md)
-
-## Citation
-
-Please cite the paper and this software release. Machine-readable metadata is
-provided in [CITATION.cff](CITATION.cff).
-
-```bibtex
-@article{rezaei2026lrfimu,
-  title     = {A latent rectified flow approach to generate synthetic wearable data -- a LABDA solution},
-  author    = {Rezaei, Amin and Kjærgaard, Morten and Schipperijn, Jasper},
-  journal   = {Machine Learning: Health},
-  year      = {2026},
-  doi       = {10.1088/3049-477X/ae91ef}
-}
-```
-
-## Limitations and development status
-
-This is a code-and-documentation release. HARTH-family data, DayForge data,
-production checkpoints, and generated IMU arrays are not bundled. No public
-checkpoint download URL or DOI is invented here. The project has no license
-file; a license decision is required before redistribution under a chosen
-open-source license.
-
-The Paper 3 scientific modules are frozen and production-tested. Future work
-may publish model artifacts through an appropriate research repository, but
-that publication is separate from this source release. Do not change the
-taxonomy, evidence hierarchy, exact-duration semantics, or checkpoint lineage
-as part of packaging work.
+The software and generated data are research outputs, not clinical devices,
+sleep detectors, privacy guarantees, or measurements from real participants.

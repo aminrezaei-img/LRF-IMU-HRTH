@@ -14,8 +14,8 @@ DOC_NAMES = (
     "data_and_taxonomy.md",
     "training.md",
     "generation.md",
-    "dayforge_mapping.md",
-    "stitching_and_fusion.md",
+    "production_release.md",
+    "repository_boundary.md",
     "reproducibility.md",
     "validation.md",
     "checkpoints.md",
@@ -29,18 +29,16 @@ def test_paper3_documentation_surface_exists():
         assert re.search(r"^# ", path.read_text(encoding="utf-8"), re.MULTILINE)
 
 
-def test_agent_guide_and_readme_describe_the_frozen_paper3_contract():
+def test_agent_guide_and_readme_describe_the_frozen_harth_contract():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     llms = (ROOT / "llms.txt").read_text(encoding="utf-8")
     for text in (readme, llms):
         assert "HARTH" in text
-        assert "DayForge" in text
-        assert "physical_state_hint" in text
-        assert "in_bed_or_lying_opportunity" in text
         assert "walking_slow" in text
         assert "cycling_standing" in text
         assert "10" in text
-    assert "paper3_lrf_dayforge_handoff_v1" in llms
+        assert "one global" in text.casefold()
+    assert "81b123eab079f5cde7400fee5620e3bffb85a673" in llms
 
 
 def test_citation_describes_this_repository():
@@ -63,7 +61,12 @@ def test_examples_are_small_and_machine_independent():
 
 @pytest.mark.parametrize(
     "wrapper",
-    ["run_lrf_imu.sh", "run_lrf_imu.ps1", "run_paper3_dayforge.sh", "run_paper3_dayforge.ps1"],
+    [
+        "run_lrf_imu.sh",
+        "run_lrf_imu.ps1",
+        "run_harth_training_pipeline.sh",
+        "run_harth_training_pipeline.ps1",
+    ],
 )
 def test_reproducible_wrappers_have_help_and_canonical_cli(wrapper):
     path = ROOT / "scripts" / wrapper
@@ -95,27 +98,6 @@ def test_powerShell_generation_wrapper_help_resolves():
     assert "generate-harth" in result.stdout
 
 
-def test_powerShell_dayforge_wrapper_help_resolves():
-    wrapper = ROOT / "scripts" / "run_paper3_dayforge.ps1"
-    result = subprocess.run(
-        [
-            "powershell",
-            "-NoProfile",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-File",
-            str(wrapper),
-            "-Help",
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr
-    assert "map-dayforge-physical-states" in result.stdout
-
-
 def test_powerShell_generation_wrapper_dry_run_resolves():
     wrapper = ROOT / "scripts" / "run_lrf_imu.ps1"
     result = subprocess.run(
@@ -143,6 +125,35 @@ def test_powerShell_generation_wrapper_dry_run_resolves():
     assert "dry_run=true" in result.stdout
 
 
+def test_powerShell_training_wrapper_dry_run_resolves():
+    wrapper = ROOT / "scripts" / "run_harth_training_pipeline.ps1"
+    result = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(wrapper),
+            "-DataRoot",
+            str(ROOT / "tests" / "fixtures" / "synthetic"),
+            "-OutputRoot",
+            str(ROOT / "dry-run-output"),
+            "-DryRun",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "dry_run=true" in result.stdout
+    assert "prepare-harth-data" in result.stdout
+    assert "train-harth-vae" in result.stdout
+    assert "train-harth-flow" in result.stdout
+    assert not (ROOT / "dry-run-output").exists()
+
+
 def test_markdown_relative_links_resolve():
     markdown_files = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
     link_pattern = re.compile(r"\[[^]]+\]\(([^)]+)\)")
@@ -164,4 +175,7 @@ def test_pyproject_exposes_editable_install_and_cli():
     assert pyproject["project"]["name"] == "lrf-imu"
     assert pyproject["project"]["scripts"]["lrf-imu"] == "lrf_imu.cli:main"
     assert "torch>=2.0" in pyproject["project"]["optional-dependencies"]["training"]
+    package_data = pyproject["tool"]["setuptools"]["package-data"]["lrf_imu"]
+    assert "resources/manifests/*.json" in package_data
+    assert "resources/normalization/*.json" in package_data
     assert sys.version_info >= (3, 10)

@@ -1,107 +1,90 @@
 # LRF-IMU-HARTH agent guide
 
-## PROJECT PURPOSE
+## PURPOSE
 
-This repository is research software for a class-conditioned latent Rectified
-Flow generator of three-axis thigh accelerometer windows. The Paper 3 path
-uses HARTH plus Adult Walking Speed under the `harth_walking_speed` composition.
-The earlier REALDISP path remains documented separately.
+This repository is the model-only HARTH-family LRF-IMU pipeline. It covers
+raw-data validation, subject-safe preprocessing, training-only normalisation,
+VAE training, ten-class latent Rectified Flow training, evaluation, and
+fixed-window signal generation.
 
-## PIPELINE
+Downstream contextual mapping, interval eligibility, cohort orchestration,
+long-interval stitching, and multimodal linkage are out of scope. Do not add
+application-specific data models or policies to the core package.
 
-HARTH-family data -> 160/40 windows -> training-only normalization -> VAE
-latent `[48,40]` -> ten-class Rectified Flow -> VAE decode -> `[N,3,160]`
-signals at 50 Hz.
+## PRODUCTION CONTRACT
 
-Paper 3 application: DayForge evidence -> Module B mapping -> Module C exact-
-duration generation -> stitching/fusion -> synthetic sensor timeline.
+- Data composition: `harth_walking_speed`
+- Data commit: `dad2cfbe89a26f72f19770419469ac037de200df`
+- Training code commit: `81b123eab079f5cde7400fee5620e3bffb85a673`
+- Held-out subject: `harth:S006`
+- Seed: 42
+- Sampling frequency: 50 Hz
+- Input geometry: three channels, 160 samples, 40-sample hop
+- VAE latent geometry: `[48, 40]`
+- Flow classes: 10
+- Observed production Flow width: 256
+
+One global checkpoint pair was reused by every downstream cohort. There are
+no persona-specific checkpoint files.
+
+## PRODUCTION ARTIFACTS
+
+- `vae_s3_z48.pt`:
+  `6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9`
+- `flow_unet_best.pt`:
+  `F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164`
+- `normalization_harth_s006.json`:
+  `F8F5E51085211BE731895744CB002815158CB5E59172E8D0BF7064A77274295B`
+- Manifest:
+  `src/lrf_imu/resources/manifests/production_harth_v1.json`
+
+Never substitute similarly named files. Verify size and SHA-256 before load.
+Large binaries and raw data are GitHub Release assets, never normal Git blobs.
 
 ## IMPORTANT PATHS
 
-- `src/lrf_imu/data/`: HARTH-family and legacy data preparation.
-- `src/lrf_imu/models/`: VAE and Flow architectures.
-- `src/lrf_imu/training/`: training loops and orchestration.
-- `src/lrf_imu/evaluation/`: Module A sanity/evaluation.
-- `src/lrf_imu/integration/physical_state.py`: Module B evidence mapping.
-- `src/lrf_imu/integration/dayforge.py`: read-only DayForge/evidence adapter.
-- `src/lrf_imu/integration/fusion.py`: existing Module C synthesis/stitching.
-- `configs/paper/harth_10class_160_40.yaml`: frozen Paper 3 model contract.
-- `configs/paper/dayforge_harth_mapping.yaml`: Module B mapping policy.
-- `docs/`: methodology, architecture, reproducibility, and validation notes.
+- `src/lrf_imu/data/`: source adapters, taxonomy, splits, windows, normalisation
+- `src/lrf_imu/models/`: VAE and Flow architectures
+- `src/lrf_imu/training/`: frozen training and HARTH orchestration
+- `src/lrf_imu/generation/`: reverse-Euler latent sampling
+- `src/lrf_imu/evaluation/`: model sanity/evaluation
+- `src/lrf_imu/artifacts.py`: release-asset acquisition and verification
+- `configs/paper/harth_10class_160_40.yaml`: production model contract
 
 ## TAXONOMY
 
 IDs are fixed: 0 `walking_slow`, 1 `walking_moderate`, 2 `walking_brisk`,
 3 `running`, 4 `stair_climbing`, 5 `cycling_seated`, 6 `cycling_standing`,
-7 `sitting`, 8 `standing`, 9 `lying`. Do not add a sleep class.
+7 `sitting`, 8 `standing`, 9 `lying`.
 
-## MODULE RESPONSIBILITIES
-
-- Module A checks VAE/Flow geometry, finite values, reconstruction, latent and
-  spectral diagnostics. It is descriptive sanity evaluation, not equivalence.
-- Module B maps realized mobility and conservative DayForge evidence. It owns
-  `physical_state_hint` and `in_bed_or_lying_opportunity` provenance.
-- Module C already implements exact-duration generation, deterministic seeds,
-  crop/stitch behavior, provenance, and failure audits. Do not reimplement it.
-
-## PRODUCTION CHECKPOINTS
-
-- VAE filename: `vae_s3_z48.pt`; SHA-256:
-  `6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9`.
-- Flow filename: `flow_unet_best.pt`; SHA-256:
-  `F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164`.
-- Scientific freeze: commit `150b4de6e58365fdda5fc7279192c136d4e8b064`,
-  tag `paper3_lrf_dayforge_handoff_v1`.
-
-## KEY COMMANDS
+## COMMANDS
 
 ```text
-python -m lrf_imu vae-smoke
-python -m lrf_imu flow-smoke
-python -m lrf_imu prepare-harth-data --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006
-python -m lrf_imu train-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --output-dir <output>
-python -m lrf_imu train-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <output>
+python -m lrf_imu fetch-production-artifacts --output-dir <artifacts>
+python -m lrf_imu verify-production-artifacts --artifact-dir <artifacts>
+python -m lrf_imu prepare-harth-data --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --window-length 160 --hop-length 40 --seed 42
+python -m lrf_imu train-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --output-dir <vae-output> --seed 42
+python -m lrf_imu train-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <flow-output> --seed 42
 python -m lrf_imu evaluate-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <output>
 python -m lrf_imu evaluate-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --flow-checkpoint <flow> --output-dir <output>
-python -m lrf_imu map-dayforge-physical-states --dayforge-root <dayforge> --derived-root <in-bed> --config configs/paper/dayforge_harth_mapping.yaml --output-dir <mapping>
-python -m lrf_imu synthesize-dayforge --dayforge-root <dayforge> --mapping-root <mapping> --vae-checkpoint <vae> --flow-checkpoint <flow> --normalization-metadata <normalization> --output-dir <fusion> --persona <id> --date <date>
+python -m lrf_imu generate-harth --flow-checkpoint <flow> --vae-checkpoint <vae> --activity sitting --seed 42 --device cuda
 ```
 
-## TEST COMMANDS
+## TESTS
 
 ```text
 python -m pytest -p no:cacheprovider -q
-python -m compileall -q src
+python scripts/check_syntax.py
+python -m ruff check src/lrf_imu/artifacts.py src/lrf_imu/cli.py scripts/check_syntax.py tests/test_core_release_boundary.py tests/test_production_artifacts.py
 git diff --check
-python -m ruff check src tests
 ```
 
-## REPRODUCIBILITY CONTRACT
+## GUARDRAILS
 
-Use seed 42 unless an experiment says otherwise. Preserve 50 Hz, three
-channels, 160-sample windows, 40-sample hop, training-only normalization,
-LOSO subject separation, exact `[start,end)` duration semantics, checkpoint
-hashes, and source immutability. Same-seed output is expected to match only
-under the tested runtime conditions; different devices/kernels may vary.
-
-## DAYFORGE INTERFACE
-
-DayForge is read-only input. `physical_state_hint` is optional contextual
-evidence with values walking, running, cycling, stairs, sitting, standing,
-lying, mixed, or unknown. `in_bed_or_lying_opportunity` is an additive,
-sensor-facing opportunity and is not physiological sleep.
-
-## SCIENTIFIC GUARDRAILS
-
-- Do not casually change the ten-class HARTH taxonomy.
-- Do not treat DayForge semantic activity as HARTH ground truth.
-- Do not map passive transport to sitting solely because a person is seated.
-- Do not infer walking speed from `physical_state_hint` alone.
-- Do not infer cycling posture from a cycling hint alone.
-- Do not treat `in_bed_or_lying_opportunity` as physiological sleep.
-- Do not generate IMU for unavailable or non-realized mobility.
-- Do not repeat one synthetic tile to fill a long interval.
-- Preserve exact-duration `[start,end)` semantics.
-- Do not modify VAE/Flow checkpoints during integration tasks.
-- Do not optimize mapping coverage by weakening evidence rules.
-- Module C stitching/fusion already exists.
+- Do not change the ten-class taxonomy or accepted checkpoint identities.
+- Do not pair the 3-channel HARTH checkpoints with 6-channel REALDISP models.
+- Do not fit normalisation on validation or held-out subjects.
+- Do not silently change the fixed 300-epoch Flow schedule.
+- Do not commit raw data, checkpoints, generated arrays, or cohort outputs.
+- Do not introduce participant/persona or application-specific mapping logic.
+- Preserve the source repository history; cleanup belongs on a new branch/tag.

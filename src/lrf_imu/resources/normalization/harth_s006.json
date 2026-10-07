@@ -1,0 +1,25 @@
+{
+  "schema_version": "lrf-imu-harth.normalization.1",
+  "dataset": "harth_walking_speed",
+  "held_out_subject": "harth:S006",
+  "channels": ["thigh_x", "thigh_y", "thigh_z"],
+  "sample_rate_hz": 50,
+  "window_samples": 160,
+  "latent_shape": [48, 40],
+  "method": "per_channel_zscore",
+  "fit_on": "training_subjects_only",
+  "ddof": 0,
+  "epsilon": 1e-08,
+  "mean": [
+    -0.5969877198736515,
+    -0.10592963376410314,
+    -0.5342781783351523
+  ],
+  "std": [
+    0.6554309322235737,
+    0.39473405281278284,
+    0.6472765870108628
+  ],
+  "source_artifact_sha256": "F8F5E51085211BE731895744CB002815158CB5E59172E8D0BF7064A77274295B",
+  "numeric_values_changed": false
+}

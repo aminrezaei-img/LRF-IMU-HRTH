@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import argparse
-import csv
 from copy import deepcopy
-from dataclasses import replace
 import json
 import math
 import numpy as np
@@ -73,7 +71,7 @@ def build_parser() -> argparse.ArgumentParser:
             "data, VAE, and Rectified Flow boundaries."
         ),
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 1.1.0")
     subparsers = parser.add_subparsers(dest="command", metavar="COMMAND")
 
     prepare = subparsers.add_parser(
@@ -139,42 +137,50 @@ def build_parser() -> argparse.ArgumentParser:
     generate_harth.add_argument("--activity", required=True, help="class ID 0..9 or canonical class name")
     generate_harth.add_argument("--seed", type=_non_negative_int, default=42)
     generate_harth.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
-
-    map_dayforge = subparsers.add_parser(
-        "map-dayforge-physical-states",
-        help="map final DayForge intervals to conservative HARTH physical states",
+    generate_harth.add_argument(
+        "--output",
+        metavar="PATH.npz",
+        help="optional compressed NumPy output containing samples and metadata",
     )
-    map_dayforge.add_argument("--dayforge-root", required=True)
-    map_dayforge.add_argument("--config", default="configs/paper/dayforge_harth_mapping.yaml")
-    map_dayforge.add_argument("--output-dir", required=True)
-    map_dayforge.add_argument("--persona")
-    map_dayforge.add_argument("--date")
-    map_dayforge.add_argument("--max-person-days", type=_positive_int)
-    map_dayforge.add_argument(
-        "--derived-root",
-        help="optional read-only root containing in_bed_opportunity.json handoff files",
-    )
+    generate_harth.add_argument("--overwrite", action="store_true")
 
-    synth = subparsers.add_parser(
-        "synthesize-dayforge",
-        help="generate exact-duration, segmented DayForge/IMU fusion output",
+    fetch_artifacts = subparsers.add_parser(
+        "fetch-production-artifacts",
+        help="download or copy the checksum-locked HARTH production artifacts",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    synth.add_argument("--dayforge-root", required=True)
-    synth.add_argument("--mapping-root", required=True)
-    synth.add_argument("--vae-checkpoint")
-    synth.add_argument("--flow-checkpoint")
-    synth.add_argument("--normalization-metadata")
-    synth.add_argument("--output-dir", required=True)
-    synth.add_argument("--seed", type=_non_negative_int, default=42)
-    synth.add_argument("--persona")
-    synth.add_argument("--date")
-    synth.add_argument("--max-person-days", type=_positive_int)
-    synth.add_argument("--stitch-overlap", type=_non_negative_int, default=40)
-    synth.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
-    synth.add_argument("--batch-size", type=_positive_int, default=1)
-    synth.add_argument("--resume", action="store_true")
-    synth.add_argument("--dry-run", action="store_true")
+    fetch_artifacts.add_argument("--output-dir", required=True, metavar="PATH")
+    fetch_artifacts.add_argument("--manifest", metavar="PATH")
+    source_group = fetch_artifacts.add_mutually_exclusive_group()
+    source_group.add_argument(
+        "--source-dir",
+        metavar="PATH",
+        help="copy from a local release-asset directory instead of downloading",
+    )
+    source_group.add_argument(
+        "--base-url",
+        metavar="URL",
+        help="override the release base URL declared in the manifest",
+    )
+    fetch_artifacts.add_argument(
+        "--models-only",
+        action="store_true",
+        help="exclude the frozen training-data archive",
+    )
+    fetch_artifacts.add_argument("--overwrite", action="store_true")
+
+    verify_artifacts = subparsers.add_parser(
+        "verify-production-artifacts",
+        help="verify production release assets against the frozen manifest",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    verify_artifacts.add_argument("--artifact-dir", required=True, metavar="PATH")
+    verify_artifacts.add_argument("--manifest", metavar="PATH")
+    verify_artifacts.add_argument(
+        "--models-only",
+        action="store_true",
+        help="verify all model artifacts but not the training-data archive",
+    )
 
     subparsers.add_parser(
         "vae-smoke",
@@ -412,123 +418,68 @@ def _run_harth_train(args: argparse.Namespace) -> int:
 def _run_generate_harth(args: argparse.Namespace) -> int:
     from .training.harth import generate_harth_window
     sample, metadata = generate_harth_window(args.flow_checkpoint, args.vae_checkpoint, args.activity, seed=args.seed, device=args.device)
-    metadata.update({"command": "generate-harth", "decoded_shape": list(sample.shape), "finite": bool(np.isfinite(sample).all()), "tensor_values_included": False})
+    metadata.update({"command": "generate-harth", "decoded_shape": list(sample.shape), "finite": bool(np.isfinite(sample).all()), "tensor_values_included": False, "output_written": False})
+    if args.output:
+        destination = Path(args.output).expanduser().resolve()
+        if destination.suffix.casefold() != ".npz":
+            raise ValueError("--output must end in .npz")
+        if destination.exists() and not args.overwrite:
+            raise FileExistsError("output already exists: {}".format(destination))
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        metadata.update({"output_written": True, "output_path": str(destination)})
+        np.savez_compressed(
+            destination,
+            samples=sample,
+            metadata_json=np.asarray(json.dumps(metadata, sort_keys=True)),
+        )
     print(json.dumps(metadata, indent=2, sort_keys=True, allow_nan=False))
     return 0
 
 
-def _run_map_dayforge(args: argparse.Namespace) -> int:
-    from .integration import (
-        audit_mappings,
-        load_mapping_config,
-        load_resolved_intervals,
-        map_interval,
-    )
+def _artifact_roles(models_only: bool) -> set[str] | None:
+    if not models_only:
+        return None
+    return {"checkpoint", "metadata", "normalization", "config"}
 
-    intervals = load_resolved_intervals(
-        args.dayforge_root,
-        persona=args.persona,
-        date=args.date,
-        max_person_days=args.max_person_days,
-        derived_root=getattr(args, "derived_root", None),
+
+def _run_fetch_production_artifacts(args: argparse.Namespace) -> int:
+    from .artifacts import acquire_artifacts, load_artifact_manifest
+
+    manifest = load_artifact_manifest(args.manifest)
+    result = acquire_artifacts(
+        manifest,
+        args.output_dir,
+        source_dir=args.source_dir,
+        base_url=args.base_url,
+        roles=_artifact_roles(args.models_only),
+        overwrite=args.overwrite,
     )
-    mapping_config = load_mapping_config(args.config)
-    baseline_config = replace(
-        mapping_config,
-        use_physical_state_hint=False,
-        use_derived_in_bed_opportunity=False,
+    result.update(
+        {
+            "command": "fetch-production-artifacts",
+            "manifest": manifest["manifest_path"],
+        }
     )
-    hint_config = replace(
-        mapping_config,
-        use_derived_in_bed_opportunity=False,
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+def _run_verify_production_artifacts(args: argparse.Namespace) -> int:
+    from .artifacts import load_artifact_manifest, verify_artifact_directory
+
+    manifest = load_artifact_manifest(args.manifest)
+    result = verify_artifact_directory(
+        manifest,
+        args.artifact_dir,
+        roles=_artifact_roles(args.models_only),
     )
-    baseline_summary = audit_mappings(
-        [map_interval(item, baseline_config) for item in intervals]
+    result.update(
+        {
+            "command": "verify-production-artifacts",
+            "manifest": manifest["manifest_path"],
+        }
     )
-    hint_summary = audit_mappings(
-        [map_interval(item, hint_config) for item in intervals]
-    )
-    mapped = [map_interval(item, mapping_config) for item in intervals]
-    summary = audit_mappings(mapped)
-    output = Path(args.output_dir).expanduser().resolve()
-    output.mkdir(parents=True, exist_ok=True)
-    fields = [
-        "persona_id",
-        "date",
-        "resolved_interval_id",
-        "source_episode_id",
-        "start_time",
-        "end_time",
-        "duration_seconds",
-        "interval_type",
-        "semantic_activity",
-        "mobility_mode",
-        "route_distance_m",
-        "route_duration_s",
-        "route_speed_kmh",
-        "realization_status",
-        "physical_state_hint",
-        "physical_state_hint_provenance",
-        "in_bed_or_lying_opportunity",
-        "in_bed_or_lying_opportunity_evidence",
-        "physical_state_class_id",
-        "physical_state_class_name",
-        "imu_eligible",
-        "mapping_status",
-        "mapping_rule",
-        "mapping_confidence",
-        "mapping_source",
-        "mapping_conflict",
-        "mapping_conflict_reason",
-        "mapping_provenance",
-        "imu_unavailable_reason",
-        "mapping_version",
-    ]
-    with (output / "physical_state_mapping.csv").open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(mapped)
-    (output / "mapping_summary.json").write_text(
-        json.dumps(
-            {
-                "mapping_version": mapping_config.version,
-                "config": str(Path(args.config).expanduser().resolve()),
-                "derived_root": (
-                    str(Path(args.derived_root).expanduser().resolve())
-                    if getattr(args, "derived_root", None)
-                    else None
-                ),
-                "summary": summary,
-                "baseline_summary": baseline_summary,
-                "physical_state_hint_summary": hint_summary,
-                "combined_summary": summary,
-                "coverage_difference": {
-                    "hint_vs_baseline_duration": hint_summary["duration_mapping_coverage"]
-                    - baseline_summary["duration_mapping_coverage"],
-                    "combined_vs_hint_duration": summary["duration_mapping_coverage"]
-                    - hint_summary["duration_mapping_coverage"],
-                    "hint_vs_baseline_intervals": hint_summary["interval_mapping_coverage"]
-                    - baseline_summary["interval_mapping_coverage"],
-                    "combined_vs_hint_intervals": summary["interval_mapping_coverage"]
-                    - hint_summary["interval_mapping_coverage"],
-                },
-                "records": len(mapped),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    (output / "mapping_report.md").write_text(
-        "# DayForge to HARTH physical-state mapping\n\n"
-        "Semantic activities and sensor states are distinct. Ambiguous intervals "
-        "remain unavailable rather than being forced into a class.\n\n"
-        + json.dumps(summary, indent=2, sort_keys=True)
-        + "\n",
-        encoding="utf-8",
-    )
-    print(json.dumps(summary, indent=2, sort_keys=True))
+    print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 
 
@@ -922,12 +873,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _run_harth_train(args)
         if args.command == "generate-harth":
             return _run_generate_harth(args)
-        if args.command == "map-dayforge-physical-states":
-            return _run_map_dayforge(args)
-        if args.command == "synthesize-dayforge":
-            from .integration.fusion_cli import run_synthesize
-
-            return run_synthesize(args)
+        if args.command == "fetch-production-artifacts":
+            return _run_fetch_production_artifacts(args)
+        if args.command == "verify-production-artifacts":
+            return _run_verify_production_artifacts(args)
         if args.command == "vae-smoke":
             return _run_vae_smoke()
         if args.command == "inspect-vae-checkpoint":

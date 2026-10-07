@@ -2,7 +2,7 @@
 
 Validation is split by responsibility and evidence level.
 
-## Module A
+## Model validation
 
 VAE and Flow sanity evaluation checks:
 
@@ -16,35 +16,26 @@ VAE and Flow sanity evaluation checks:
 These reports are sanity/resemblance checks. They are not distributional
 equivalence claims and should not be substituted for a scientific benchmark.
 
-## Module B
+## Release validation
 
-Mapping validation checks parser identity and time alignment, fixed class IDs,
-evidence precedence, unavailable reasons, conflict flags, provenance, and
-source immutability. The mapping summary keeps baseline, physical-hint, and
-combined coverage visible.
+The release checks also require:
 
-## Module C
-
-Fusion validation checks:
-
-- exact target sample count;
-- short-interval cropping;
-- long-interval multi-window generation;
-- deterministic seed derivation;
-- `[start,end)` timestamp alignment;
-- finite arrays and expected channel geometry;
-- stitching boundary jumps;
-- provenance completeness;
-- unsupported intervals without arrays; and
-- generation failures separately from intentional unavailability.
+- exactly one global VAE/Flow checkpoint pair in the artifact manifest;
+- byte-count and SHA-256 verification for every release asset;
+- no application-specific source/configuration/script surface;
+- no raw data, checkpoints, or generated arrays in normal Git history;
+- working preprocessing, training, evaluation, generation, artifact-fetch,
+  and artifact-verification command help; and
+- portable documentation links and paths.
 
 ## Commands
 
 ```bash
 python -m pytest -p no:cacheprovider -q
-python -m compileall -q src
+python scripts/check_syntax.py
 git diff --check
-python -m ruff check src tests
+python -m ruff check src/lrf_imu/artifacts.py src/lrf_imu/cli.py scripts/check_syntax.py \
+  tests/test_core_release_boundary.py tests/test_production_artifacts.py
 ```
 
 The repository also provides `scripts/validate_release.sh` and

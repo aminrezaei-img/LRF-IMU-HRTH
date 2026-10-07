@@ -1,7 +1,7 @@
 # Checkpoints
 
-Production checkpoints are external artifacts. They are not added to normal
-Git history by this release.
+Production checkpoints are immutable GitHub Release assets. They are not
+added to normal Git history.
 
 ## VAE
 
@@ -23,6 +23,24 @@ F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164
 
 ## Verification
 
+Preferred:
+
+```bash
+python -m lrf_imu fetch-production-artifacts \
+  --output-dir production-artifacts \
+  --models-only
+
+python -m lrf_imu verify-production-artifacts \
+  --artifact-dir production-artifacts \
+  --models-only
+```
+
+The packaged manifest verifies the two checkpoint files. Clean run summaries,
+configuration, and normalisation are tracked as small repository resources;
+recovered metadata containing private workstation paths is not published.
+
+Manual verification:
+
 PowerShell:
 
 ```powershell
@@ -41,6 +59,5 @@ geometry. The Paper 3 production pair is three-channel, `[48,40]` latent
 geometry, and ten classes. Do not silently pair these files with the earlier
 REALDISP six-channel checkpoints.
 
-No public Paper 3 checkpoint download URL is asserted here. Future artifact
-publication can use a research repository or release asset while preserving
-these hashes.
+The release tag is `paper3-harth-production-v1`. It contains one global model
+pair, not persona-specific weights. Downstream cohort outputs are excluded.

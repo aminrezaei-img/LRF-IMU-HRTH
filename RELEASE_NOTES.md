@@ -1,5 +1,21 @@
 # Release notes
 
+## 1.1.0 — Self-contained HARTH core release
+
+Version 1.1.0 isolates the HARTH model lineage from downstream applications:
+
+- removes contextual mapping, cohort orchestration, and fusion surfaces from
+  the core branch;
+- adds a checksum-locked GitHub Release manifest for the one accepted global
+  VAE/Flow checkpoint pair;
+- adds the frozen 55-file HARTH/walking-speed training-data snapshot with its
+  upstream README and licence as a release asset;
+- adds download and verification commands that reject mismatched artifacts;
+- records the exact training code, data, configuration, model, and runtime
+  identities; and
+- keeps all scientific preprocessing, training, evaluation, and native-window
+  generation behavior unchanged.
+
 ## 1.0.0 — Code-only public release
 
 Version 1.0.0 publishes the validated research-code surface:

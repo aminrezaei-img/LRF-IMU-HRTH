@@ -1,0 +1,80 @@
+{
+  "schema_version": "lrf-imu-harth.production-artifacts.1",
+  "release_tag": "paper3-harth-production-v1",
+  "release_base_url": "https://github.com/aminrezaei-img/LRF-IMU-HRTH/releases/download/paper3-harth-production-v1",
+  "repository": "https://github.com/aminrezaei-img/LRF-IMU-HRTH",
+  "training_code_commit": "81b123eab079f5cde7400fee5620e3bffb85a673",
+  "scientific_generation_commit": "150b4de6e58365fdda5fc7279192c136d4e8b064",
+  "training_data_repository": "https://github.com/ntnu-ai-lab/harth-ml-experiments.git",
+  "training_data_commit": "dad2cfbe89a26f72f19770419469ac037de200df",
+  "checkpoint_scope": "one_global_pair",
+  "persona_specific_checkpoints": false,
+  "cohort_outputs_included": false,
+  "public_metadata_policy": "Scientific metadata, configuration, and normalisation are packaged in Git; recovered metadata containing private workstation paths remains in the private lineage lock and is not published.",
+  "model_contract": {
+    "composition": "harth_walking_speed",
+    "held_out_subject": "harth:S006",
+    "seed": 42,
+    "sample_rate_hz": 50,
+    "channels": 3,
+    "window_samples": 160,
+    "window_hop_samples": 40,
+    "latent_shape": [48, 40],
+    "classes": 10,
+    "flow_model_width": 256
+  },
+  "training_summary": {
+    "split_window_counts": {
+      "train": 159575,
+      "validation": 18533,
+      "held_out_test": 8497
+    },
+    "vae": {
+      "epochs_completed": 285,
+      "best_epoch": 185,
+      "best_validation_loss": 0.0008646519627415715,
+      "source_metadata_sha256": "00CA84C9AADD74DB016373854BFEA0911AD769ED82FE213461831A560E8A48C3"
+    },
+    "rectified_flow": {
+      "epochs_completed": 300,
+      "best_epoch": 226,
+      "best_validation_loss": 0.018769992914869738,
+      "source_metadata_sha256": "E06B7B685190C5B18917A90F45914295A29C6088B967D585E513202D12479EAE"
+    },
+    "environment": {
+      "python": "3.11.11",
+      "pytorch": "2.5.1",
+      "torch_cuda": "12.1",
+      "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    }
+  },
+  "packaged_resources": {
+    "configuration": "configs/paper/harth_10class_160_40.yaml",
+    "configuration_sha256": "4E4FA24D139719C02930650B021DC729907AD2872449736C5FEF16DB63BEED50",
+    "normalization": "src/lrf_imu/resources/normalization/harth_s006.json",
+    "normalization_source_artifact_sha256": "F8F5E51085211BE731895744CB002815158CB5E59172E8D0BF7064A77274295B"
+  },
+  "artifacts": [
+    {
+      "filename": "vae_s3_z48.pt",
+      "role": "checkpoint",
+      "model": "vae",
+      "bytes": 2990434,
+      "sha256": "6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9"
+    },
+    {
+      "filename": "flow_unet_best.pt",
+      "role": "checkpoint",
+      "model": "rectified_flow",
+      "bytes": 185505026,
+      "sha256": "F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164"
+    },
+    {
+      "filename": "harth_walking_speed_data_dad2cfbe89a26f72f19770419469ac037de200df.zip",
+      "role": "training_data",
+      "bytes": 385975231,
+      "sha256": "AFCAAB04C151E0C182FC85F96DF98762F942280ED26C802E2A6B25BD2FE1C651",
+      "includes": ["LICENSE", "README.md", "harth", "adult_walking_speed"]
+    }
+  ]
+}

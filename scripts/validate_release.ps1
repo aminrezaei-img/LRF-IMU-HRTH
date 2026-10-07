@@ -6,7 +6,7 @@ param(
 
 function Show-Usage {
     "Usage: validate_release.ps1 [-Python PATH]"
-    "Runs bounded tests, compilation, diff hygiene, targeted Ruff, and CLI help checks."
+    "Runs bounded tests, syntax parsing, diff hygiene, targeted Ruff, and CLI help checks."
 }
 
 if ($Help) { Show-Usage; exit 0 }
@@ -15,26 +15,25 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 $env:PYTHONPATH = "$repoRoot/src" + $(if ($env:PYTHONPATH) { ";$env:PYTHONPATH" } else { "" })
 
-& $Python -m compileall -q src
+& $Python -B scripts/check_syntax.py
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 git diff --check
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $Python -m ruff check `
-    src/lrf_imu/integration/dayforge.py `
-    src/lrf_imu/integration/physical_state.py `
-    src/lrf_imu/integration/dayforge_audit.py `
-    src/lrf_imu/integration/__init__.py `
+    src/lrf_imu/artifacts.py `
     src/lrf_imu/cli.py `
-    tests/test_dayforge_handoff.py `
-    tests/test_dayforge_fusion.py
+    scripts/check_syntax.py `
+    tests/test_core_release_boundary.py `
+    tests/test_production_artifacts.py
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-& $Python -m pytest -p no:cacheprovider -q
+$env:PYTHONDONTWRITEBYTECODE = "1"
+& $Python -B -m pytest -p no:cacheprovider -q
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $commands = @(
     "prepare-harth-data", "train-harth-vae", "train-harth-flow", "generate-harth",
-    "evaluate-harth-vae", "evaluate-harth-flow", "map-dayforge-physical-states",
-    "synthesize-dayforge"
+    "evaluate-harth-vae", "evaluate-harth-flow", "fetch-production-artifacts",
+    "verify-production-artifacts"
 )
 foreach ($command in $commands) {
     & $Python -m lrf_imu $command --help | Out-Null

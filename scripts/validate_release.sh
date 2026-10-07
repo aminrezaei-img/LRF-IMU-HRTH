@@ -7,7 +7,7 @@ usage() {
   cat <<'EOF'
 Usage: validate_release.sh [--python PATH]
 
-Run tests, compilation, diff hygiene, targeted Ruff, and public CLI help checks.
+Run tests, syntax parsing, diff hygiene, targeted Ruff, and public CLI help checks.
 EOF
 }
 
@@ -24,22 +24,20 @@ repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 export PYTHONPATH="$repo_root/src${PYTHONPATH:+:$PYTHONPATH}"
 
-"$python_cmd" -m compileall -q src
+"$python_cmd" -B scripts/check_syntax.py
 git diff --check
 "$python_cmd" -m ruff check \
-  src/lrf_imu/integration/dayforge.py \
-  src/lrf_imu/integration/physical_state.py \
-  src/lrf_imu/integration/dayforge_audit.py \
-  src/lrf_imu/integration/__init__.py \
+  src/lrf_imu/artifacts.py \
   src/lrf_imu/cli.py \
-  tests/test_dayforge_handoff.py \
-  tests/test_dayforge_fusion.py
-"$python_cmd" -m pytest -p no:cacheprovider -q
+  scripts/check_syntax.py \
+  tests/test_core_release_boundary.py \
+  tests/test_production_artifacts.py
+PYTHONDONTWRITEBYTECODE=1 "$python_cmd" -B -m pytest -p no:cacheprovider -q
 
 for command in \
   prepare-harth-data train-harth-vae train-harth-flow generate-harth \
-  evaluate-harth-vae evaluate-harth-flow map-dayforge-physical-states \
-  synthesize-dayforge; do
+  evaluate-harth-vae evaluate-harth-flow fetch-production-artifacts \
+  verify-production-artifacts; do
   "$python_cmd" -m lrf_imu "$command" --help >/dev/null
 done
 
