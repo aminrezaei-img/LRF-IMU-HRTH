@@ -1,43 +1,90 @@
-# LRF-IMU
+# LRF-IMU-HARTH agent guide
 
-> Code-only public release, version 1.0.0. `exact_paper_reproduction=false`.
+## PURPOSE
 
-## Paper identity
+This repository is the model-only HARTH-family LRF-IMU pipeline. It covers
+raw-data validation, subject-safe preprocessing, training-only normalisation,
+VAE training, ten-class latent Rectified Flow training, evaluation, and
+fixed-window signal generation.
 
-- Title: A latent rectified flow approach to generate synthetic wearable data – a LABDA solution
-- Authors: Amin Rezaei; Morten Kjærgaard; Jasper Schipperijn
-- Journal: Machine Learning: Health
-- DOI: 10.1088/3049-477X/ae91ef
+Downstream contextual mapping, interval eligibility, cohort orchestration,
+long-interval stitching, and multimodal linkage are out of scope. Do not add
+application-specific data models or policies to the core package.
 
-## Repository map
+## PRODUCTION CONTRACT
 
-- `README.md`: researcher entry point, installation, and core commands.
-- `DATA_ACCESS.md`: external REALDISP access responsibility and expected ideal-log layout.
-- `REPRODUCIBILITY.md`: evidence levels, workflow, manifests, and limitations.
-- `MODEL_CARD.md`: model scope, intended use, and unsupported claims.
-- `docs/RESULTS_REPRODUCTION.md`: regenerated evaluation and analysis results.
-- `docs/KNOWN_DISCREPANCIES.md`: unresolved historical evidence conflicts.
-- `configs/paper/`: six-channel, accelerometer-only, and sensitivity configurations.
-- `src/lrf_imu/`: preprocessing, VAE, Rectified Flow, generation, evaluation, analysis, and reproducibility orchestration.
-- `contracts/`: machine-readable source, parity, and runtime evidence.
-- `tests/`: synthetic fixtures, parity checks, packaging tests, and safety scanners.
+- Data composition: `harth_walking_speed`
+- Data commit: `dad2cfbe89a26f72f19770419469ac037de200df`
+- Training code commit: `81b123eab079f5cde7400fee5620e3bffb85a673`
+- Held-out subject: `harth:S006`
+- Seed: 42
+- Sampling frequency: 50 Hz
+- Input geometry: three channels, 160 samples, 40-sample hop
+- VAE latent geometry: `[48, 40]`
+- Flow classes: 10
+- Observed production Flow width: 256
 
-## Core commands
+One global checkpoint pair was reused by every downstream cohort. There are
+no persona-specific checkpoint files.
+
+## PRODUCTION ARTIFACTS
+
+- `vae_s3_z48.pt`:
+  `6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9`
+- `flow_unet_best.pt`:
+  `F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164`
+- `normalization_harth_s006.json`:
+  `F8F5E51085211BE731895744CB002815158CB5E59172E8D0BF7064A77274295B`
+- Manifest:
+  `src/lrf_imu/resources/manifests/production_harth_v1.json`
+
+Never substitute similarly named files. Verify size and SHA-256 before load.
+Large binaries and raw data are GitHub Release assets, never normal Git blobs.
+
+## IMPORTANT PATHS
+
+- `src/lrf_imu/data/`: source adapters, taxonomy, splits, windows, normalisation
+- `src/lrf_imu/models/`: VAE and Flow architectures
+- `src/lrf_imu/training/`: frozen training and HARTH orchestration
+- `src/lrf_imu/generation/`: reverse-Euler latent sampling
+- `src/lrf_imu/evaluation/`: model sanity/evaluation
+- `src/lrf_imu/artifacts.py`: release-asset acquisition and verification
+- `configs/paper/harth_10class_160_40.yaml`: production model contract
+
+## TAXONOMY
+
+IDs are fixed: 0 `walking_slow`, 1 `walking_moderate`, 2 `walking_brisk`,
+3 `running`, 4 `stair_climbing`, 5 `cycling_seated`, 6 `cycling_standing`,
+7 `sitting`, 8 `standing`, 9 `lying`.
+
+## COMMANDS
 
 ```text
-python -m pip install ".[training,evaluation,analysis,test]"
-python -m lrf_imu vae-smoke
-python -m lrf_imu flow-smoke
-python -m lrf_imu prepare-data --data-root <realdisp-root> --held-out-subject 1 --sensor-configuration six_channel --validate-only
-python -m lrf_imu evaluate --data-root <realdisp-root> --sensor six_channel --classifier rf --held-out-subject 1 --scenario trtr
-python -m lrf_imu reproduce-core --data-root <realdisp-root> --checkpoint-root <checkpoint-root> --output-root <external-output> --all-folds --dry-run
+python -m lrf_imu fetch-production-artifacts --output-dir <artifacts>
+python -m lrf_imu verify-production-artifacts --artifact-dir <artifacts>
+python -m lrf_imu prepare-harth-data --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --window-length 160 --hop-length 40 --seed 42
+python -m lrf_imu train-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --output-dir <vae-output> --seed 42
+python -m lrf_imu train-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <flow-output> --seed 42
+python -m lrf_imu evaluate-harth-vae --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --output-dir <output>
+python -m lrf_imu evaluate-harth-flow --data-root <root> --composition harth_walking_speed --held-out-subject harth:S006 --config configs/paper/harth_10class_160_40.yaml --vae-checkpoint <vae> --flow-checkpoint <flow> --output-dir <output>
+python -m lrf_imu generate-harth --flow-checkpoint <flow> --vae-checkpoint <vae> --activity sitting --seed 42 --device cuda
 ```
 
-## Evidence and artifact boundary
+## TESTS
 
-- Audited task: REALDISP ideal placement, right-thigh IMU, 50 Hz, four activities, 12 LOSO folds, main window/hop 160/40.
-- Six-channel and reconstructed three-channel preprocessing use separately trained checkpoints; 3CH is not an inference-time channel drop or proof of exact historical parser lineage.
-- Paper/TSTR generation uses ten reverse-Euler steps. Website trajectories use a separate 100-step visualization profile.
-- Privacy results are threat-model-specific empirical observations, not anonymization or general privacy guarantees.
-- REALDISP data, participant-derived windows, checkpoints, generated arrays, trained evaluators, historical `Results/` payloads, manuscript files, and figures are not included.
-- Historical reproduction requires user-supplied REALDISP access and matching external checkpoints.
+```text
+python -m pytest -p no:cacheprovider -q
+python scripts/check_syntax.py
+python -m ruff check src/lrf_imu/artifacts.py src/lrf_imu/cli.py scripts/check_syntax.py tests/test_core_release_boundary.py tests/test_production_artifacts.py
+git diff --check
+```
+
+## GUARDRAILS
+
+- Do not change the ten-class taxonomy or accepted checkpoint identities.
+- Do not pair the 3-channel HARTH checkpoints with 6-channel REALDISP models.
+- Do not fit normalisation on validation or held-out subjects.
+- Do not silently change the fixed 300-epoch Flow schedule.
+- Do not commit raw data, checkpoints, generated arrays, or cohort outputs.
+- Do not introduce participant/persona or application-specific mapping logic.
+- Preserve the source repository history; cleanup belongs on a new branch/tag.

@@ -1,5 +1,15 @@
 # Reproducibility status
 
+## HARTH production supplement
+
+The self-contained HARTH core release adds a frozen training-data archive and
+the one accepted global VAE/Flow checkpoint pair as checksum-locked GitHub
+Release assets. Its exact code/data/model identities and end-to-end commands
+are documented in [`docs/reproducibility.md`](docs/reproducibility.md) and the
+packaged production manifest. The historical REALDISP audit below remains as
+lineage evidence; statements that checkpoints are absent refer to that older
+REALDISP result set, not to the HARTH production release assets.
+
 ## Current evidence boundary
 
 This code-only release contains portable preprocessing, VAE, Rectified Flow,

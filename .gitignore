@@ -17,6 +17,13 @@
 /tmp/
 /temp/
 **/checkpoints/
+/dayforge-diary/
+/paper3-overnight/
+
+# Recovery and patch artifacts are never release inputs.
+*.patch
+*.mbox
+*.stat.txt
 
 # Model files and generated numerical artifacts.
 *.pt

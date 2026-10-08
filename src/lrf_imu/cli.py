@@ -71,7 +71,7 @@ def build_parser() -> argparse.ArgumentParser:
             "data, VAE, and Rectified Flow boundaries."
         ),
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 1.1.0")
     subparsers = parser.add_subparsers(dest="command", metavar="COMMAND")
 
     prepare = subparsers.add_parser(
@@ -137,6 +137,50 @@ def build_parser() -> argparse.ArgumentParser:
     generate_harth.add_argument("--activity", required=True, help="class ID 0..9 or canonical class name")
     generate_harth.add_argument("--seed", type=_non_negative_int, default=42)
     generate_harth.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    generate_harth.add_argument(
+        "--output",
+        metavar="PATH.npz",
+        help="optional compressed NumPy output containing samples and metadata",
+    )
+    generate_harth.add_argument("--overwrite", action="store_true")
+
+    fetch_artifacts = subparsers.add_parser(
+        "fetch-production-artifacts",
+        help="download or copy the checksum-locked HARTH production artifacts",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    fetch_artifacts.add_argument("--output-dir", required=True, metavar="PATH")
+    fetch_artifacts.add_argument("--manifest", metavar="PATH")
+    source_group = fetch_artifacts.add_mutually_exclusive_group()
+    source_group.add_argument(
+        "--source-dir",
+        metavar="PATH",
+        help="copy from a local release-asset directory instead of downloading",
+    )
+    source_group.add_argument(
+        "--base-url",
+        metavar="URL",
+        help="override the release base URL declared in the manifest",
+    )
+    fetch_artifacts.add_argument(
+        "--models-only",
+        action="store_true",
+        help="exclude the frozen training-data archive",
+    )
+    fetch_artifacts.add_argument("--overwrite", action="store_true")
+
+    verify_artifacts = subparsers.add_parser(
+        "verify-production-artifacts",
+        help="verify production release assets against the frozen manifest",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    verify_artifacts.add_argument("--artifact-dir", required=True, metavar="PATH")
+    verify_artifacts.add_argument("--manifest", metavar="PATH")
+    verify_artifacts.add_argument(
+        "--models-only",
+        action="store_true",
+        help="verify all model artifacts but not the training-data archive",
+    )
 
     subparsers.add_parser(
         "vae-smoke",
@@ -374,8 +418,68 @@ def _run_harth_train(args: argparse.Namespace) -> int:
 def _run_generate_harth(args: argparse.Namespace) -> int:
     from .training.harth import generate_harth_window
     sample, metadata = generate_harth_window(args.flow_checkpoint, args.vae_checkpoint, args.activity, seed=args.seed, device=args.device)
-    metadata.update({"command": "generate-harth", "decoded_shape": list(sample.shape), "finite": bool(np.isfinite(sample).all()), "tensor_values_included": False})
+    metadata.update({"command": "generate-harth", "decoded_shape": list(sample.shape), "finite": bool(np.isfinite(sample).all()), "tensor_values_included": False, "output_written": False})
+    if args.output:
+        destination = Path(args.output).expanduser().resolve()
+        if destination.suffix.casefold() != ".npz":
+            raise ValueError("--output must end in .npz")
+        if destination.exists() and not args.overwrite:
+            raise FileExistsError("output already exists: {}".format(destination))
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        metadata.update({"output_written": True, "output_path": str(destination)})
+        np.savez_compressed(
+            destination,
+            samples=sample,
+            metadata_json=np.asarray(json.dumps(metadata, sort_keys=True)),
+        )
     print(json.dumps(metadata, indent=2, sort_keys=True, allow_nan=False))
+    return 0
+
+
+def _artifact_roles(models_only: bool) -> set[str] | None:
+    if not models_only:
+        return None
+    return {"checkpoint", "metadata", "normalization", "config"}
+
+
+def _run_fetch_production_artifacts(args: argparse.Namespace) -> int:
+    from .artifacts import acquire_artifacts, load_artifact_manifest
+
+    manifest = load_artifact_manifest(args.manifest)
+    result = acquire_artifacts(
+        manifest,
+        args.output_dir,
+        source_dir=args.source_dir,
+        base_url=args.base_url,
+        roles=_artifact_roles(args.models_only),
+        overwrite=args.overwrite,
+    )
+    result.update(
+        {
+            "command": "fetch-production-artifacts",
+            "manifest": manifest["manifest_path"],
+        }
+    )
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+def _run_verify_production_artifacts(args: argparse.Namespace) -> int:
+    from .artifacts import load_artifact_manifest, verify_artifact_directory
+
+    manifest = load_artifact_manifest(args.manifest)
+    result = verify_artifact_directory(
+        manifest,
+        args.artifact_dir,
+        roles=_artifact_roles(args.models_only),
+    )
+    result.update(
+        {
+            "command": "verify-production-artifacts",
+            "manifest": manifest["manifest_path"],
+        }
+    )
+    print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 
 
@@ -769,6 +873,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _run_harth_train(args)
         if args.command == "generate-harth":
             return _run_generate_harth(args)
+        if args.command == "fetch-production-artifacts":
+            return _run_fetch_production_artifacts(args)
+        if args.command == "verify-production-artifacts":
+            return _run_verify_production_artifacts(args)
         if args.command == "vae-smoke":
             return _run_vae_smoke()
         if args.command == "inspect-vae-checkpoint":
@@ -783,6 +891,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _run_generate(args)
         if args.command == "export-trajectories":
             return _run_export_trajectories(args)
+        if args.command in {"evaluate-harth-vae", "evaluate-harth-flow"}:
+            from .evaluation.cli import run_harth_sanity
+
+            return run_harth_sanity(args)
         if args.command == "evaluate":
             from .evaluation.cli import run_evaluate
 

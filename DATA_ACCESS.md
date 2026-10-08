@@ -1,84 +1,83 @@
 # Data access
 
-## Dataset boundary
+## Production HARTH-family snapshot
 
-The audited paper task uses the REALDISP benchmark. The dataset is external to
-this repository and is not redistributed here. Users must obtain it directly
-from the dataset custodian under the terms that apply to their intended use.
-This repository does not grant access to REALDISP or decide its license terms.
+The production ten-class model used two folders from
+`ntnu-ai-lab/harth-ml-experiments`:
 
-The audited subset is:
+- `harth/`;
+- `adult_walking_speed/`.
 
-- ideal-placement recordings from one right-thigh IMU;
-- 50 Hz sampling with six channels: `ax`, `ay`, `az`, `gx`, `gy`, `gz`;
-- original activity codes 1, 3, 4, and 33, mapped to walking, running, jump_up,
-  and cycling;
-- subjects 1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, and 16;
-- 12 leave-one-subject-out folds;
-- 160-sample windows with a 40-sample hop; and
-- per-channel z-score standardization fitted on training participants within
-  each fold.
-
-The audited source notes that this paper-specific four-class preprocessing
-filters target labels before constructing contiguous runs. That choice is
-useful for reproducing the paper task but should be reviewed before a general
-REALDISP parser is designed.
-
-## Official primary source and citation
-
-Official primary source: [REALDISP Activity Recognition Dataset at the UCI
-Machine Learning Repository](https://archive.ics.uci.edu/dataset/305/realdisp%2Bactivity%2Brecognition%2Bdataset)
-
-Formal citation:
-
-> Banos, O., Toth, M., & Amft, O. (2012). REALDISP Activity Recognition Dataset [Dataset]. UCI Machine Learning Repository. DOI 10.24432/C5GP6D.
-
-Users remain responsible for reviewing the current dataset terms and citation
-requirements at the official record before downloading or using the dataset.
-This repository neither auto-downloads nor redistributes REALDISP.
-
-## Local setup
-
-Keep acquired data outside Git and outside generated-output directories. Pass a
-user-selected `data_root` to a configuration loader; do not encode a personal
-or machine-specific path in a config, script, notebook, or documentation file.
-Do not commit raw logs, preprocessed windows, or participant-derived synthetic
-data. Check the current dataset terms before sharing any derived artifact.
-Expected direct-child layout:
+The frozen source commit is:
 
 ```text
-<realdisp-root>/
-  subject1_ideal.log
-  subject2_ideal.log
-  subject3_ideal.log
-  ...
-  subject16_ideal.log
+dad2cfbe89a26f72f19770419469ac037de200df
 ```
 
-Only the audited subjects 1, 2, 3, 5, 8, 9, 10, 11, 12, 13, 14, and 16 enter
-the canonical LOSO cohort. Numeric zero padding is accepted. The loader does not
-search nested directories and does not download missing files.
+GitHub Release `paper3-harth-production-v1` contains a ZIP archive of exactly
+the 55 tracked CSV files used by the pipeline, plus the upstream `README.md`
+and MIT `LICENSE`. The archive SHA-256 is recorded in the packaged production
+artifact manifest. `har70plus/` and unrelated experiment outputs are not part
+of the production composition.
 
-## Milestone 3A preparation contract
+Acquire and verify the archive with:
 
-The public loader accepts only explicit direct-child subject*_ideal.log files.
-Each row must have exactly 120 numeric tab-separated columns. The six-channel
-path selects right-thigh columns 80..85; the explicit reconstructed 3CH path selects
-80..82. Column 119 is retained as a raw activity code and is mapped only through
-the four-class vocabulary 1 -> 0, 3 -> 1, 4 -> 2, and 33 -> 3.
+```bash
+python -m lrf_imu fetch-production-artifacts \
+  --output-dir production-artifacts
+```
 
-The default public compatibility mode is filter-before-runs, preserving the
-historical paper-task behavior for short excluded-label gaps. Strict original
-contiguity is an explicit opt-in. Complete 160/40 windows do not cross activity
-boundaries and are never padded. The VAE subject-level validation fraction is
-0.15; the separate CNN window-level fraction remains 0.20.
+After extraction, point `--data-root` at the directory containing both source
+folders:
 
-Normalization is fitted on the training partition only, using population standard
-deviation (ddof=0) with a 1e-8 floor. Duplicate checks use SHA-1 over canonical
-exact-window bytes and the public default checks train/validation, train/test, and
-validation/test boundaries; a historical train/validation-only adapter remains
-explicitly labeled as compatibility behavior.
+```text
+<data-root>/
+  LICENSE
+  README.md
+  harth/
+    S006.csv
+    ...
+  adult_walking_speed/
+    01.csv
+    ...
+```
 
-REALDISP and all participant-derived arrays remain outside this repository. The
-preparation pipeline returns arrays in memory but serializes only JSON-safe metadata
-with raw values, labels, signals, and windows excluded.
+The loader uses direct-child discovery inside each declared folder. It does
+not recursively search a wider workspace and does not silently include other
+datasets.
+
+## Production preparation contract
+
+- composition: `harth_walking_speed`;
+- sensor: right-thigh accelerometer, three axes;
+- sampling rate: 50 Hz;
+- window length/hop: 160/40 samples;
+- split key: namespaced `dataset:subject_id`;
+- held-out subject: `harth:S006`;
+- validation fraction: 0.15 at subject level;
+- seed: 42;
+- normalisation: per-channel z-score fitted on training subjects only;
+- duplicate audit: exact window-byte checks within and across all partitions.
+
+The accepted snapshot produced 159,575 training, 18,533 validation, and 8,497
+held-out windows. A different count is a reason to trace the data/configuration
+identity rather than force the expected values.
+
+## Licensing and citation
+
+The release archive preserves the upstream licence and README verbatim.
+Anyone redistributing or using the snapshot remains responsible for following
+the upstream attribution and dataset citation requirements. The data licence
+does not supply a licence for this software repository.
+
+## Legacy REALDISP path
+
+The repository retains the earlier four-class REALDISP implementation and its
+parity evidence. REALDISP is not bundled in the HARTH production release.
+Users of that legacy path must obtain the dataset from the
+[UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/305/realdisp%2Bactivity%2Brecognition%2Bdataset)
+under its current terms.
+
+The two data lineages must not be mixed: the production HARTH checkpoint pair
+is three-channel and ten-class, while historical REALDISP checkpoints can be
+six-channel and four-class.

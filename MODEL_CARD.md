@@ -8,7 +8,7 @@ Flow U-Net transports class-conditioned latent noise toward data before the VAE
 decoder returns a window. The paper/TSTR sampler uses ten reverse-Euler steps.
 
 The public model supports separately trained 6CH and 3CH configurations.
-Historical checkpoints are not included. The 3CH preprocessing path is an
+Historical REALDISP checkpoints are not included. The 3CH preprocessing path is an
 explicit reconstruction of accelerometer columns, paired only with separately
 trained 3CH checkpoints; it is not an inference-time channel drop and is not
 proof of exact historical parser lineage.
@@ -18,6 +18,31 @@ synthetic inputs, historical 6CH/3CH checkpoints, and a real fold. Core
 evaluation and analysis have exact, partial, and blocked components documented
 in [`docs/RESULTS_REPRODUCTION.md`](docs/RESULTS_REPRODUCTION.md).
 `exact_paper_reproduction=false` remains unchanged.
+
+## HARTH production model
+
+The production HARTH-family release is a separately trained three-channel,
+ten-class model. It uses HARTH plus Adult Walking Speed, holds out
+`harth:S006`, samples at 50 Hz, uses 160-sample windows with a 40-sample hop,
+and fixes seed 42. Its VAE latent geometry is `[48,40]`; the accepted Flow has
+observed model width 256.
+
+GitHub Release `paper3-harth-production-v1` contains exactly one global
+checkpoint pair:
+
+- `vae_s3_z48.pt`, SHA-256
+  `6B118182E14FF04CBD57D66A76986BF3568561F0FD42D02257F8036A0138AAD9`;
+- `flow_unet_best.pt`, SHA-256
+  `F1058EB1FB94809B74B8DFFC24E2697F8C73B046CF2A8E7D24FFF60EC6D63164`.
+
+These files were reused unchanged by downstream cohorts. They are not
+participant- or persona-specific models. The release also provides the exact
+licensed training-data snapshot as a release asset and clean training summary,
+configuration, and normalisation metadata in Git.
+
+The model accepts canonical class IDs and generates independent native
+windows. Contextual class assignment, eligibility, long-interval assembly,
+and multimodal linkage are outside the model boundary.
 
 ## Intended and out-of-scope use
 
@@ -33,7 +58,9 @@ The audited evidence covers a controlled REALDISP subset: ideal placement, one
 right-thigh sensor, four activities, 12 listed subjects, and leave-one-subject-
 out evaluation. It does not establish performance for other placements,
 activities, populations, sampling rates, or deployment conditions. REALDISP
-data and derived artifacts are not included.
+data and derived artifacts are not included. The distinct HARTH production
+snapshot is distributed only through its checksum-locked release asset with
+the upstream README and licence.
 
 The audit retains unresolved discrepancies in the VAE loss/KL schedule and
 Rectified Flow base width, as well as incomplete provenance for some paper

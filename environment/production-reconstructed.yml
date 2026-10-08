@@ -1,0 +1,24 @@
+# Reconstructed and revalidated on 2026-10-07.
+# The original complete conda lock was not preserved. Critical production
+# versions below are taken from frozen run metadata; the remaining package
+# versions describe the environment used to validate this cleaned release.
+name: lrf-imu-harth-production
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11.11
+  - pip
+  - numpy=2.3.5
+  - pyyaml=6.0.3
+  - scipy=1.15.2
+  - scikit-learn=1.6.1
+  - pandas=2.2.3
+  - matplotlib=3.10.1
+  - pytorch=2.5.1
+  - pytorch-cuda=12.1
+  - pip:
+      - pytest==9.0.3
+      - ruff==0.12.12
+      - -e .

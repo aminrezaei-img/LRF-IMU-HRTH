@@ -1,5 +1,10 @@
 # HARTH-family replacement for the REALDISP data path
 
+> Historical design record. The implemented core still keeps raw CSV files
+> out of normal Git history. For long-term reproduction, the final public
+> 55-file snapshot plus its upstream README and licence is distributed as a
+> checksum-locked GitHub Release asset; it is not copied into the source tree.
+
 ## Purpose
 
 This document is the implementation handoff for replacing the current

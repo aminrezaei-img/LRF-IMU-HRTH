@@ -62,7 +62,9 @@ def test_runtime_dependencies_and_package_data_are_declared_consistently() -> No
     assert project_dependencies == {"PyYAML>=6.0", "numpy>=1.21.3"}
 
     pyproject = (REPOSITORY_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'lrf_imu = ["resources/configs/paper/*.yaml"]' in pyproject
+    assert '"resources/configs/paper/*.yaml"' in pyproject
+    assert '"resources/manifests/*.json"' in pyproject
+    assert '"resources/normalization/*.json"' in pyproject
 
 
 def test_packaged_paper_configs_are_intentional_synchronized_resources() -> None:
@@ -179,7 +181,7 @@ def test_citation_preserves_exact_scientific_identity() -> None:
 
     assert citation["title"] == "LRF-IMU"
     assert citation["type"] == "software"
-    assert citation["version"] == "1.0.0"
+    assert citation["version"] == "1.1.0"
     assert "doi" not in citation
     assert [
         f'{author["given-names"]} {author["family-names"]}'
